@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth, useCanAccessRoute } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/types/auth";
 
 interface ProtectedRouteProps {
@@ -21,7 +21,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const { isLoading, isAuthenticated, user } = useAuth();
-  const canAccessRoute = useCanAccessRoute(pathname);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -36,15 +35,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return;
     }
 
-    if (user) {
-      if (allowedRoles && allowedRoles.length > 0) {
-        if (!allowedRoles.includes(user.role)) {
-          router.push(unauthorizedUrl);
-          return;
-        }
-      }
-
-      if (!canAccessRoute) {
+    if (user && allowedRoles && allowedRoles.length > 0) {
+      if (!allowedRoles.includes(user.role)) {
         router.push(unauthorizedUrl);
         return;
       }
@@ -58,11 +50,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     fallbackUrl,
     allowedRoles,
     unauthorizedUrl,
-    canAccessRoute,
     pathname,
   ]);
 
-  // Don't render loading during SSR - return empty div
   if (!isClient || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -76,10 +66,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // If not authenticated or authorized, render nothing (redirect will happen)
   if (!isAuthenticated) return null;
   if (allowedRoles && allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) return null;
-  if (!canAccessRoute) return null;
 
   return <>{children}</>;
 };

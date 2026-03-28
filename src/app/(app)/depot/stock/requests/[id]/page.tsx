@@ -43,11 +43,11 @@ export default function StockRequestDetailPage() {
   const canManageStockActions = useCanManageStock();
 
   // Check if current user can approve/reject (must be from the source zone)
-  const canApproveReject = userZone?.id === (request?.from_zone_id || request?.fromZone?.id);
+  const canApproveReject = userZone === (request?.from_zone_id || request?.fromZone?.id);
 
   // Check if current user can edit/delete (must be the requester and request must be pending)
   const canEditDelete = request?.status === "pending" &&
-    userZone?.id === (request?.to_zone_id || request?.toZone?.id);
+    userZone === (request?.to_zone_id || request?.toZone?.id);
 
   // Mutations
   const deleteMutation = useDeleteStockRequest();
@@ -279,7 +279,7 @@ export default function StockRequestDetailPage() {
                     {/* Show message if user cannot perform actions */}
                     {request.status === "pending" && !canApproveReject && !canEditDelete && (
                       <div className="text-sm text-gray-500 italic">
-                        {userZone?.id === (request?.to_zone_id || request?.toZone?.id)
+                        {userZone === (request?.to_zone_id || request?.toZone?.id)
                           ? "Waiting for approval from source zone"
                           : "You cannot approve requests from other zones"}
                       </div>

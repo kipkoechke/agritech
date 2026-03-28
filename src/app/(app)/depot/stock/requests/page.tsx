@@ -633,7 +633,7 @@ export default function StockRequestsPage() {
                           </ActionMenu.Item>
                           {canManageStockActions && (
                             <>
-                              {request.status === "pending" && userZone?.id === (request.from_zone_id || request.fromZone?.id) && (
+                              {request.status === "pending" && userZone === (request.from_zone_id || request.fromZone?.id) && (
                                 <>
                                   <ActionMenu.Item onClick={() => handleApprove(request)} className="text-green-600">
                                     <MdCheckCircle className="w-4 h-4 mr-2" />
@@ -645,7 +645,7 @@ export default function StockRequestsPage() {
                                   </ActionMenu.Item>
                                 </>
                               )}
-                              {request.status === "pending" && userZone?.id === (request.to_zone_id || request.toZone?.id) && (
+                              {request.status === "pending" && userZone === (request.to_zone_id || request.toZone?.id) && (
                                 <>
                                   <ActionMenu.Item onClick={() => router.push(`/depot/stock/requests/${request.id}/edit`)}>
                                     <MdEdit className="w-4 h-4 mr-2" />
@@ -657,7 +657,7 @@ export default function StockRequestsPage() {
                                   </ActionMenu.Item>
                                 </>
                               )}
-                              {request.status === "approved" && userZone?.id === (request.from_zone_id || request.fromZone?.id) && (
+                              {request.status === "approved" && userZone === (request.from_zone_id || request.fromZone?.id) && (
                                 <ActionMenu.Item onClick={() => handleFulfill(request)} className="text-blue-600">
                                   <MdCallReceived className="w-4 h-4 mr-2" />
                                   Fulfill
@@ -783,7 +783,7 @@ export default function StockRequestsPage() {
 
                               {canManageStockActions && (
                                 <>
-                                  {request.status === "pending" && userZone?.id === (request.from_zone_id || request.fromZone?.id) && (
+                                  {request.status === "pending" && userZone === (request.from_zone_id || request.fromZone?.id) && (
                                     <>
                                       <ActionMenu.Item onClick={() => handleApprove(request)} className="text-green-600">
                                         <MdCheckCircle className="w-4 h-4 mr-2" />
@@ -796,7 +796,7 @@ export default function StockRequestsPage() {
                                     </>
                                   )}
 
-                                  {request.status === "pending" && userZone?.id === (request.to_zone_id || request.toZone?.id) && (
+                                  {request.status === "pending" && userZone === (request.to_zone_id || request.toZone?.id) && (
                                     <>
                                       <ActionMenu.Item onClick={() => router.push(`/depot/stock/requests/${request.id}/edit`)}>
                                         <MdEdit className="w-4 h-4 mr-2" />
@@ -809,7 +809,7 @@ export default function StockRequestsPage() {
                                     </>
                                   )}
 
-                                  {request.status === "approved" && userZone?.id === (request.from_zone_id || request.fromZone?.id) && (
+                                  {request.status === "approved" && userZone === (request.from_zone_id || request.fromZone?.id) && (
                                     <ActionMenu.Item onClick={() => handleFulfill(request)} className="text-blue-600">
                                       <MdCallReceived className="w-4 h-4 mr-2" />
                                       Fulfill

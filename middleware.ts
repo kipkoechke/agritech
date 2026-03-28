@@ -19,12 +19,13 @@ function getUserFromCookie(request: NextRequest): any {
  */
 export function getDefaultDashboard(role: string): string {
   switch (role) {
-    case "customer":
-      return "/customer/dashboard";
-    case "depot-manager":
-      return "/depot/dashboard";
-    case "sales-person":
-      return "/sales-person/dashboard";
+    case "farmer":
+      return "/farmer/dashboard";
+    case "farm_supervisor":
+      return "/supervisor/dashboard";
+    case "plucker":
+      return "/plucker/dashboard";
+    case "admin":
     default:
       return "/dashboard";
   }
@@ -75,17 +76,6 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/") {
     const defaultDashboard = getDefaultDashboard(user.role);
     return NextResponse.redirect(new URL(defaultDashboard, request.url));
-  }
-
-  // Only admins can add new stock (sync with useCanAddStock hook)
-  if (pathname === "/depot/stock/new") {
-    const adminRoles = ["super-admin", "system-admin"];
-    const specialEmails = ["ikibet@ravinedairies.co.ke"];
-    const isAdmin = adminRoles.includes(user.role);
-    const isSpecialEmail = user.email && specialEmails.includes(user.email.toLowerCase());
-    if (!isAdmin && !isSpecialEmail) {
-      return NextResponse.redirect(new URL("/depot/stock", request.url));
-    }
   }
 
   return NextResponse.next();

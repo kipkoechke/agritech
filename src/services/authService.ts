@@ -4,20 +4,15 @@ import type {
   LogoutResponse,
   LoginResponse,
   User,
-  UserProfile,
 } from "../types/auth";
 import { setAuthToken, setUserData, clearAuthData } from "../lib/auth";
 
-// Auth API endpoints
 const AUTH_ENDPOINTS = {
-  LOGIN: "/login",
-  LOGOUT: "/logout",
-  PROFILE: "/me",
+  LOGIN: "/auth/login",
+  LOGOUT: "/auth/logout",
+  ME: "/auth/me",
 } as const;
 
-/**
- * Login - authenticates user and returns token directly
- */
 export const login = async (
   credentials: LoginCredentials,
   remember: boolean = false,
@@ -42,45 +37,26 @@ export const login = async (
     throw new Error("Invalid response from server");
   }
 
-  // Extract user data from response (excluding token)
-  const { token, ...userData } = response.data;
+  const { token, user } = response.data;
 
   setAuthToken(token, remember);
-  setUserData(userData as User);
+  setUserData(user);
 
   return response.data;
 };
 
-// Legacy alias for backwards compatibility
 export const directLogin = login;
 
-/**
- * Logout user and clear authentication data
- */
 export const logoutUser = async (): Promise<void> => {
   await axiosInstance.post<LogoutResponse>(AUTH_ENDPOINTS.LOGOUT);
   clearAuthData();
 };
 
-/**
- * Verify if current session is valid
- */
-export const verifySession = async (): Promise<boolean> => {
-  const response = await axiosInstance.get("/verify");
-  return response.status === 200;
+export const getMe = async (): Promise<User> => {
+  const response = await axiosInstance.get<{ data: User }>(AUTH_ENDPOINTS.ME);
+  return response.data.data;
 };
 
-/**
- * Get user profile from /profile endpoint
- */
-export const getProfile = async (): Promise<UserProfile> => {
-  const response = await axiosInstance.get<UserProfile>(AUTH_ENDPOINTS.PROFILE);
-  return response.data;
-};
-
-/**
- * Clear authentication data (client-side only)
- */
 export const clearAuthSession = (): void => {
   clearAuthData();
 };

@@ -22,7 +22,7 @@ export default function NewStockRequestPage() {
 
   const [formData, setFormData] = useState<CreateStockRequestPayload>({
     from_zone_id: "", // Zone they're requesting FROM (source)
-    to_zone_id: userZone?.id || "", // User's zone (destination) - automatically set
+    to_zone_id: userZone || "", // User's zone (destination) - automatically set
     notes: "",
     products: [{ product_id: "", quantity: 0, batches: [] }],
   });
@@ -42,10 +42,10 @@ export default function NewStockRequestPage() {
 
   // Update to_zone_id when userZone is loaded (user's own zone)
   useEffect(() => {
-    if (userZone?.id && !formData.to_zone_id) {
-      setFormData(prev => ({ ...prev, to_zone_id: userZone.id }));
+    if (userZone && !formData.to_zone_id) {
+      setFormData(prev => ({ ...prev, to_zone_id: userZone }));
     }
-  }, [userZone?.id, formData.to_zone_id]);
+  }, [userZone, formData.to_zone_id]);
 
   const handleZoneChange = (value: string) => {
     setFormData(prev => ({ ...prev, from_zone_id: value }));
@@ -251,7 +251,7 @@ export default function NewStockRequestPage() {
                       From: {formData.from_zone_id ?
                         zonesData?.data?.find(z => z.id === formData.from_zone_id)?.name || "Unknown" :
                         "Select source zone"} →
-                      To: <span className="font-medium">{userZone?.name || "Loading..."}</span>
+                      To: <span className="font-medium">{userZone || "Loading..."}</span>
                     </p>
                   </div>
                 </div>
@@ -263,7 +263,7 @@ export default function NewStockRequestPage() {
                   Source Zone (Request From) *
                 </label>
                 <p className="text-xs text-gray-600 mb-2">
-                  Select which zone you want to request stock from. Stock will be transferred to your zone ({userZone?.name || "your zone"}).
+                  Select which zone you want to request stock from. Stock will be transferred to your zone ({userZone || "your zone"}).
                 </p>
                 <select
                   value={formData.from_zone_id}

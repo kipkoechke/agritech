@@ -4,13 +4,9 @@ import { useState } from "react";
 import { HiBars3, HiXMark } from "react-icons/hi2";
 import {
   MdPerson,
-  MdBusiness,
-  MdAccountBalance,
-  MdPayment,
-  MdWallet,
   MdLogout,
 } from "react-icons/md";
-import { useAuth, useProfile, useLogout } from "../../hooks/useAuth";
+import { useAuth, useLogout } from "../../hooks/useAuth";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 import Logo from "../common/Logo";
 import ENgaoLogo from "../common/ENgaoLogo";
@@ -23,25 +19,13 @@ interface HeaderProps {
 // Format role for display
 const formatRole = (role: string) => {
   return role
-    .split("-")
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
 
-// Get zone name from profile zone (can be string or object)
-const getZoneName = (
-  zone: string | { id: string; name: string } | null | undefined,
-): string | null => {
-  if (!zone) return null;
-  if (typeof zone === "string") {
-    return zone === "NA" ? null : zone;
-  }
-  return zone.name || null;
-};
-
 const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
   const { user } = useAuth();
-  const { data: profile } = useProfile();
   const logoutMutation = useLogout();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useOutsideClick(() => setIsProfileOpen(false));
@@ -96,7 +80,7 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
               {/* User Details - Hidden on small screens, shown on medium+ */}
               <div className="hidden md:flex flex-col gap-0.5">
                 <h3 className="font-semibold text-sm text-gray-900 leading-tight whitespace-nowrap">
-                  {profile?.name || user.name}
+                  {user.name}
                 </h3>
               </div>
             </div>
@@ -112,112 +96,13 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-base truncate text-gray-900">
-                        {profile?.name || user.name}
+                        {user.name}
                       </h3>
                       <p className="text-xs text-gray-500 capitalize">
-                        {formatRole(profile?.role?.name || user.role || "")}
+                        {formatRole(user.role || "")}
                       </p>
                     </div>
                   </div>
-                </div>
-
-                {/* Details */}
-                <div className="p-4 space-y-2">
-                  {/* Paybill & Account Number Row */}
-                  {[
-                    "customer",
-                    "sales-person",
-                    "sales-representative",
-                    "depot-manager",
-                  ].includes(profile?.role?.name || user.role || "") && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Paybill */}
-                      {(profile?.paybill || user.paybill) && (
-                        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-purple-50">
-                          <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                            <MdPayment className="w-4 h-4 text-purple-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-purple-600">Paybill</p>
-                            <p className="text-sm font-bold text-gray-900">
-                              {profile?.paybill || user.paybill}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Account Number */}
-                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-blue-50">
-                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                          <MdAccountBalance className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-blue-600">Account No.</p>
-                          <p className="text-sm font-bold text-gray-900">
-                            {user.account_number || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Zone & Wallet Balance Row */}
-                  {(getZoneName(profile?.zone) ||
-                    user.zone ||
-                    [
-                      "customer",
-                      "sales-representative",
-                      "sales-person",
-                    ].includes(profile?.role?.name || user.role || "")) && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Zone */}
-                      {(getZoneName(profile?.zone) || user.zone) && (
-                        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-50">
-                          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                            <MdBusiness className="w-4 h-4 text-amber-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-amber-600">Zone</p>
-                            <p className="text-sm font-bold text-gray-900 truncate">
-                              {getZoneName(profile?.zone) ||
-                                user.zone?.name ||
-                                "N/A"}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Wallet Balance - for customers and sales reps */}
-                      {[
-                        "customer",
-                        "sales-representative",
-                        "sales-person",
-                      ].includes(profile?.role?.name || user.role || "") && (
-                        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                            <MdWallet className="w-4 h-4 text-emerald-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-emerald-600">
-                              Wallet Balance
-                            </p>
-                            <p className="text-sm font-bold text-gray-900">
-                              KES{" "}
-                              {profile?.wallet_balance || user.wallet_balance
-                                ? parseFloat(
-                                    profile?.wallet_balance ||
-                                      user.wallet_balance ||
-                                      "0",
-                                  ).toLocaleString("en-KE", {
-                                    minimumFractionDigits: 2,
-                                  })
-                                : "0.00"}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 {/* Logout Button */}

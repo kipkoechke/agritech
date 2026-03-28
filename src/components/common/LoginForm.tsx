@@ -42,11 +42,12 @@ export const LoginForm = () => {
       {
         onSuccess: (response) => {
           reset();
+          console.log("Login successful:", response);
           // Use redirect param if provided and not root, otherwise use role-based default
           const redirectUrl =
             redirectParam && redirectParam !== "/"
               ? redirectParam
-              : getDefaultDashboard(response.role);
+              : getDefaultDashboard(response.user.role);
           router.push(redirectUrl);
         },
       },

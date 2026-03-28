@@ -1,64 +1,22 @@
 import axiosInstance from "@/lib/axios";
-import type {
-  CreateUserPayload,
-  User,
-  UserDetailResponse,
-  UsersQueryParams,
-  UsersResponse,
-  UpdateUserPayload,
-  UserRole,
-} from "@/types/user";
+import type { User, UsersResponse, CreateUserData, UpdateUserData } from "@/types/user";
 
-// Get all users
-export const getUsers = async (
-  page: number = 1,
-  search?: string,
-  params?: Partial<UsersQueryParams>,
-): Promise<UsersResponse> => {
-  const queryParams: UsersQueryParams = {
-    page,
-    per_page: 15,
-    ...params,
-  };
-
-  if (search) {
-    queryParams.search = search;
-  }
-
-  const response = await axiosInstance.get<UsersResponse>("/users", {
-    params: queryParams,
-  });
-  return response.data;
+export const getUsers = async (): Promise<User[]> => {
+  const response = await axiosInstance.get<UsersResponse>("/users");
+  return response.data.data;
 };
 
-// Get single user
 export const getUser = async (id: string): Promise<User> => {
-  const response = await axiosInstance.get<User>(`/users/${id}`);
-  return response.data;
+  const response = await axiosInstance.get<{ data: User }>(`/users/${id}`);
+  return response.data.data;
 };
 
-// Create user
-export const createUser = async (payload: CreateUserPayload): Promise<User> => {
-  const response = await axiosInstance.post<User>("/users", payload);
-  return response.data;
+export const createUser = async (data: CreateUserData): Promise<User> => {
+  const response = await axiosInstance.post<{ data: User }>("/users", data);
+  return response.data.data;
 };
 
-// Update user
-export const updateUser = async (
-  id: string,
-  payload: UpdateUserPayload,
-): Promise<User> => {
-  const response = await axiosInstance.patch<User>(`/users/${id}`, payload);
-  return response.data;
-};
-
-// Delete user
-export const deleteUser = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/users/${id}`);
-};
-
-// Get user roles from /users/roles endpoint
-export const getUserRoles = async (): Promise<UserRole[]> => {
-  const response = await axiosInstance.get<UserRole[]>("/users/roles");
-  return response.data;
+export const updateUser = async (id: string, data: UpdateUserData): Promise<User> => {
+  const response = await axiosInstance.put<{ data: User }>(`/users/${id}`, data);
+  return response.data.data;
 };

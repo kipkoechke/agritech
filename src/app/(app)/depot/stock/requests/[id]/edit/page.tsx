@@ -324,7 +324,7 @@ export default function EditStockRequestPage({ params }: EditStockRequestPagePro
                         : "Select source zone"}{" "}
                       → To:{" "}
                       <span className="font-medium">
-                        {zonesData?.data?.find((z) => z.id === formData.to_zone_id)?.name || userZone?.name || "Loading..."}
+                        {zonesData?.data?.find((z) => z.id === formData.to_zone_id)?.name || userZone || "Loading..."}
                       </span>
                     </p>
                   </div>

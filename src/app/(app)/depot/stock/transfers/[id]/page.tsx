@@ -36,10 +36,10 @@ export default function StockTransferDetailPage() {
   const canManageStockActions = useCanManageStock();
 
   // Check if current user can complete the transfer (must be from destination zone)
-  const canComplete = canManageStockActions && transfer && userZone?.id === transfer.to_zone_id && transfer.status === "pending";
+  const canComplete = canManageStockActions && transfer && userZone === transfer.to_zone_id && transfer.status === "pending";
 
   // Check if current user can cancel the transfer (must be from source zone)
-  const canCancel = canManageStockActions && transfer && userZone?.id === transfer.from_zone_id && transfer.status === "pending";
+  const canCancel = canManageStockActions && transfer && userZone === transfer.from_zone_id && transfer.status === "pending";
 
   // Mutations
   const completeMutation = useCompleteStockTransfer();
