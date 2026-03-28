@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 
->>>>>>> 2d3d2ac81cc6860929334601d9643a00d49b4374
 # SOKOCHAPP - Agritech Tea Farming Management
 
 ## Overview
