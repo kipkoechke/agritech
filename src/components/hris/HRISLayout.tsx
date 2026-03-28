@@ -1,0 +1,154 @@
+"use client";
+
+import React, { ReactNode } from "react";
+import {
+  MdDashboard,
+  MdGroup,
+  MdSell,
+  MdBusiness,
+  MdSettings,
+  MdBackup,
+} from "react-icons/md";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import PageHeader from "@/components/common/PageHeader";
+
+interface HRISLayoutProps {
+  children: ReactNode;
+  title: string | ReactNode;
+  description: string;
+  action?: ReactNode;
+  search?: ReactNode;
+}
+
+const HRISLayout: React.FC<HRISLayoutProps> = ({
+  children,
+  title,
+  description,
+  action,
+  search,
+}) => {
+  const pathname = usePathname();
+
+  const tabs = [
+    {
+      name: "Dashboard",
+      icon: MdDashboard,
+      href: "/hris/dashboard",
+      active: pathname === "/hris/dashboard",
+    },
+    {
+      name: "User Management",
+      icon: MdGroup,
+      href: "/hris/users",
+      active:
+        pathname.startsWith("/hris/users") ||
+        pathname.startsWith("/hris/roles"),
+    },
+    {
+      name: "Sales Reps",
+      icon: MdSell,
+      href: "/sales-representatives",
+      active: pathname.startsWith("/sales-representatives"),
+    },
+    {
+      name: "Depot Managers",
+      icon: MdBusiness,
+      href: "/depot-managers",
+      active: pathname.startsWith("/depot-managers"),
+    },
+    {
+      name: "Business Managers",
+      icon: MdBusiness,
+      href: "/hris/business-managers",
+      active: pathname.startsWith("/hris/business-managers"),
+    },
+    {
+      name: "Operational Controls",
+      icon: MdSettings,
+      href: "/operational-controls",
+      active: pathname.startsWith("/operational-controls"),
+    },
+    {
+      name: "Backup",
+      icon: MdBackup,
+      href: "/hris/backup",
+      active: pathname.startsWith("/hris/backup"),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      {/* Mobile Horizontal Tabs - Using TabBar styling pattern */}
+      <div className="md:hidden shrink-0 px-2 pt-2">
+        <div
+          className="flex bg-primary rounded-xl shadow p-1 items-center w-full overflow-x-auto scrollbar-hide"
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          <div className="flex gap-0.5 min-w-max">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`flex items-center px-2 sm:px-3 py-2 transition-all duration-300 text-xs sm:text-sm relative outline-none whitespace-nowrap shrink-0 min-w-0 justify-center rounded-lg ${
+                  tab.active
+                    ? "text-white font-semibold bg-accent"
+                    : "text-white/80 hover:text-white hover:bg-primary-dark"
+                }`}
+              >
+                <tab.icon className="w-4 h-4 mr-1 shrink-0" />
+                <span className="truncate">{tab.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* HRIS Sidebar - Hidden on mobile */}
+      <div className="hidden md:block bg-white border-r border-gray-200 shrink-0 h-screen overflow-y-auto">
+        <nav className="p-2">
+          <ul className="space-y-0.5">
+            {tabs.map((tab) => (
+              <li key={tab.href}>
+                <Link
+                  href={tab.href}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm whitespace-nowrap ${
+                    tab.active
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  <span className="font-medium">{tab.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden pt-2">
+        {/* Header - Fixed */}
+        <div className="mx-3 md:mx-6 mb-4">
+          <PageHeader
+            title={title}
+            description={description}
+            search={search}
+            action={action}
+          />
+        </div>
+
+        {/* Content - Non-scrollable container, children handle their own scrolling */}
+        <div className="flex-1 px-3 md:px-6 pb-20 md:pb-6 overflow-hidden min-h-0 flex flex-col">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HRISLayout;

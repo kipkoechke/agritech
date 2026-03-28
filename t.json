@@ -1,0 +1,431 @@
+{
+  "period": {
+    "start": "2026-02-01 00:00:00",
+    "end": "2026-02-16 23:59:59"
+  },
+  "filtered_customer": null,
+  "revenue_performance": {
+    "total_order_value": "5.18M",
+    "total_amount_collected": "1.71M",
+    "total_amount_pending": "3.47M",
+    "total_dispatched_unpaid": "1.11M",
+    "total_revenue": "5.18M",
+    "total_orders": 121,
+    "revenue_trend": [
+      {
+        "date": "2026-02-01",
+        "total_revenue": "0",
+        "order_count": 0,
+        "total_order_value": "0",
+        "total_amount_collected": "0",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-02",
+        "total_revenue": "0",
+        "order_count": 0,
+        "total_order_value": "0",
+        "total_amount_collected": "0",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-03",
+        "total_revenue": "0",
+        "order_count": 0,
+        "total_order_value": "0",
+        "total_amount_collected": "0",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-04",
+        "total_revenue": "0",
+        "order_count": 0,
+        "total_order_value": "0",
+        "total_amount_collected": "0",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-05",
+        "total_revenue": "0",
+        "order_count": 0,
+        "total_order_value": "0",
+        "total_amount_collected": "0",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-06",
+        "total_revenue": "193.65K",
+        "order_count": 11,
+        "total_order_value": "193.65K",
+        "total_amount_collected": "155.49K",
+        "total_amount_pending": "38.16K"
+      },
+      {
+        "date": "2026-02-07",
+        "total_revenue": "414K",
+        "order_count": 4,
+        "total_order_value": "414K",
+        "total_amount_collected": "0",
+        "total_amount_pending": "414K"
+      },
+      {
+        "date": "2026-02-08",
+        "total_revenue": "784.51K",
+        "order_count": 9,
+        "total_order_value": "784.51K",
+        "total_amount_collected": "0",
+        "total_amount_pending": "784.51K"
+      },
+      {
+        "date": "2026-02-09",
+        "total_revenue": "1.07M",
+        "order_count": 23,
+        "total_order_value": "1.07M",
+        "total_amount_collected": "186.84K",
+        "total_amount_pending": "884.58K"
+      },
+      {
+        "date": "2026-02-10",
+        "total_revenue": "79.38K",
+        "order_count": 3,
+        "total_order_value": "79.38K",
+        "total_amount_collected": "225.85K",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-11",
+        "total_revenue": "957.69K",
+        "order_count": 21,
+        "total_order_value": "957.69K",
+        "total_amount_collected": "239.55K",
+        "total_amount_pending": "718.15K"
+      },
+      {
+        "date": "2026-02-12",
+        "total_revenue": "175.83K",
+        "order_count": 11,
+        "total_order_value": "175.83K",
+        "total_amount_collected": "151.09K",
+        "total_amount_pending": "24.74K"
+      },
+      {
+        "date": "2026-02-13",
+        "total_revenue": "290.88K",
+        "order_count": 12,
+        "total_order_value": "290.88K",
+        "total_amount_collected": "291.99K",
+        "total_amount_pending": "0"
+      },
+      {
+        "date": "2026-02-14",
+        "total_revenue": "538.95K",
+        "order_count": 10,
+        "total_order_value": "538.95K",
+        "total_amount_collected": "244.25K",
+        "total_amount_pending": "294.7K"
+      },
+      {
+        "date": "2026-02-15",
+        "total_revenue": "235.89K",
+        "order_count": 5,
+        "total_order_value": "235.89K",
+        "total_amount_collected": "159.25K",
+        "total_amount_pending": "76.64K"
+      },
+      {
+        "date": "2026-02-16",
+        "total_revenue": "438.56K",
+        "order_count": 12,
+        "total_order_value": "438.56K",
+        "total_amount_collected": "29.58K",
+        "total_amount_pending": "408.99K"
+      }
+    ],
+    "orders_by_status": [
+      {
+        "delivery_status": "dispatched",
+        "count": 53
+      },
+      {
+        "delivery_status": "pending",
+        "count": 68
+      }
+    ],
+    "orders_by_payment_status": [
+      {
+        "payment_status": "paid",
+        "count": 54
+      },
+      {
+        "payment_status": "partially_paid",
+        "count": 13
+      },
+      {
+        "payment_status": "pending",
+        "count": 54
+      }
+    ]
+  },
+  "finance_cash_flow": {
+    "outstanding_receivables": "3.5M",
+    "payments_collected": "1.71M",
+    "payments_collected_breakdown": {
+      "mpesa_transactions": "1.71M",
+      "buni_transactions": "0",
+      "order_payments": "0",
+      "wallet_credits_same_day": "572.21K",
+      "wallet_credits_other_days": "0"
+    },
+    "invoice_aging": {
+      "current": "1.84M",
+      "overdue": "1.09M"
+    }
+  },
+  "enhanced_metrics": {
+    "orders_created_value": "5.18M",
+    "payments_for_these_orders": "1.18M",
+    "outstanding_for_these_orders": "4M",
+    "total_money_received": "1.71M",
+    "wallet_funding": "572.21K",
+    "payment_breakdown_for_orders": {
+      "direct_order_payments": "1.18M",
+      "wallet_payments_for_orders": "0"
+    }
+  },
+  "distribution_performance": {
+    "orders_fulfilled": 0,
+    "orders_pending": 39,
+    "orders_in_transit": 53,
+    "avg_fulfillment_time": null
+  },
+  "product_performance": {
+    "top_products": [
+      {
+        "product_id": "019c29ed-7d48-725a-9cf4-eba277dd0e4b",
+        "product_name": "Ravines Gold ESL (long life) 500ml",
+        "total_quantity": 6414,
+        "total_revenue": "3.44M"
+      },
+      {
+        "product_id": "019c29ee-7ee6-723d-9218-f9a1a84ef7aa",
+        "product_name": "Ravine's Gold ESL (long life milk ) 200ml",
+        "total_quantity": 2387,
+        "total_revenue": "996.54K"
+      },
+      {
+        "product_id": "019c29e6-27e9-711f-bbd2-f2948358d680",
+        "product_name": "Ravines Gold Fino ( longlife) 500ml",
+        "total_quantity": 604,
+        "total_revenue": "344.28K"
+      },
+      {
+        "product_id": "019c29ef-9764-71aa-a99c-c6b2063da412",
+        "product_name": "Ravine's Gold Maziwa Lala pouch 500ML",
+        "total_quantity": 200,
+        "total_revenue": "198K"
+      },
+      {
+        "product_id": "019c29fc-ed59-72a3-af42-91e545121979",
+        "product_name": "Ravine Gold Vanilla Yoghurt 250ml",
+        "total_quantity": 121,
+        "total_revenue": "65.34K"
+      },
+      {
+        "product_id": "019c29f0-9a7d-7078-a856-47c579adbdfd",
+        "product_name": "Ravine's Gold Maziwa Lala pouch 200ML",
+        "total_quantity": 67,
+        "total_revenue": "60.3K"
+      },
+      {
+        "product_id": "019c29fa-4c82-72f6-9c24-b1af14904ff2",
+        "product_name": "Ravine Gold Vanilla Yoghurt 500ml",
+        "total_quantity": 31,
+        "total_revenue": "16.74K"
+      },
+      {
+        "product_id": "019c29f1-dae3-7371-b179-9d3ed59a481e",
+        "product_name": "Ravine's Gold Maziwa Lala bottle 500ML",
+        "total_quantity": 13,
+        "total_revenue": "10.14K"
+      },
+      {
+        "product_id": "019c29f7-5b1e-736e-b6fd-70428df51d62",
+        "product_name": "Ravine Gold Vanilla Yoghurt 150ml",
+        "total_quantity": 22,
+        "total_revenue": "8.71K"
+      },
+      {
+        "product_id": "019c29fc-c3c7-7064-8a1c-4a2d7ee0e12c",
+        "product_name": "Ravine Gold Vanilla Yoghurt 100ml",
+        "total_quantity": 24,
+        "total_revenue": "6.91K"
+      }
+    ],
+    "slow_moving_products": [
+      {
+        "product_id": "019c46ef-7914-7018-98a8-d2adfaaf5571",
+        "product_name": "Ravine Gold Strawberry Yoghurt 150ml",
+        "total_quantity": 1,
+        "total_revenue": "396.00"
+      },
+      {
+        "product_id": "019c2a06-4389-7243-bd90-b9934a8353d0",
+        "product_name": "Ravine Gold Natural yoghurt 150ml",
+        "total_quantity": 5,
+        "total_revenue": "1.98K"
+      },
+      {
+        "product_id": "019c29f6-52e5-72c4-b7e3-05b98a4c1498",
+        "product_name": "Ravine Gold Natural yoghurt 250ml",
+        "total_quantity": 5,
+        "total_revenue": "2.7K"
+      },
+      {
+        "product_id": "019c29f6-3d52-718c-a60e-960056bf1efb",
+        "product_name": "Ravine Gold Strawberry Yoghurt 100ml",
+        "total_quantity": 10,
+        "total_revenue": "2.88K"
+      },
+      {
+        "product_id": "019c29fa-e3b4-72fd-b05b-fea42ecb3fe4",
+        "product_name": "Ravine Gold Strawberry Yoghurt 500ml",
+        "total_quantity": 8,
+        "total_revenue": "4.32K"
+      },
+      {
+        "product_id": "019c29f8-61e2-7121-a549-603ed4f3bc7c",
+        "product_name": "Ravine Gold Strawberry Yoghurt 250ml",
+        "total_quantity": 11,
+        "total_revenue": "5.94K"
+      },
+      {
+        "product_id": "019c29fc-c3c7-7064-8a1c-4a2d7ee0e12c",
+        "product_name": "Ravine Gold Vanilla Yoghurt 100ml",
+        "total_quantity": 24,
+        "total_revenue": "6.91K"
+      },
+      {
+        "product_id": "019c29f7-5b1e-736e-b6fd-70428df51d62",
+        "product_name": "Ravine Gold Vanilla Yoghurt 150ml",
+        "total_quantity": 22,
+        "total_revenue": "8.71K"
+      },
+      {
+        "product_id": "019c29f1-dae3-7371-b179-9d3ed59a481e",
+        "product_name": "Ravine's Gold Maziwa Lala bottle 500ML",
+        "total_quantity": 13,
+        "total_revenue": "10.14K"
+      },
+      {
+        "product_id": "019c29fa-4c82-72f6-9c24-b1af14904ff2",
+        "product_name": "Ravine Gold Vanilla Yoghurt 500ml",
+        "total_quantity": 31,
+        "total_revenue": "16.74K"
+      }
+    ]
+  },
+  "customer_insights": {
+    "total_customers": 129,
+    "new_customers": 129,
+    "top_customers": [
+      {
+        "customer_id": "019c3304-6d62-70b5-a4da-f0c2ceaf3f3d",
+        "customer_name": "Blue crest",
+        "customer_account_number": "02000021",
+        "total_spent": "321K",
+        "order_count": 2
+      },
+      {
+        "customer_id": "019c3e4c-441d-7072-9f4a-4acc1aed3631",
+        "customer_name": "Joseph mwangangi",
+        "customer_account_number": "02000029",
+        "total_spent": "312.9K",
+        "order_count": 2
+      },
+      {
+        "customer_id": "019c65c1-36fd-717d-8f3e-bb7d13f8ef2a",
+        "customer_name": "Samuel King'oo Nzusyo",
+        "customer_account_number": "RQRNYENA",
+        "total_spent": "288K",
+        "order_count": 1
+      },
+      {
+        "customer_id": "019c3e09-6f41-7165-9a9d-076a6267d979",
+        "customer_name": "Sylvester kioko",
+        "customer_account_number": "02000028",
+        "total_spent": "262.59K",
+        "order_count": 2
+      },
+      {
+        "customer_id": "019c4c0f-96c8-70e2-be06-140cdfacb271",
+        "customer_name": "Emmanuel thuku",
+        "customer_account_number": "02000054",
+        "total_spent": "227.5K",
+        "order_count": 1
+      },
+      {
+        "customer_id": "019c52d8-dd3b-738e-98cc-17ac2b951869",
+        "customer_name": "Isaac Ndengwa",
+        "customer_account_number": "EJQKY7",
+        "total_spent": "201K",
+        "order_count": 1
+      },
+      {
+        "customer_id": "019c32d9-0532-728e-89ef-50cf976ea03a",
+        "customer_name": "Robert Waitherero",
+        "customer_account_number": "02000012",
+        "total_spent": "196.02K",
+        "order_count": 2
+      },
+      {
+        "customer_id": "019c3dfd-8420-72de-a1fe-3e6a57020046",
+        "customer_name": "Allan Omondi",
+        "customer_account_number": "02000027",
+        "total_spent": "182.23K",
+        "order_count": 1
+      },
+      {
+        "customer_id": "019c4bb8-53d5-71da-8dbd-ab4dc5f6c997",
+        "customer_name": "Nelson maina",
+        "customer_account_number": "02000051",
+        "total_spent": "163.2K",
+        "order_count": 1
+      },
+      {
+        "customer_id": "019c32fd-587d-722e-b52b-a0e3ab9b15bb",
+        "customer_name": "Monicah",
+        "customer_account_number": "02000016",
+        "total_spent": "159K",
+        "order_count": 1
+      }
+    ]
+  },
+  "zone_breakdown": {
+    "orders_by_zone": [
+      {
+        "zone_id": "019bfab1-df87-73bc-a018-471ac521765b",
+        "zone_name": "Kakamega",
+        "order_count": 1,
+        "total_revenue": "25.74K"
+      },
+      {
+        "zone_id": "019bfab1-df7f-709c-9c68-6945274f113f",
+        "zone_name": "Nairobi",
+        "order_count": 76,
+        "total_revenue": "3.88M"
+      },
+      {
+        "zone_id": "019bfab1-df83-7392-b23f-eef08e612f45",
+        "zone_name": "Masii",
+        "order_count": 31,
+        "total_revenue": "1.11M"
+      },
+      {
+        "zone_id": "019bfab1-df7a-71c1-b4eb-297bae885cea",
+        "zone_name": "Nakuru",
+        "order_count": 13,
+        "total_revenue": "156K"
+      }
+    ]
+  }
+}
