@@ -10,9 +10,9 @@ import { setAuthToken, setUserData, clearAuthData } from "../lib/auth";
 
 // Auth API endpoints
 const AUTH_ENDPOINTS = {
-  LOGIN: "/auth/login",
-  LOGOUT: "/auth/logout",
-  PROFILE: "/auth/me",
+  LOGIN: "/login",
+  LOGOUT: "/logout",
+  PROFILE: "/me",
 } as const;
 
 /**
@@ -66,7 +66,7 @@ export const logoutUser = async (): Promise<void> => {
  * Verify if current session is valid
  */
 export const verifySession = async (): Promise<boolean> => {
-  const response = await axiosInstance.get("/auth/verify");
+  const response = await axiosInstance.get("/verify");
   return response.status === 200;
 };
 

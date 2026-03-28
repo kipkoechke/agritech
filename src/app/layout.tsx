@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SOKOCHAPP",
   description: "SOKOCHAPP - Tea Farming Management",
+  icons: {
+    icon: "/assets/logo.webp",
+  },
 };
 
 export const viewport: Viewport = {

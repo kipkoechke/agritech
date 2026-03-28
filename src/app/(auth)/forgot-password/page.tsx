@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
             <Image
               className="mx-auto h-20 w-auto object-contain"
               src="/assets/logo.png"
-              alt="National Police Service"
+              alt="SOKOCHAPP"
               width={535}
               height={100}
               priority
