@@ -38,14 +38,9 @@ export interface Farm {
 export interface CreateFarmData {
   name: string;
   size: number;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
+  coordinates: Record<string, any>;
   zone_id: string;
   product_id: string;
-  owner_id?: string;
-  supervisor_id?: string;
 }
 
 export interface UpdateFarmData {

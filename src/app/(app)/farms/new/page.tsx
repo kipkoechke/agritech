@@ -2,12 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MdAgriculture, MdArrowBack } from "react-icons/md";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { MdAgriculture, MdArrowBack } from "react-icons/md";
 import { useCreateFarm } from "@/hooks/useFarm";
 import { useZones } from "@/hooks/useZone";
 import { useProducts } from "@/hooks/useProduct";
-import type { CreateFarmData } from "@/services/farmService";
+import type { CreateFarmData } from "@/types/farm";
+import "leaflet/dist/leaflet.css";
+
+// Only dynamic-import components that need SSR off
+const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
+
+// Hook can be used normally, no dynamic
+import { useMapEvents } from "react-leaflet";
 
 export default function NewFarmPage() {
   const router = useRouter();
@@ -23,43 +33,51 @@ export default function NewFarmPage() {
     product_id: "",
   });
 
-  const [coordinatesText, setCoordinatesText] = useState("{}");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "size" ? parseFloat(value) || 0 : value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Parse coordinates from JSON string
-    let coordinates = {};
-    try {
-      coordinates = JSON.parse(coordinatesText);
-    } catch {
-      coordinates = {};
+    if (!coords) {
+      alert("Please pick coordinates on the map");
+      return;
     }
 
     const data: CreateFarmData = {
       ...formData,
-      coordinates,
+      coordinates: coords,
     };
 
     createFarm.mutate(data, {
       onSuccess: () => {
         router.push("/farms");
       },
+      onError: (err: any) => {
+        alert(err.message || "Failed to create farm");
+      },
     });
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "size" ? parseFloat(value) || 0 : value,
-    }));
-  };
+  // Component for picking coordinates
+  function LocationMarker() {
+    useMapEvents({
+      click(e) {
+        setCoords(e.latlng);
+      },
+    });
+
+    return coords ? <Marker position={coords} /> : null;
+  }
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen p-4 bg-gray-50">
       <div className="mb-6">
         <Link
           href="/farms"
@@ -74,18 +92,14 @@ export default function NewFarmPage() {
         </h1>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-2xl">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-2xl mx-auto space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Farm Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Farm Name *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Farm Name *</label>
             <input
               type="text"
-              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -95,16 +109,11 @@ export default function NewFarmPage() {
             />
           </div>
 
+          {/* Farm Size */}
           <div>
-            <label
-              htmlFor="size"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Size *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Size *</label>
             <input
               type="number"
-              id="size"
               name="size"
               value={formData.size}
               onChange={handleChange}
@@ -116,43 +125,18 @@ export default function NewFarmPage() {
             />
           </div>
 
+          {/* Zone */}
           <div>
-            <label
-              htmlFor="coordinates"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Coordinates (JSON)
-            </label>
-            <textarea
-              id="coordinates"
-              value={coordinatesText}
-              onChange={(e) => setCoordinatesText(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-              placeholder='{"lat": 0, "lng": 0}'
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Enter coordinates in JSON format (e.g., {"{\"lat\": -1.234, \"lng\": 36.789"})
-            </p>
-          </div>
-
-          <div>
-            <label
-              htmlFor="zone_id"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Zone
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Zone</label>
             <select
-              id="zone_id"
               name="zone_id"
               value={formData.zone_id}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
               disabled={zonesLoading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
             >
               <option value="">Select a zone</option>
-              {zones?.map((zone) => (
+              {zones?.map(zone => (
                 <option key={zone.id} value={zone.id}>
                   {zone.name}
                 </option>
@@ -160,23 +144,18 @@ export default function NewFarmPage() {
             </select>
           </div>
 
+          {/* Product */}
           <div>
-            <label
-              htmlFor="product_id"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Product
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
             <select
-              id="product_id"
               name="product_id"
               value={formData.product_id}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
               disabled={productsLoading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
             >
               <option value="">Select a product</option>
-              {products?.map((product) => (
+              {products?.map(product => (
                 <option key={product.id} value={product.id}>
                   {product.name}
                 </option>
@@ -184,6 +163,23 @@ export default function NewFarmPage() {
             </select>
           </div>
 
+          {/* Map for picking coordinates */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Pick Coordinates</label>
+            <div className="h-64 w-full border rounded-md overflow-hidden">
+              <MapContainer center={[0, 0]} zoom={2} style={{ height: "100%", width: "100%" }}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <LocationMarker />
+              </MapContainer>
+            </div>
+            {coords && (
+              <p className="mt-2 text-sm text-gray-700">
+                Selected: Lat {coords.lat.toFixed(5)}, Lng {coords.lng.toFixed(5)}
+              </p>
+            )}
+          </div>
+
+          {/* Buttons */}
           <div className="flex gap-4 pt-4">
             <button
               type="submit"
