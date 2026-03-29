@@ -292,7 +292,7 @@ export default function TeaDashboardPage() {
             <div className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/10 text-primary shrink-0">
               <MdDashboard className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <h1 className="text-base md:text-lg font-bold text-gray-900">Tea Analytics Dashboard</h1>
+            <h1 className="text-base md:text-lg font-bold text-gray-900">Dashboard</h1>
             <MdFilterList className="w-4 h-4 text-gray-400 shrink-0" />
             <div className="hidden md:flex items-center gap-2 ml-2 px-3 py-1 bg-blue-50 rounded-full">
               <MdCalendarToday className="w-3.5 h-3.5 text-blue-600" />
