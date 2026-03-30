@@ -18,6 +18,7 @@ import {
   MdLocationOn,
   MdBusiness,
   MdPerson,
+  MdDesignServices,
 } from "react-icons/md";
 import {
   LineChart,
@@ -37,6 +38,7 @@ import {
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor, useIsPlucker } from "@/hooks/useAuth";
 
 // @ts-ignore
 delete L.Icon.Default.prototype._getIconUrl;
@@ -151,6 +153,12 @@ const RankingChart = ({ data, title, icon: Icon, valueLabel = "KG" }: {
 );
 
 export default function TeaDashboardPage() {
+  const { user } = useAuth();
+  const isAdmin = useIsAdmin();
+  const isFarmer = useIsFarmer();
+  const isSupervisor = useIsSupervisor();
+  const isPlucker = useIsPlucker();
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
@@ -173,7 +181,18 @@ export default function TeaDashboardPage() {
   };
 
   const filteredData = useMemo(() => {
-    return ALL_DATA.filter((item) => {
+    let data = ALL_DATA;
+    
+    // Filter by user's zone if not admin
+    if (isFarmer && user?.zone_id) {
+      data = data.filter((item) => item.zone === user?.zone_name);
+    }
+    if (isSupervisor && user?.zone_id) {
+      data = data.filter((item) => item.zone === user?.zone_name);
+    }
+    
+    // Apply additional filters
+    return data.filter((item) => {
       const matchesZone = !zone || item.zone === zone;
       const matchesFactory = !factory || item.factory === factory;
       const matchesSupervisor = !supervisor || item.supervisor === supervisor;
@@ -186,7 +205,7 @@ export default function TeaDashboardPage() {
       }
       return matchesZone && matchesFactory && matchesSupervisor && matchesDate;
     });
-  }, [zone, factory, supervisor, startDate, endDate]);
+  }, [zone, factory, supervisor, startDate, endDate, user, isFarmer, isSupervisor]);
 
   const stats = useMemo(() => {
     const farmers = new Set(filteredData.map((d) => d.plucker)).size;
@@ -281,6 +300,15 @@ export default function TeaDashboardPage() {
     return "#ef4444";
   };
 
+  // Determine dashboard title based on role
+  const getDashboardTitle = () => {
+    if (isAdmin) return "Admin Dashboard";
+    if (isFarmer) return "My Farm Dashboard";
+    if (isSupervisor) return "Supervisor Dashboard";
+    if (isPlucker) return "My Dashboard";
+    return "Dashboard";
+  };
+
   return (
     <div className="absolute inset-0 flex flex-col bg-slate-100">
       <div className="bg-white border-b border-slate-200 shrink-0">
@@ -292,7 +320,7 @@ export default function TeaDashboardPage() {
             <div className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/10 text-primary shrink-0">
               <MdDashboard className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <h1 className="text-base md:text-lg font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-base md:text-lg font-bold text-gray-900">{getDashboardTitle()}</h1>
             <MdFilterList className="w-4 h-4 text-gray-400 shrink-0" />
             <div className="hidden md:flex items-center gap-2 ml-2 px-3 py-1 bg-blue-50 rounded-full">
               <MdCalendarToday className="w-3.5 h-3.5 text-blue-600" />
@@ -359,164 +387,198 @@ export default function TeaDashboardPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 md:px-4 py-2 pb-20 md:pb-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
-          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                <MdAgriculture className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+        {/* Stats Cards - Only show for Admin and Farmer */}
+        {(isAdmin || isFarmer) && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                  <MdAgriculture className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+                </div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Total Farmers</p><p className="text-lg md:text-2xl font-bold text-slate-900">{formatNumber(stats.farmers)}</p></div>
               </div>
-              <div><p className="text-[10px] md:text-xs text-slate-500">Total Farmers</p><p className="text-lg md:text-2xl font-bold text-slate-900">{formatNumber(stats.farmers)}</p></div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                  <MdSupervisorAccount className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
+                </div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Supervisors</p><p className="text-lg md:text-2xl font-bold text-emerald-600">{formatNumber(stats.supervisors)}</p></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+                  <MdFactory className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
+                </div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Factories</p><p className="text-lg md:text-2xl font-bold text-purple-600">{formatNumber(stats.factories)}</p></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                  <MdLocationOn className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+                </div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Zones</p><p className="text-lg md:text-2xl font-bold text-orange-600">{formatNumber(stats.zones)}</p></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                  <MdScale className="w-4 h-4 md:w-5 md:h-5 text-amber-600" />
+                </div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Total Tea</p><p className="text-lg md:text-2xl font-bold text-amber-600">{formatKilos(stats.totalKilos)}</p></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                  <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
+                </div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Avg/Farmer</p><p className="text-lg md:text-2xl font-bold text-teal-600">{formatKilos(Math.round(stats.avgKilosPerFarmer))}</p></div>
+              </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <MdSupervisorAccount className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
-              </div>
-              <div><p className="text-[10px] md:text-xs text-slate-500">Supervisors</p><p className="text-lg md:text-2xl font-bold text-emerald-600">{formatNumber(stats.supervisors)}</p></div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
-                <MdFactory className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
-              </div>
-              <div><p className="text-[10px] md:text-xs text-slate-500">Factories</p><p className="text-lg md:text-2xl font-bold text-purple-600">{formatNumber(stats.factories)}</p></div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                <MdLocationOn className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
-              </div>
-              <div><p className="text-[10px] md:text-xs text-slate-500">Zones</p><p className="text-lg md:text-2xl font-bold text-orange-600">{formatNumber(stats.zones)}</p></div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
-                <MdScale className="w-4 h-4 md:w-5 md:h-5 text-amber-600" />
-              </div>
-              <div><p className="text-[10px] md:text-xs text-slate-500">Total Tea</p><p className="text-lg md:text-2xl font-bold text-amber-600">{formatKilos(stats.totalKilos)}</p></div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
-                <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
-              </div>
-              <div><p className="text-[10px] md:text-xs text-slate-500">Avg/Farmer</p><p className="text-lg md:text-2xl font-bold text-teal-600">{formatKilos(Math.round(stats.avgKilosPerFarmer))}</p></div>
-            </div>
-          </div>
-        </div>
+        )}
 
-        <div className="bg-white rounded-lg border border-slate-200 mb-4">
-          <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-              <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-              Tea Collection Trend by Zone
-            </h2>
-          </div>
-          <div className="p-3 md:p-4">
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip formatter={(value) => `${value} KG`} />
-                <Legend />
-                {trendZones.map((zone) => (
-                  <Line key={zone} type="monotone" dataKey={zone} stroke={ZONE_COLORS[zone]} strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <RankingChart data={topFactories} title="Top Factories by Collection" icon={MdBusiness} valueLabel="KG" />
-          <RankingChart data={topFarmers.map(f => ({ name: f.name, value: f.kilos }))} title="Top Farmers by Production" icon={MdPerson} valueLabel="KG" />
-        </div>
-
-        <div className="bg-white rounded-lg border border-slate-200 mb-4">
-          <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-              <MdMap className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-              Farm Locations Map
-            </h2>
-          </div>
-          <div className="p-3 md:p-4">
-            <div className="h-[500px] rounded-lg overflow-hidden border border-gray-200">
-              <MapContainer center={[0.2, 35.5] as L.LatLngExpression} zoom={7} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {mapMarkers.map((marker) => (
-                  <CircleMarker key={marker.id} center={[marker.lat, marker.lng] as L.LatLngExpression} radius={Math.sqrt(marker.totalKilos) / 2} fillColor={getMarkerColor(marker.totalKilos)} color={getMarkerColor(marker.totalKilos)} weight={2} opacity={1} fillOpacity={0.7}>
-                    <Popup>
-                      <div className="text-sm">
-                        <p className="font-bold text-gray-900">{marker.name}</p>
-                        <p className="text-gray-600">Zone: {marker.zone}</p>
-                        <p className="text-gray-600">Factory: {marker.factory}</p>
-                        <p className="text-gray-600">Supervisor: {marker.supervisor}</p>
-                        <p className="text-primary font-bold mt-1">{marker.totalKilos} KG total</p>
-                      </div>
-                    </Popup>
-                  </CircleMarker>
-                ))}
-              </MapContainer>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-4 justify-center">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-xs text-gray-600">High (400+ KG)</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-gray-600">Medium (300-399 KG)</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div><span className="text-xs text-gray-600">Low (200-299 KG)</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-xs text-gray-600">Very Low (&lt;200 KG)</span></div>
-              <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs"><span className="text-primary">●</span></div><span className="text-xs text-gray-600">Circle size = total production</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white rounded-lg border border-slate-200">
+        {/* Tea Collection Trend - Show for Admin and Farmer */}
+        {(isAdmin || isFarmer) && (
+          <div className="bg-white rounded-lg border border-slate-200 mb-4">
             <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
               <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-                <MdLocationOn className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                Zone Distribution
+                <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
+                Tea Collection Trend {isFarmer ? "(My Farm)" : "by Zone"}
               </h2>
             </div>
             <div className="p-3 md:p-4">
-              {zoneDistribution.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie data={zoneDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={(entry) => `${entry.name}: ${entry.value} KG`}>
-                      {zoneDistribution.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value} KG`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (<p className="text-gray-500 text-center py-8">No data available</p>)}
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `${value} KG`} />
+                  {trendZones.length > 0 && <Legend />}
+                  {trendZones.map((zone) => (
+                    <Line key={zone} type="monotone" dataKey={zone} stroke={ZONE_COLORS[zone]} strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200">
+        )}
+
+        {/* Rankings - Show for Admin and Farmer */}
+        {(isAdmin || isFarmer) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <RankingChart 
+              data={topFactories} 
+              title={isFarmer ? "My Factories by Collection" : "Top Factories by Collection"} 
+              icon={MdBusiness} 
+              valueLabel="KG" 
+            />
+            <RankingChart 
+              data={topFarmers.map(f => ({ name: f.name, value: f.kilos }))} 
+              title={isFarmer ? "My Farmers by Production" : "Top Farmers by Production"} 
+              icon={MdPerson} 
+              valueLabel="KG" 
+            />
+          </div>
+        )}
+
+        {/* Farm Locations Map - Show for Admin and Farmer */}
+        {(isAdmin || isFarmer) && (
+          <div className="bg-white rounded-lg border border-slate-200 mb-4">
             <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
               <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-                <MdSupervisorAccount className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                Supervisor Performance
+                <MdMap className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
+                {isFarmer ? "My Farm Locations Map" : "Farm Locations Map"}
               </h2>
             </div>
             <div className="p-3 md:p-4">
-              {supervisorPerformance.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={supervisorPerformance}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `${value} KG`} />
-                    <Bar dataKey="kilos" fill="#3b82f6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (<p className="text-gray-500 text-center py-8">No data available</p>)}
+              <div className="h-[500px] rounded-lg overflow-hidden border border-gray-200">
+                <MapContainer center={[0.2, 35.5] as L.LatLngExpression} zoom={7} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  {mapMarkers.map((marker) => (
+                    <CircleMarker key={marker.id} center={[marker.lat, marker.lng] as L.LatLngExpression} radius={Math.sqrt(marker.totalKilos) / 2} fillColor={getMarkerColor(marker.totalKilos)} color={getMarkerColor(marker.totalKilos)} weight={2} opacity={1} fillOpacity={0.7}>
+                      <Popup>
+                        <div className="text-sm">
+                          <p className="font-bold text-gray-900">{marker.name}</p>
+                          <p className="text-gray-600">Zone: {marker.zone}</p>
+                          <p className="text-gray-600">Factory: {marker.factory}</p>
+                          <p className="text-gray-600">Supervisor: {marker.supervisor}</p>
+                          <p className="text-primary font-bold mt-1">{marker.totalKilos} KG total</p>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  ))}
+                </MapContainer>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4 justify-center">
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-xs text-gray-600">High (400+ KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-gray-600">Medium (300-399 KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div><span className="text-xs text-gray-600">Low (200-299 KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-xs text-gray-600">Very Low (&lt;200 KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs"><span className="text-primary">●</span></div><span className="text-xs text-gray-600">Circle size = total production</span></div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Zone Distribution and Supervisor Performance - Show for Admin and Farmer */}
+        {(isAdmin || isFarmer) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg border border-slate-200">
+              <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
+                  <MdLocationOn className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
+                  Zone Distribution
+                </h2>
+              </div>
+              <div className="p-3 md:p-4">
+                {zoneDistribution.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={zoneDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={(entry) => `${entry.name}: ${entry.value} KG`}>
+                        {zoneDistribution.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
+                      </Pie>
+                      <Tooltip formatter={(value) => `${value} KG`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (<p className="text-gray-500 text-center py-8">No data available</p>)}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200">
+              <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
+                  <MdSupervisorAccount className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
+                  {isFarmer ? "My Supervisors Performance" : "Supervisor Performance"}
+                </h2>
+              </div>
+              <div className="p-3 md:p-4">
+                {supervisorPerformance.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={supervisorPerformance}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `${value} KG`} />
+                      <Bar dataKey="kilos" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (<p className="text-gray-500 text-center py-8">No data available</p>)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* For Plucker - Show My Services only */}
+        {isPlucker && (
+          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center">
+            <MdDesignServices className="w-16 h-16 text-primary mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">My Services</h2>
+            <p className="text-gray-500">Your services and tasks will appear here.</p>
+          </div>
+        )}
       </div>
     </div>
   );
