@@ -27,8 +27,8 @@ export interface UpdateUserData {
   email?: string;
   password?: string;
   phone?: string;
-}
-
-export interface UsersResponse {
-  data: User[];
+  role?: string;
+  national_id?: string;
+  employee_id?: string;
+  zone_id?: string;
 }
