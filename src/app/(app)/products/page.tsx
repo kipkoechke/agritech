@@ -20,6 +20,7 @@ import {
   useProducts,
   usePrefetchProducts,
   useDeleteProduct,
+  productQueryKeys,
 } from "@/hooks/useProduct";
 import { useProductCategories } from "@/hooks/useProductCategory";
 import Pagination from "@/components/common/Pagination";
@@ -27,8 +28,34 @@ import { ActionMenu } from "@/components/common/ActionMenu";
 import { SearchField } from "@/components/common/SearchField";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface Product {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+  image?: string;
+  unit_of_measure?: string;
+  is_active: boolean;
+  category?: {
+    id: string;
+    name: string;
+  };
+}
+
+interface ProductsResponse {
+  data: Product[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
+  };
+}
 
 export default function ProductsPage() {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -37,7 +64,7 @@ export default function ProductsPage() {
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const perPage = 15;
 
-  const prefetchProducts = usePrefetchProducts();
+  const prefetchProducts = usePrefetchProducts(queryClient);
   const deleteMutation = useDeleteProduct();
 
   // Fetch categories for filter
@@ -45,7 +72,7 @@ export default function ProductsPage() {
 
   const categoryOptions = [
     { value: "", label: "All Categories" },
-    ...(categoriesData?.data?.map((cat) => ({
+    ...(categoriesData?.data?.map((cat: any) => ({
       value: String(cat.id),
       label: cat.name,
     })) || []),
@@ -74,24 +101,21 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading, error } = useProducts({
+  const { data: productsData, isLoading, error } = useProducts({
     page,
     per_page: perPage,
     search: debouncedSearch || undefined,
     category_id: categoryFilter || undefined,
   });
 
-  // Prefetch next page
-  useEffect(() => {
-    if (data?.pagination && page < data.pagination.last_page) {
-      prefetchProducts({
-        page: page + 1,
-        per_page: perPage,
-        search: debouncedSearch || undefined,
-        category_id: categoryFilter || undefined,
-      });
-    }
-  }, [data, page, perPage, debouncedSearch, categoryFilter, prefetchProducts]);
+  // Cast the response to our expected type
+  const products = productsData as ProductsResponse | undefined;
+
+useEffect(() => {
+  if (products?.pagination && page < products.pagination.last_page) {
+    prefetchProducts();
+  }
+}, [products, page, prefetchProducts]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -100,6 +124,14 @@ export default function ProductsPage() {
   const formatPrice = (price: string | number) => {
     const numPrice = typeof price === "string" ? parseFloat(price) : price;
     return `KES ${numPrice.toLocaleString("en-KE", { minimumFractionDigits: 2 })}`;
+  };
+
+  // Prefetch product details on hover
+  const handleProductHover = (productId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: productQueryKeys.detail(productId),
+      queryFn: () => import("@/services/productService").then(module => module.getProduct(productId)),
+    });
   };
 
   return (
@@ -179,27 +211,29 @@ export default function ProductsPage() {
         {/* Loading State */}
         {isLoading && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">Loading products...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-gray-600 mt-2">Loading products...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600">Failed to load products</p>
+            <p className="text-red-600">Failed to load products. Please try again later.</p>
           </div>
         )}
 
         {/* Products Table */}
-        {data && data.data.length > 0 && (
+        {products && products.data && products.data.length > 0 && (
           <Modal>
             <div className="bg-white rounded-lg shadow overflow-hidden flex-1 min-h-0 flex flex-col">
               {/* Mobile Card View */}
               <div className="md:hidden overflow-y-auto flex-1 p-3 space-y-2">
-                {data.data.map((product) => (
+                {products.data.map((product: Product) => (
                   <div
                     key={product.id}
                     className="bg-gray-50 rounded-lg p-3 border border-gray-100"
+                    onMouseEnter={() => handleProductHover(product.id)}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
@@ -339,8 +373,12 @@ export default function ProductsPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.data.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-50">
+                    {products.data.map((product: Product) => (
+                      <tr 
+                        key={product.id} 
+                        className="hover:bg-gray-50"
+                        onMouseEnter={() => handleProductHover(product.id)}
+                      >
                         <td className="px-2 pl-4 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             {product.image ? (
@@ -426,6 +464,14 @@ export default function ProductsPage() {
                                 <MdEdit className="w-4 h-4" />
                                 Edit
                               </ActionMenu.Item>
+                              <ActionMenu.Item
+                                onClick={() =>
+                                  (window.location.href = `/products/${product.id}/price-history`)
+                                }
+                              >
+                                <MdInventory className="w-4 h-4" />
+                                Price History
+                              </ActionMenu.Item>
                               <Modal.Open
                                 opens={`delete-product-${product.id}`}
                               >
@@ -454,13 +500,13 @@ export default function ProductsPage() {
                 </table>
               </div>
 
-              {data.pagination && data.pagination.total > 0 && (
+              {products.pagination && products.pagination.total > 0 && (
                 <Pagination
-                  currentPage={data.pagination.current_page}
-                  totalPages={data.pagination.last_page}
+                  currentPage={products.pagination.current_page}
+                  totalPages={products.pagination.last_page}
                   onPageChange={handlePageChange}
-                  totalItems={data.pagination.total}
-                  itemsPerPage={data.pagination.per_page}
+                  totalItems={products.pagination.total}
+                  itemsPerPage={products.pagination.per_page}
                 />
               )}
             </div>
@@ -468,7 +514,7 @@ export default function ProductsPage() {
         )}
 
         {/* Empty State */}
-        {data && data.data.length === 0 && (
+        {products && products.data && products.data.length === 0 && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <MdInventory className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
