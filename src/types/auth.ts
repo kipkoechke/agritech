@@ -1,6 +1,5 @@
-// Authentication related types and interfaces
 
-export type UserRole = "admin" | "farmer" | "farm_supervisor" | "plucker";
+export type UserRole = "admin" | "farmer" | "supervisor" | "plucker";
 
 export interface User {
   id: string;

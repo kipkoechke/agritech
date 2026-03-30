@@ -11,12 +11,13 @@ import {
   MdMap,
   MdSupervisorAccount,
   MdPerson,
+  MdDesignServices,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React, { useMemo } from "react";
-import { useLogout } from "@/hooks/useAuth";
+import { useLogout, useAuth, useIsAdmin, useIsFarmer, useIsSupervisor, useIsPlucker } from "@/hooks/useAuth";
 
 interface SidebarProps {
   isMobileMenuOpen?: boolean;
@@ -26,60 +27,89 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   const pathname = usePathname();
   const logoutMutation = useLogout();
+  const { user, isLoading } = useAuth();
+  const isAdmin = useIsAdmin();
+  const isFarmer = useIsFarmer();
+  const isSupervisor = useIsSupervisor();
+  const isPlucker = useIsPlucker();
 
-  const allMenuItems = useMemo(
-    () => [
+  const menuItems = useMemo(() => {
+    // All menu items definition
+    const allMenuItems = [
       {
         name: "Dashboard",
         icon: MdDashboard,
         href: "/dashboard",
         active: pathname === "/dashboard",
+        visibleTo: ["admin", "farmer"],
       },
       {
         name: "Farms",
         icon: MdAgriculture,
         href: "/farms",
         active: pathname.startsWith("/farms"),
+        visibleTo: ["admin"],
       },
       {
         name: "Farm Workers",
         icon: MdPeople,
         href: "/farm-workers",
         active: pathname.startsWith("/farm-workers"),
+        visibleTo: ["admin", "supervisor"],
       },
       {
         name: "Farm Supervisors",
         icon: MdSupervisorAccount,
         href: "/farm-supervisors",
         active: pathname.startsWith("/farm-supervisors"),
+        visibleTo: ["admin"],
       },
       {
         name: "Farmers",
         icon: MdPerson,
         href: "/farmers",
         active: pathname.startsWith("/farmers"),
+        visibleTo: ["admin"],
       },
       {
         name: "Factory",
         icon: MdFactory,
         href: "/factory",
         active: pathname.startsWith("/factory"),
+        visibleTo: ["admin"],
       },
       {
         name: "Weighing Points",
         icon: MdScale,
         href: "/weighing-points",
         active: pathname.startsWith("/weighing-points"),
+        visibleTo: ["admin", "supervisor"],
       },
       {
         name: "Farm Map",
         icon: MdMap,
         href: "/farm-map",
         active: pathname === "/farm-map",
+        visibleTo: ["admin", "supervisor"],
       },
-    ],
-    [pathname]
-  );
+      {
+        name: "My Services",
+        icon: MdDesignServices,
+        href: "/my-services",
+        active: pathname.startsWith("/my-services"),
+        visibleTo: ["admin", "farmer", "supervisor", "plucker"],
+      },
+    ];
+
+    // Filter menu items based on user role
+    const role = user?.role;
+    
+    return allMenuItems.filter(item => {
+      if (isAdmin) return true; // Admin sees everything
+      if (role && item.visibleTo.includes(role)) return true;
+      return false;
+    });
+  }, [pathname, user, isAdmin]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -90,6 +120,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       onClose();
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-primary-hover border-r border-primary-hover/20 h-full flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -133,7 +171,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
 
       <nav className="flex-1 py-2 px-3">
         <ul className="flex flex-col space-y-0.5">
-          {allMenuItems.map((item) => (
+          {menuItems.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
