@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import {
   MdClose,
   MdMap,
@@ -10,10 +11,8 @@ import {
   MdExpandLess,
   MdLocationOn,
   MdAgriculture,
-  MdFactory,
   MdScale,
   MdTrendingUp,
-  MdStar,
 } from "react-icons/md";
 import {
   BarChart,
@@ -27,18 +26,29 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor, useIsPlucker } from "@/hooks/useAuth";
 
-// @ts-ignore
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
+// Dynamically import Leaflet components with no SSR
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const CircleMarker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.CircleMarker),
+  { ssr: false }
+);
+const Popup = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Popup),
+  { ssr: false }
+);
+
+// Import Leaflet CSS
+import "leaflet/dist/leaflet.css";
+import React from "react";
 
 // Dummy farm data
 const FARMS_DATA = [
@@ -115,6 +125,23 @@ export default function FarmMapPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [zone, setZone] = useState("");
   const [factory, setFactory] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Fix for Leaflet icon issue - only run on client
+  React.useEffect(() => {
+    setIsMounted(true);
+    if (typeof window !== "undefined") {
+      import("leaflet").then((L) => {
+        // @ts-ignore
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+        });
+      });
+    }
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -190,10 +217,19 @@ export default function FarmMapPage() {
 
   const mapCenter = useMemo(() => {
     if ((isFarmer || isSupervisor) && filteredFarms.length > 0) {
-      return [filteredFarms[0].lat, filteredFarms[0].lng] as L.LatLngExpression;
+      return [filteredFarms[0].lat, filteredFarms[0].lng] as [number, number];
     }
-    return [-1.2921, 36.8219] as L.LatLngExpression;
+    return [-1.2921, 36.8219] as [number, number];
   }, [filteredFarms, isFarmer, isSupervisor]);
+
+  // Show loading placeholder until mounted on client
+  if (!isMounted) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 flex flex-col bg-slate-100">
@@ -336,14 +372,11 @@ export default function FarmMapPage() {
                 style={{ height: "100%", width: "100%" }}
                 scrollWheelZoom={true}
               >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {filteredFarms.map((farm) => (
                   <CircleMarker
                     key={farm.id}
-                    center={[farm.lat, farm.lng] as L.LatLngExpression}
+                    center={[farm.lat, farm.lng]}
                     radius={Math.sqrt(farm.totalKilos) / 2}
                     fillColor={getMarkerColor(farm.totalKilos)}
                     color={getMarkerColor(farm.totalKilos)}

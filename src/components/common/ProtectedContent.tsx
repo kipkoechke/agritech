@@ -8,7 +8,6 @@ import {
   useAuth,
   useHasRole,
   useIsAdmin,
-  useIsManagement,
 } from "@/hooks/useAuth";
 import type { UserRole } from "@/types/auth";
 
@@ -33,7 +32,6 @@ export const ProtectedContent: React.FC<ProtectedContentProps> = ({
 }) => {
   const { isAuthenticated, user } = useAuth();
   const isAdmin = useIsAdmin();
-  const isManagement = useIsManagement();
 
   if (!isAuthenticated) {
     return <>{fallback}</>;
@@ -44,18 +42,9 @@ export const ProtectedContent: React.FC<ProtectedContentProps> = ({
     return <>{fallback}</>;
   }
 
-  // Check management requirement
-  if (requireManagement && !isManagement) {
-    return <>{fallback}</>;
-  }
+ 
 
-  // Check specific roles if provided
-  if (allowedRoles && allowedRoles.length > 0 && user) {
-    // Super admin always has access
-    if (user.role !== "super-admin" && !allowedRoles.includes(user.role)) {
-      return <>{fallback}</>;
-    }
-  }
+ 
 
   return <>{children}</>;
 };
@@ -90,10 +79,7 @@ export const ProtectedAction: React.FC<ProtectedActionProps> = ({
 
   // Check specific roles if provided
   if (allowedRoles && allowedRoles.length > 0 && user) {
-    // Super admin always has access
-    if (user.role !== "super-admin" && !allowedRoles.includes(user.role)) {
-      return <>{fallback}</>;
-    }
+    
   }
 
   return <>{children}</>;
@@ -116,10 +102,7 @@ export const RoleBasedContent: React.FC<RoleBasedContentProps> = ({
   const hasRole = useHasRole(roles);
   const { user } = useAuth();
 
-  // Super admin sees everything
-  if (user?.role === "super-admin") {
-    return <>{children}</>;
-  }
+ 
 
   if (!hasRole) {
     return <>{fallback}</>;
@@ -161,11 +144,8 @@ export const ManagementOnly: React.FC<ManagementOnlyProps> = ({
   children,
   fallback = null,
 }) => {
-  const isManagement = useIsManagement();
 
-  if (!isManagement) {
-    return <>{fallback}</>;
-  }
+ 
 
   return <>{children}</>;
 };
