@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdAgriculture,
         href: "/farms",
         active: pathname.startsWith("/farms"),
-        visibleTo: ["admin"],
+        visibleTo: ["admin", "farmer"],
       },
       {
         name: "Farm Workers",
@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdSupervisorAccount,
         href: "/farm-supervisors",
         active: pathname.startsWith("/farm-supervisors"),
-        visibleTo: ["admin"],
+        visibleTo: ["admin", "farmer"],
       },
       {
         name: "Farmers",
@@ -76,14 +76,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdFactory,
         href: "/factory",
         active: pathname.startsWith("/factory"),
-        visibleTo: ["admin"],
+        visibleTo: ["admin", "farmer"],
       },
       {
         name: "Weighing Points",
         icon: MdScale,
         href: "/weighing-points",
         active: pathname.startsWith("/weighing-points"),
-        visibleTo: ["admin", "supervisor"],
+        visibleTo: ["admin", "farmer", "supervisor"],
       },
       {
         name: "Farm Map",
