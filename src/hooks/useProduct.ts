@@ -1,3 +1,4 @@
+// hooks/useProduct.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getProducts,
@@ -9,7 +10,14 @@ import {
   addProductPriceHistory,
   deleteProductPriceHistory,
 } from "@/services/productService";
-import type { CreateProductData, UpdateProductData, CreatePriceHistoryData } from "@/types/product";
+import type { 
+  CreateProductData, 
+  UpdateProductData, 
+  CreatePriceHistoryData,
+  ProductsResponse,
+  ProductResponse,
+  PriceHistoryResponse
+} from "@/types/product";
 import toast from "react-hot-toast";
 
 // Query Keys
@@ -22,11 +30,16 @@ export const productQueryKeys = {
   priceHistory: (productId: string) => [...productQueryKeys.detail(productId), "price-history"] as const,
 };
 
-// Get all products
-export const useProducts = (p0: { page: number; per_page: number; search: string | undefined; category_id: string | undefined; }) => {
+// Get all products with optional filters
+export const useProducts = (params?: {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  category_id?: string;
+}) => {
   return useQuery({
-    queryKey: productQueryKeys.lists(),
-    queryFn: getProducts,
+    queryKey: productQueryKeys.list(params),
+    queryFn: () => getProducts(params),
   });
 };
 
@@ -58,8 +71,8 @@ export const useCreateProduct = () => {
       queryClient.invalidateQueries({ queryKey: productQueryKeys.lists() });
       toast.success("Product created successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create product");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to create product");
     },
   });
 };
@@ -75,8 +88,8 @@ export const useUpdateProduct = () => {
       queryClient.invalidateQueries({ queryKey: productQueryKeys.detail(variables.id) });
       toast.success("Product updated successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update product");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update product");
     },
   });
 };
@@ -91,8 +104,8 @@ export const useDeleteProduct = () => {
       queryClient.invalidateQueries({ queryKey: productQueryKeys.lists() });
       toast.success("Product deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete product");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to delete product");
     },
   });
 };
@@ -107,8 +120,8 @@ export const useAddProductPriceHistory = () => {
       queryClient.invalidateQueries({ queryKey: productQueryKeys.priceHistory(variables.product_id) });
       toast.success("Price history added successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to add price history");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to add price history");
     },
   });
 };
@@ -123,18 +136,23 @@ export const useDeleteProductPriceHistory = () => {
       queryClient.invalidateQueries({ queryKey: productQueryKeys.all });
       toast.success("Price history deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete price history");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to delete price history");
     },
   });
 };
 
 // Prefetch products (for SSR or optimistic loading)
 export const usePrefetchProducts = (queryClient: any) => {
-  return () => {
+  return (params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    category_id?: string;
+  }) => {
     queryClient.prefetchQuery({
-      queryKey: productQueryKeys.lists(),
-      queryFn: getProducts,
+      queryKey: productQueryKeys.list(params),
+      queryFn: () => getProducts(params),
     });
   };
 };
