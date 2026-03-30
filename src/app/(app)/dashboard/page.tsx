@@ -19,6 +19,7 @@ import {
   MdBusiness,
   MdPerson,
   MdDesignServices,
+  MdPeople,
 } from "react-icons/md";
 import {
   LineChart,
@@ -48,51 +49,61 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
+// Updated data with realistic Kenyan names
 const ALL_DATA = [
-  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Kiprotich", plucker: "Farmer A", kilos: 145, date: "2026-03-01", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
-  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Kiprotich", plucker: "Farmer A", kilos: 152, date: "2026-03-02", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
-  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Kiprotich", plucker: "Farmer A", kilos: 148, date: "2026-03-03", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
-  { zone: "Kericho", factory: "Tegat Tea Factory", supervisor: "Langat", plucker: "Farmer B", kilos: 98, date: "2026-03-01", lat: -0.382, lng: 35.292, farmerName: "Mary Langat", farmerId: "F002" },
-  { zone: "Kericho", factory: "Tegat Tea Factory", supervisor: "Langat", plucker: "Farmer B", kilos: 105, date: "2026-03-02", lat: -0.382, lng: 35.292, farmerName: "Mary Langat", farmerId: "F002" },
-  { zone: "Kericho", factory: "Tegat Tea Factory", supervisor: "Langat", plucker: "Farmer B", kilos: 112, date: "2026-03-03", lat: -0.382, lng: 35.292, farmerName: "Mary Langat", farmerId: "F002" },
-  { zone: "Kericho", factory: "Toror Tea Factory", supervisor: "Kipkemboi", plucker: "Farmer C", kilos: 180, date: "2026-03-01", lat: -0.375, lng: 35.278, farmerName: "Peter Kipkemboi", farmerId: "F003" },
-  { zone: "Kericho", factory: "Toror Tea Factory", supervisor: "Kipkemboi", plucker: "Farmer C", kilos: 175, date: "2026-03-02", lat: -0.375, lng: 35.278, farmerName: "Peter Kipkemboi", farmerId: "F003" },
-  { zone: "Kericho", factory: "Toror Tea Factory", supervisor: "Kipkemboi", plucker: "Farmer C", kilos: 190, date: "2026-03-03", lat: -0.375, lng: 35.278, farmerName: "Peter Kipkemboi", farmerId: "F003" },
-  { zone: "Kericho", factory: "Litein Tea Factory", supervisor: "Cherono", plucker: "Farmer D", kilos: 75, date: "2026-03-01", lat: -0.395, lng: 35.301, farmerName: "Grace Cherono", farmerId: "F004" },
-  { zone: "Kericho", factory: "Litein Tea Factory", supervisor: "Cherono", plucker: "Farmer D", kilos: 82, date: "2026-03-02", lat: -0.395, lng: 35.301, farmerName: "Grace Cherono", farmerId: "F004" },
-  { zone: "Kericho", factory: "Litein Tea Factory", supervisor: "Cherono", plucker: "Farmer D", kilos: 78, date: "2026-03-03", lat: -0.395, lng: 35.301, farmerName: "Grace Cherono", farmerId: "F004" },
-  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Koech", plucker: "Farmer E", kilos: 210, date: "2026-03-01", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
-  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Koech", plucker: "Farmer E", kilos: 205, date: "2026-03-02", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
-  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Koech", plucker: "Farmer E", kilos: 215, date: "2026-03-03", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
-  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Mutai", plucker: "Farmer F", kilos: 160, date: "2026-03-01", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
-  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Mutai", plucker: "Farmer F", kilos: 155, date: "2026-03-02", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
-  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Mutai", plucker: "Farmer F", kilos: 168, date: "2026-03-03", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
-  { zone: "Nandi", factory: "Chemomi Tea Factory", supervisor: "Bett", plucker: "Farmer G", kilos: 130, date: "2026-03-01", lat: 0.145, lng: 35.018, farmerName: "James Bett", farmerId: "F007" },
-  { zone: "Nandi", factory: "Chemomi Tea Factory", supervisor: "Bett", plucker: "Farmer G", kilos: 125, date: "2026-03-02", lat: 0.145, lng: 35.018, farmerName: "James Bett", farmerId: "F007" },
-  { zone: "Nandi", factory: "Chemomi Tea Factory", supervisor: "Bett", plucker: "Farmer G", kilos: 135, date: "2026-03-03", lat: 0.145, lng: 35.018, farmerName: "James Bett", farmerId: "F007" },
-  { zone: "Nandi", factory: "Kapsumbeiwa Tea Factory", supervisor: "Kiplagat", plucker: "Farmer H", kilos: 95, date: "2026-03-01", lat: 0.158, lng: 35.032, farmerName: "Esther Kiplagat", farmerId: "F008" },
-  { zone: "Nandi", factory: "Kapsumbeiwa Tea Factory", supervisor: "Kiplagat", plucker: "Farmer H", kilos: 100, date: "2026-03-02", lat: 0.158, lng: 35.032, farmerName: "Esther Kiplagat", farmerId: "F008" },
-  { zone: "Nandi", factory: "Kapsumbeiwa Tea Factory", supervisor: "Kiplagat", plucker: "Farmer H", kilos: 92, date: "2026-03-03", lat: 0.158, lng: 35.032, farmerName: "Esther Kiplagat", farmerId: "F008" },
-  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Rono", plucker: "Farmer I", kilos: 112, date: "2026-03-01", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
-  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Rono", plucker: "Farmer I", kilos: 118, date: "2026-03-02", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
-  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Rono", plucker: "Farmer I", kilos: 115, date: "2026-03-03", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
-  { zone: "Bomet", factory: "Kapsuser Tea Factory", supervisor: "Korir", plucker: "Farmer J", kilos: 88, date: "2026-03-01", lat: -0.842, lng: 35.108, farmerName: "Rebecca Korir", farmerId: "F010" },
-  { zone: "Bomet", factory: "Kapsuser Tea Factory", supervisor: "Korir", plucker: "Farmer J", kilos: 92, date: "2026-03-02", lat: -0.842, lng: 35.108, farmerName: "Rebecca Korir", farmerId: "F010" },
-  { zone: "Bomet", factory: "Kapsuser Tea Factory", supervisor: "Korir", plucker: "Farmer J", kilos: 85, date: "2026-03-03", lat: -0.842, lng: 35.108, farmerName: "Rebecca Korir", farmerId: "F010" },
-  { zone: "Kiambu", factory: "Githambo Tea Factory", supervisor: "Mwangi", plucker: "Farmer K", kilos: 67, date: "2026-03-01", lat: -1.158, lng: 36.788, farmerName: "Patrick Mwangi", farmerId: "F011" },
-  { zone: "Kiambu", factory: "Githambo Tea Factory", supervisor: "Mwangi", plucker: "Farmer K", kilos: 72, date: "2026-03-02", lat: -1.158, lng: 36.788, farmerName: "Patrick Mwangi", farmerId: "F011" },
-  { zone: "Kiambu", factory: "Githambo Tea Factory", supervisor: "Mwangi", plucker: "Farmer K", kilos: 70, date: "2026-03-03", lat: -1.158, lng: 36.788, farmerName: "Patrick Mwangi", farmerId: "F011" },
-  { zone: "Kiambu", factory: "Kiamara Tea Factory", supervisor: "Wanjiku", plucker: "Farmer L", kilos: 54, date: "2026-03-01", lat: -1.165, lng: 36.795, farmerName: "Lucy Wanjiku", farmerId: "F012" },
-  { zone: "Kiambu", factory: "Kiamara Tea Factory", supervisor: "Wanjiku", plucker: "Farmer L", kilos: 58, date: "2026-03-02", lat: -1.165, lng: 36.795, farmerName: "Lucy Wanjiku", farmerId: "F012" },
-  { zone: "Kiambu", factory: "Kiamara Tea Factory", supervisor: "Wanjiku", plucker: "Farmer L", kilos: 56, date: "2026-03-03", lat: -1.165, lng: 36.795, farmerName: "Lucy Wanjiku", farmerId: "F012" },
-  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Kiprotich", plucker: "Farmer A", kilos: 158, date: "2026-04-01", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
-  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Kiprotich", plucker: "Farmer A", kilos: 162, date: "2026-04-02", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
-  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Koech", plucker: "Farmer E", kilos: 225, date: "2026-04-01", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
-  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Koech", plucker: "Farmer E", kilos: 230, date: "2026-04-02", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
-  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Mutai", plucker: "Farmer F", kilos: 175, date: "2026-04-01", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
-  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Mutai", plucker: "Farmer F", kilos: 180, date: "2026-04-02", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
-  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Rono", plucker: "Farmer I", kilos: 125, date: "2026-04-01", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
-  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Rono", plucker: "Farmer I", kilos: 130, date: "2026-04-02", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
+  // Kericho Data
+  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Wilson Kipruto", plucker: "James Kipkemoi", kilos: 145, date: "2026-03-01", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
+  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Wilson Kipruto", plucker: "James Kipkemoi", kilos: 152, date: "2026-03-02", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
+  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Wilson Kipruto", plucker: "James Kipkemoi", kilos: 148, date: "2026-03-03", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
+  { zone: "Kericho", factory: "Tegat Tea Factory", supervisor: "Joseph Langat", plucker: "Peter Kiprono", kilos: 98, date: "2026-03-01", lat: -0.382, lng: 35.292, farmerName: "Mary Langat", farmerId: "F002" },
+  { zone: "Kericho", factory: "Tegat Tea Factory", supervisor: "Joseph Langat", plucker: "Peter Kiprono", kilos: 105, date: "2026-03-02", lat: -0.382, lng: 35.292, farmerName: "Mary Langat", farmerId: "F002" },
+  { zone: "Kericho", factory: "Tegat Tea Factory", supervisor: "Joseph Langat", plucker: "Peter Kiprono", kilos: 112, date: "2026-03-03", lat: -0.382, lng: 35.292, farmerName: "Mary Langat", farmerId: "F002" },
+  { zone: "Kericho", factory: "Toror Tea Factory", supervisor: "David Kipkemboi", plucker: "Samuel Kipkurui", kilos: 180, date: "2026-03-01", lat: -0.375, lng: 35.278, farmerName: "Peter Kipkemboi", farmerId: "F003" },
+  { zone: "Kericho", factory: "Toror Tea Factory", supervisor: "David Kipkemboi", plucker: "Samuel Kipkurui", kilos: 175, date: "2026-03-02", lat: -0.375, lng: 35.278, farmerName: "Peter Kipkemboi", farmerId: "F003" },
+  { zone: "Kericho", factory: "Toror Tea Factory", supervisor: "David Kipkemboi", plucker: "Samuel Kipkurui", kilos: 190, date: "2026-03-03", lat: -0.375, lng: 35.278, farmerName: "Peter Kipkemboi", farmerId: "F003" },
+  { zone: "Kericho", factory: "Litein Tea Factory", supervisor: "Grace Cherono", plucker: "Esther Chepchumba", kilos: 75, date: "2026-03-01", lat: -0.395, lng: 35.301, farmerName: "Grace Cherono", farmerId: "F004" },
+  { zone: "Kericho", factory: "Litein Tea Factory", supervisor: "Grace Cherono", plucker: "Esther Chepchumba", kilos: 82, date: "2026-03-02", lat: -0.395, lng: 35.301, farmerName: "Grace Cherono", farmerId: "F004" },
+  { zone: "Kericho", factory: "Litein Tea Factory", supervisor: "Grace Cherono", plucker: "Esther Chepchumba", kilos: 78, date: "2026-03-03", lat: -0.395, lng: 35.301, farmerName: "Grace Cherono", farmerId: "F004" },
+  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Daniel Koech", plucker: "Joseph Kipngetich", kilos: 210, date: "2026-03-01", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
+  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Daniel Koech", plucker: "Joseph Kipngetich", kilos: 205, date: "2026-03-02", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
+  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Daniel Koech", plucker: "Joseph Kipngetich", kilos: 215, date: "2026-03-03", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
+  
+  // Nandi Data
+  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Joshua Mutai", plucker: "Wilson Kipsang", kilos: 160, date: "2026-03-01", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
+  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Joshua Mutai", plucker: "Wilson Kipsang", kilos: 155, date: "2026-03-02", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
+  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Joshua Mutai", plucker: "Wilson Kipsang", kilos: 168, date: "2026-03-03", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
+  { zone: "Nandi", factory: "Chemomi Tea Factory", supervisor: "Catherine Bett", plucker: "Eliud Kipchoge", kilos: 130, date: "2026-03-01", lat: 0.145, lng: 35.018, farmerName: "James Bett", farmerId: "F007" },
+  { zone: "Nandi", factory: "Chemomi Tea Factory", supervisor: "Catherine Bett", plucker: "Eliud Kipchoge", kilos: 125, date: "2026-03-02", lat: 0.145, lng: 35.018, farmerName: "James Bett", farmerId: "F007" },
+  { zone: "Nandi", factory: "Chemomi Tea Factory", supervisor: "Catherine Bett", plucker: "Eliud Kipchoge", kilos: 135, date: "2026-03-03", lat: 0.145, lng: 35.018, farmerName: "James Bett", farmerId: "F007" },
+  { zone: "Nandi", factory: "Kapsumbeiwa Tea Factory", supervisor: "Fredrick Kiplagat", plucker: "Hellen Chebet", kilos: 95, date: "2026-03-01", lat: 0.158, lng: 35.032, farmerName: "Esther Kiplagat", farmerId: "F008" },
+  { zone: "Nandi", factory: "Kapsumbeiwa Tea Factory", supervisor: "Fredrick Kiplagat", plucker: "Hellen Chebet", kilos: 100, date: "2026-03-02", lat: 0.158, lng: 35.032, farmerName: "Esther Kiplagat", farmerId: "F008" },
+  { zone: "Nandi", factory: "Kapsumbeiwa Tea Factory", supervisor: "Fredrick Kiplagat", plucker: "Hellen Chebet", kilos: 92, date: "2026-03-03", lat: 0.158, lng: 35.032, farmerName: "Esther Kiplagat", farmerId: "F008" },
+  
+  // Bomet Data
+  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Patrick Rono", plucker: "Moses Kirui", kilos: 112, date: "2026-03-01", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
+  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Patrick Rono", plucker: "Moses Kirui", kilos: 118, date: "2026-03-02", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
+  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Patrick Rono", plucker: "Moses Kirui", kilos: 115, date: "2026-03-03", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
+  { zone: "Bomet", factory: "Kapsuser Tea Factory", supervisor: "Nancy Korir", plucker: "Beatrice Chepngeno", kilos: 88, date: "2026-03-01", lat: -0.842, lng: 35.108, farmerName: "Rebecca Korir", farmerId: "F010" },
+  { zone: "Bomet", factory: "Kapsuser Tea Factory", supervisor: "Nancy Korir", plucker: "Beatrice Chepngeno", kilos: 92, date: "2026-03-02", lat: -0.842, lng: 35.108, farmerName: "Rebecca Korir", farmerId: "F010" },
+  { zone: "Bomet", factory: "Kapsuser Tea Factory", supervisor: "Nancy Korir", plucker: "Beatrice Chepngeno", kilos: 85, date: "2026-03-03", lat: -0.842, lng: 35.108, farmerName: "Rebecca Korir", farmerId: "F010" },
+  
+  // Kiambu Data
+  { zone: "Kiambu", factory: "Githambo Tea Factory", supervisor: "Peter Mwangi", plucker: "John Kamau", kilos: 67, date: "2026-03-01", lat: -1.158, lng: 36.788, farmerName: "Patrick Mwangi", farmerId: "F011" },
+  { zone: "Kiambu", factory: "Githambo Tea Factory", supervisor: "Peter Mwangi", plucker: "John Kamau", kilos: 72, date: "2026-03-02", lat: -1.158, lng: 36.788, farmerName: "Patrick Mwangi", farmerId: "F011" },
+  { zone: "Kiambu", factory: "Githambo Tea Factory", supervisor: "Peter Mwangi", plucker: "John Kamau", kilos: 70, date: "2026-03-03", lat: -1.158, lng: 36.788, farmerName: "Patrick Mwangi", farmerId: "F011" },
+  { zone: "Kiambu", factory: "Kiamara Tea Factory", supervisor: "Lucy Wanjiku", plucker: "Grace Njeri", kilos: 54, date: "2026-03-01", lat: -1.165, lng: 36.795, farmerName: "Lucy Wanjiku", farmerId: "F012" },
+  { zone: "Kiambu", factory: "Kiamara Tea Factory", supervisor: "Lucy Wanjiku", plucker: "Grace Njeri", kilos: 58, date: "2026-03-02", lat: -1.165, lng: 36.795, farmerName: "Lucy Wanjiku", farmerId: "F012" },
+  { zone: "Kiambu", factory: "Kiamara Tea Factory", supervisor: "Lucy Wanjiku", plucker: "Grace Njeri", kilos: 56, date: "2026-03-03", lat: -1.165, lng: 36.795, farmerName: "Lucy Wanjiku", farmerId: "F012" },
+  
+  // Additional data for April
+  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Wilson Kipruto", plucker: "James Kipkemoi", kilos: 158, date: "2026-04-01", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
+  { zone: "Kericho", factory: "Momul Tea Factory", supervisor: "Wilson Kipruto", plucker: "James Kipkemoi", kilos: 162, date: "2026-04-02", lat: -0.368, lng: 35.283, farmerName: "John Kiprotich", farmerId: "F001" },
+  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Daniel Koech", plucker: "Joseph Kipngetich", kilos: 225, date: "2026-04-01", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
+  { zone: "Kericho", factory: "Chelal Tea Factory", supervisor: "Daniel Koech", plucker: "Joseph Kipngetich", kilos: 230, date: "2026-04-02", lat: -0.388, lng: 35.288, farmerName: "David Koech", farmerId: "F005" },
+  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Joshua Mutai", plucker: "Wilson Kipsang", kilos: 175, date: "2026-04-01", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
+  { zone: "Nandi", factory: "Kipkoimet Tea Factory", supervisor: "Joshua Mutai", plucker: "Wilson Kipsang", kilos: 180, date: "2026-04-02", lat: 0.152, lng: 35.025, farmerName: "Sarah Mutai", farmerId: "F006" },
+  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Patrick Rono", plucker: "Moses Kirui", kilos: 125, date: "2026-04-01", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
+  { zone: "Bomet", factory: "Sotik Tea Factory", supervisor: "Patrick Rono", plucker: "Moses Kirui", kilos: 130, date: "2026-04-02", lat: -0.858, lng: 35.119, farmerName: "Samuel Rono", farmerId: "F009" },
 ];
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
@@ -164,8 +175,10 @@ export default function TeaDashboardPage() {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [zone, setZone] = useState("");
+  const [farmer, setFarmer] = useState("");
   const [factory, setFactory] = useState("");
   const [supervisor, setSupervisor] = useState("");
+  const [plucker, setPlucker] = useState("");
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -174,8 +187,10 @@ export default function TeaDashboardPage() {
 
   const handleClearFilters = () => {
     setZone("");
+    setFarmer("");
     setFactory("");
     setSupervisor("");
+    setPlucker("");
     setStartDate("");
     setEndDate("");
   };
@@ -183,7 +198,6 @@ export default function TeaDashboardPage() {
   const filteredData = useMemo(() => {
     let data = ALL_DATA;
     
-    // Filter by user's zone if not admin
     if (isFarmer && user?.zone_id) {
       data = data.filter((item) => item.zone === user?.zone_name);
     }
@@ -191,11 +205,12 @@ export default function TeaDashboardPage() {
       data = data.filter((item) => item.zone === user?.zone_name);
     }
     
-    // Apply additional filters
     return data.filter((item) => {
       const matchesZone = !zone || item.zone === zone;
+      const matchesFarmer = !farmer || item.farmerName === farmer;
       const matchesFactory = !factory || item.factory === factory;
       const matchesSupervisor = !supervisor || item.supervisor === supervisor;
+      const matchesPlucker = !plucker || item.plucker === plucker;
       let matchesDate = true;
       if (startDate && endDate) {
         const itemDate = new Date(item.date);
@@ -203,9 +218,9 @@ export default function TeaDashboardPage() {
         const end = new Date(endDate);
         matchesDate = itemDate >= start && itemDate <= end;
       }
-      return matchesZone && matchesFactory && matchesSupervisor && matchesDate;
+      return matchesZone && matchesFarmer && matchesFactory && matchesSupervisor && matchesPlucker && matchesDate;
     });
-  }, [zone, factory, supervisor, startDate, endDate, user, isFarmer, isSupervisor]);
+  }, [zone, farmer, factory, supervisor, plucker, startDate, endDate, user, isFarmer, isSupervisor]);
 
   const stats = useMemo(() => {
     const farmers = new Set(filteredData.map((d) => d.plucker)).size;
@@ -287,8 +302,11 @@ export default function TeaDashboardPage() {
   const formatKilos = (kilos: number) => `${kilos.toLocaleString("en-KE")} KG`;
 
   const uniqueZones = [...new Set(ALL_DATA.map(d => d.zone))];
+  const uniqueFarmers = [...new Set(ALL_DATA.map(d => d.farmerName))];
   const uniqueFactories = [...new Set(ALL_DATA.map(d => d.factory))];
   const uniqueSupervisors = [...new Set(ALL_DATA.map(d => d.supervisor))];
+  const uniquePluckers = [...new Set(ALL_DATA.map(d => d.plucker))];
+  
   const dateRangeText = startDate && endDate 
     ? `${new Date(startDate).toLocaleDateString("en-GB")} - ${new Date(endDate).toLocaleDateString("en-GB")}`
     : "All time";
@@ -300,7 +318,6 @@ export default function TeaDashboardPage() {
     return "#ef4444";
   };
 
-  // Determine dashboard title based on role
   const getDashboardTitle = () => {
     if (isAdmin) return "Admin Dashboard";
     if (isFarmer) return "My Farm Dashboard";
@@ -344,12 +361,19 @@ export default function TeaDashboardPage() {
               <MdCalendarToday className="w-3.5 h-3.5 text-blue-600" />
               <span className="text-xs font-medium text-blue-700">{dateRangeText}</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
               <div>
                 <label className="text-gray-700 mb-1 flex text-xs font-medium">Zone</label>
                 <select value={zone} onChange={(e) => setZone(e.target.value)} className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm">
                   <option value="">All Zones</option>
                   {uniqueZones.map((z) => (<option key={z} value={z}>{z}</option>))}
+                </select>
+              </div>
+              <div>
+                <label className="text-gray-700 mb-1 flex text-xs font-medium">Farmer</label>
+                <select value={farmer} onChange={(e) => setFarmer(e.target.value)} className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm">
+                  <option value="">All Farmers</option>
+                  {uniqueFarmers.map((f) => (<option key={f} value={f}>{f}</option>))}
                 </select>
               </div>
               <div>
@@ -366,6 +390,13 @@ export default function TeaDashboardPage() {
                   {uniqueSupervisors.map((s) => (<option key={s} value={s}>{s}</option>))}
                 </select>
               </div>
+              <div>
+                <label className="text-gray-700 mb-1 flex text-xs font-medium">Farm Worker/Plucker</label>
+                <select value={plucker} onChange={(e) => setPlucker(e.target.value)} className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm">
+                  <option value="">All Workers</option>
+                  {uniquePluckers.map((p) => (<option key={p} value={p}>{p}</option>))}
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-gray-700 mb-1 flex text-xs font-medium">Start Date</label>
@@ -378,7 +409,11 @@ export default function TeaDashboardPage() {
               </div>
             </div>
             <div className="flex justify-end mt-3">
-              <button onClick={handleClearFilters} disabled={!zone && !factory && !supervisor && !startDate && !endDate} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${zone || factory || supervisor || startDate || endDate ? "text-gray-700 bg-gray-100 hover:bg-gray-200" : "text-gray-400 bg-gray-50 cursor-not-allowed"}`}>
+              <button 
+                onClick={handleClearFilters} 
+                disabled={!zone && !farmer && !factory && !supervisor && !plucker && !startDate && !endDate} 
+                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <MdClose className="w-4 h-4" /> Clear Filters
               </button>
             </div>
