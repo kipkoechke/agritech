@@ -1,3 +1,4 @@
+// middleware.ts (Updated with my-services access)
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -20,15 +21,48 @@ function getUserFromCookie(request: NextRequest): any {
 export function getDefaultDashboard(role: string): string {
   switch (role) {
     case "farmer":
-      return "/farmer/dashboard";
-    case "farm_supervisor":
-      return "/supervisor/dashboard";
+      return "/dashboard";
+    case "supervisor":
+      return "/dashboard";
     case "plucker":
-      return "/plucker/dashboard";
+      return "/dashboard";
     case "admin":
+      return "/dashboard";
     default:
       return "/dashboard";
   }
+}
+
+/**
+ * Check if user has access to a specific route based on role
+ */
+function hasRouteAccess(role: string, pathname: string): boolean {
+  // Admin has access to all routes
+  if (role === "admin") return true;
+
+  // Routes that are accessible by all authenticated users
+  const publicForAllRoles = ["/dashboard", "/my-services", "/unauthorized"];
+  
+  // Check if it's a public route for all roles
+  if (publicForAllRoles.some((route) => pathname.startsWith(route))) {
+    return true;
+  }
+
+  // Role-specific route restrictions
+  const restrictedPaths: Record<string, string[]> = {
+    farmer: ["/farms", "/farm-workers", "/farm-supervisors", "/farmers", "/factory", "/weighing-points", "/farm-map"],
+    supervisor: ["/farms", "/farmers", "/factory"],
+    plucker: ["/farms", "/farm-workers", "/farm-supervisors", "/farmers", "/factory", "/weighing-points", "/farm-map", "/orders", "/products"],
+  };
+
+  const restricted = restrictedPaths[role] || [];
+  
+  // Check if current path is restricted for this role
+  // If path is in restricted list, deny access (return false)
+  // Otherwise allow access (return true)
+  const isRestricted = restricted.some((path) => pathname.startsWith(path));
+  
+  return !isRestricted;
 }
 
 export async function middleware(request: NextRequest) {
@@ -43,7 +77,7 @@ export async function middleware(request: NextRequest) {
 
   // If it's a public route, allow access
   if (isPublicRoute) {
-    // Redirect authenticated users from login page to their default dashboard
+    // Redirect authenticated users from login page to dashboard
     if (pathname === "/login" && token) {
       const user = getUserFromCookie(request);
       if (user) {
@@ -72,7 +106,13 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Redirect from root to user's default dashboard
+  // Check if user has access to the requested route
+  if (!hasRouteAccess(user.role, pathname)) {
+    // Redirect to unauthorized page
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+
+  // Redirect from root to user's dashboard
   if (pathname === "/") {
     const defaultDashboard = getDefaultDashboard(user.role);
     return NextResponse.redirect(new URL(defaultDashboard, request.url));

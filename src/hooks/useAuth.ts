@@ -1,3 +1,4 @@
+// hooks/useAuth.ts (Updated with role-based helpers)
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   logoutUser,
@@ -69,6 +70,7 @@ export const useLogin = () => {
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
     },
   });
 };
@@ -140,9 +142,9 @@ export const useIsFarmer = (): boolean => {
 /**
  * Hook to check if user is a farm supervisor
  */
-export const useIsFarmSupervisor = (): boolean => {
+export const useIsSupervisor = (): boolean => {
   const { user } = useAuth();
-  return user?.role === "farm_supervisor";
+  return user?.role === "supervisor";
 };
 
 /**
@@ -163,5 +165,64 @@ export const useAuthStatus = () => {
   return {
     isAuthenticated: isAuthenticated() && !!user,
     user,
+  };
+};
+
+/**
+ * Hook to get role-based dashboard components
+ */
+export const useRoleBasedDashboard = () => {
+  const { user } = useAuth();
+  
+  const getDashboardTitle = () => {
+    switch (user?.role) {
+      case "admin":
+        return "Admin Dashboard";
+      case "farmer":
+        return "Farmer Dashboard";
+      case "supervisor":
+        return "Farm Supervisor Dashboard";
+      case "plucker":
+        return "Plucker Dashboard";
+      default:
+        return "Dashboard";
+    }
+  };
+
+  const getDashboardIcon = () => {
+    switch (user?.role) {
+      case "admin":
+        return "👨‍💼";
+      case "farmer":
+        return "👨‍🌾";
+      case "supervisor":
+        return "👔";
+      case "plucker":
+        return "🌿";
+      default:
+        return "📊";
+    }
+  };
+
+  const getAvailableModules = () => {
+    const modules = {
+      admin: ["dashboard", "farms", "workers", "zones", "orders", "products", "reports", "users"],
+      farmer: ["dashboard", "orders", "products"],
+      supervisor: ["dashboard", "farms", "workers", "orders"],
+      plucker: ["dashboard", "tasks", "collection"],
+    };
+    
+    return modules[user?.role as keyof typeof modules] || modules.farmer;
+  };
+
+  return {
+    role: user?.role,
+    dashboardTitle: getDashboardTitle(),
+    dashboardIcon: getDashboardIcon(),
+    availableModules: getAvailableModules(),
+    isAdmin: user?.role === "admin",
+    isFarmer: user?.role === "farmer",
+    isSupervisor: user?.role === "supervisor",
+    isPlucker: user?.role === "plucker",
   };
 };
