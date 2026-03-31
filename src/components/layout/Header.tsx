@@ -52,15 +52,14 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
 
         <div className="flex items-center min-w-0">
           
-          {/* ✅ Image Logo (NEW) */}
           <Image
-            src="/assets/logo.webp"
-            alt="SOKOCHAPP"
-            width={120}
-            height={40}
-            className="object-contain"
-            priority
-          />
+  src="/assets/logo.webp"
+  alt="SOKOCHAPP"
+  width={80}
+  height={30}
+  className="h-6 w-auto object-contain"
+  priority
+/>
 
           {/* Separator */}
           <div className="h-8 md:h-12 w-px bg-gray-300 mx-2 md:mx-4 shrink-0"></div>
