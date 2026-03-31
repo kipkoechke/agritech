@@ -478,28 +478,28 @@ export default function TeaDashboardPage() {
 
         {/* Tea Collection Trend - Show for Admin and Farmer */}
         {(isAdmin || isFarmer) && (
-          <div className="bg-white rounded-lg border border-slate-200 mb-4">
-            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-                <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                Tea Collection Trend {isFarmer ? "(My Farm)" : "by Zone"}
-              </h2>
-            </div>
-            <div className="p-3 md:p-4">
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `${value} KG`} />
-                  {trendZones.length > 0 && <Legend />}
-                  {trendZones.map((zone) => (
-                    <Line key={zone} type="monotone" dataKey={zone} stroke={ZONE_COLORS[zone]} strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+                    <div className="bg-white rounded-lg border border-slate-200 mb-4">
+  <ResponsiveContainer width="100%" height={260}>
+    <LineChart data={trendData}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="date" />
+      <YAxis />
+      <Tooltip formatter={(value) => `${value} KG`} />
+      {trendZones.length > 0 && <Legend />}
+      {trendZones.map((zone) => (
+        <Line
+          key={zone}
+          type="monotone"
+          dataKey={zone}
+          stroke={ZONE_COLORS[zone]}
+          strokeWidth={2}
+          dot={{ r: 4 }}
+          activeDot={{ r: 6 }}
+        />
+      ))}
+    </LineChart>
+  </ResponsiveContainer>
+</div>
         )}
 
         {/* Rankings - Show for Admin and Farmer */}
