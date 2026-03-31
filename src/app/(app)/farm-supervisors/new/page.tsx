@@ -1,4 +1,4 @@
-// app/farm-supervisors/new/page.tsx
+// app/farm-supervisors/new/page.tsx (Fixed)
 "use client";
 
 import { useState } from "react";
@@ -150,9 +150,19 @@ export default function NewSupervisorPage() {
           </div>
 
           <div className="flex gap-4 pt-4">
-            <Button type="primary" htmlType="submit" loading={createUser.isPending}>
-              <MdSave className="w-5 h-5" />
-              {createUser.isPending ? "Creating..." : "Create Supervisor"}
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              disabled={createUser.isPending}
+            >
+              {createUser.isPending ? (
+                "Creating..."
+              ) : (
+                <>
+                  <MdSave className="w-5 h-5" />
+                  Create Supervisor
+                </>
+              )}
             </Button>
             <Link
               href="/farm-supervisors"
