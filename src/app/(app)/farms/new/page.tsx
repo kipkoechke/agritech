@@ -1,4 +1,4 @@
-// app/farms/new/page.tsx (Fixed and Cleaned)
+// app/farms/new/page.tsx (Fixed with Farmer Users)
 "use client";
 
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { MdAgriculture, MdArrowBack } from "react-icons/md";
 import { useCreateFarm } from "@/hooks/useFarm";
 import { useZones } from "@/hooks/useZone";
 import { useProducts } from "@/hooks/useProduct";
+import { useUsers } from "@/hooks/useUser";
 import type { CreateFarmData } from "@/types/farm";
 import "leaflet/dist/leaflet.css";
 
@@ -50,9 +51,14 @@ export default function NewFarmPage() {
   const createFarm = useCreateFarm();
   const { data: zones, isLoading: zonesLoading } = useZones();
   const { data: productsResponse, isLoading: productsLoading } = useProducts();
+  const { data: usersResponse, isLoading: usersLoading } = useUsers({ 
+    role: "farmer",
+    per_page: 100 
+  });
 
   const products = productsResponse?.data || [];
   const zonesList = zones || [];
+  const farmers = usersResponse?.data || [];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -102,24 +108,28 @@ export default function NewFarmPage() {
       return;
     }
 
+    if (!formData.owner_id) {
+      alert("Please select an owner");
+      return;
+    }
+
     if (!coordinates) {
       alert("Please pick coordinates on the map");
       return;
     }
 
-    // Prepare data for API
+    // Prepare data for API - exactly matching the required format
     const data: CreateFarmData = {
       name: formData.name,
       size: formData.size,
       zone_id: formData.zone_id,
       product_id: formData.product_id,
-      coordinates: coordinates,
+      owner_id: formData.owner_id,
+      coordinates: {
+        lat: coordinates.lat,
+        lng: coordinates.lng
+      }
     };
-
-    // Only add owner_id if provided
-    if (formData.owner_id) {
-      data.zone_id = formData.owner_id;
-    }
 
     try {
       await createFarm.mutateAsync(data);
@@ -242,22 +252,34 @@ export default function NewFarmPage() {
             )}
           </div>
 
-          {/* Owner ID (Optional) */}
+          {/* Owner - Farmer Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Owner ID (Optional)
+              Owner (Farmer) *
             </label>
-            <input
-              type="text"
+            <select
               name="owner_id"
               value={formData.owner_id}
               onChange={handleChange}
+              disabled={usersLoading}
+              required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-              placeholder="Enter owner ID (optional)"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              If left empty, the current user will be assigned as owner
-            </p>
+            >
+              <option value="">Select a farmer</option>
+              {farmers.map((farmer: any) => (
+                <option key={farmer.id} value={farmer.id}>
+                  {farmer.name} {farmer.email ? `(${farmer.email})` : ""}
+                </option>
+              ))}
+            </select>
+            {usersLoading && (
+              <p className="text-xs text-gray-500 mt-1">Loading farmers...</p>
+            )}
+            {!usersLoading && farmers.length === 0 && (
+              <p className="text-xs text-red-500 mt-1">
+                No farmers available. Please create a farmer user first.
+              </p>
+            )}
           </div>
 
           {/* Map for picking coordinates */}
@@ -267,8 +289,8 @@ export default function NewFarmPage() {
             </label>
             <div className="h-64 w-full border rounded-md overflow-hidden bg-gray-100">
               <MapContainer
-                center={[0.2, 35.5]}
-                zoom={7}
+                center={[-1.2921, 36.8219]}
+                zoom={13}
                 style={{ height: "100%", width: "100%" }}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
