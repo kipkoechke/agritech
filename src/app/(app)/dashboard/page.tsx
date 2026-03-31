@@ -319,10 +319,10 @@ export default function TeaDashboardPage() {
   };
 
   const getDashboardTitle = () => {
-    if (isAdmin) return "Admin Dashboard";
-    if (isFarmer) return "My Farm Dashboard";
+    if (isAdmin) return " Dashboard";
+    if (isFarmer) return "Farm Dashboard";
     if (isSupervisor) return "Supervisor Dashboard";
-    if (isPlucker) return "My Dashboard";
+    if (isPlucker) return "Dashboard";
     return "Dashboard";
   };
 
