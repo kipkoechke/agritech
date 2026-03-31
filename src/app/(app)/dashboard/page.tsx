@@ -474,7 +474,11 @@ const formatKilosLower = (kilos: number) => `${kilos.toLocaleString("en-KE")} kg
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
                   <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
                 </div>
-                <div><p className="text-[10px] md:text-xs text-slate-500">Avg/Farmer</p><p className="text-lg md:text-2xl font-bold text-teal-600">{formatKilos(Math.round(stats.avgKilosPerFarmer))}</p></div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Avg/Farmer</p>
+                <p className="text-lg md:text-2xl font-bold text-teal-600">
+  {formatKilosLower(Math.round(stats.avgKilosPerFarmer))}
+</p>
+                </div>
               </div>
             </div>
           </div>
