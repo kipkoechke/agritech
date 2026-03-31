@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { HiBars3, HiXMark } from "react-icons/hi2";
-import {
-  MdPerson,
-  MdLogout,
-} from "react-icons/md";
+import { MdPerson, MdLogout } from "react-icons/md";
 import { useAuth, useLogout } from "../../hooks/useAuth";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-import Logo from "../common/Logo";
 import ENgaoLogo from "../common/ENgaoLogo";
 
 interface HeaderProps {
@@ -36,7 +33,10 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
 
   return (
     <div className="bg-white font-bold tracking-widest border-b border-gray-200 flex items-center justify-between px-3 md:px-8 py-2 col-span-full sticky top-0 z-30">
+      
+      {/* LEFT SIDE */}
       <div className="flex items-center min-w-0">
+        
         {/* Mobile menu button */}
         <button
           onClick={onMenuToggle}
@@ -51,62 +51,69 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
         </button>
 
         <div className="flex items-center min-w-0">
-          {/* NPS Logo */}
-          <Logo />
+          
+          {/* ✅ Image Logo (NEW) */}
+          <Image
+            src="/assets/logo.webp"
+            alt="SOKOCHAPP"
+            width={120}
+            height={40}
+            className="object-contain"
+            priority
+          />
 
-          {/* Separator Line */}
+          {/* Separator */}
           <div className="h-8 md:h-12 w-px bg-gray-300 mx-2 md:mx-4 shrink-0"></div>
 
-          {/* eNGAO Logo Text */}
+          {/* eNGAO Logo */}
           <ENgaoLogo size="md" />
         </div>
       </div>
 
-      {/* User Profile Section */}
+      {/* RIGHT SIDE (USER PROFILE) */}
       <div className="flex items-center gap-2 md:gap-3">
         {user && (
           <div className="relative" ref={profileRef}>
+            
+            {/* Profile Trigger */}
             <div
               className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
               {/* Avatar */}
-              <div className="shrink-0">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MdPerson className="w-5 h-5 text-primary" />
-                </div>
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                <MdPerson className="w-5 h-5 text-primary" />
               </div>
 
-              {/* User Details - Hidden on small screens, shown on medium+ */}
-              <div className="hidden md:flex flex-col gap-0.5">
-                <h3 className="font-semibold text-sm text-gray-900 leading-tight whitespace-nowrap">
+              {/* Name */}
+              <div className="hidden md:flex flex-col">
+                <h3 className="font-semibold text-sm text-gray-900 whitespace-nowrap">
                   {user.name}
                 </h3>
               </div>
             </div>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown */}
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
-                {/* Header */}
-                <div className="bg-white p-4 border-b border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-15 h-15 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
-                      <MdPerson className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-base truncate text-gray-900">
-                        {user.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 capitalize">
-                        {formatRole(user.role || "")}
-                      </p>
-                    </div>
+                
+                {/* User Info */}
+                <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
+                    <MdPerson className="w-7 h-7 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-base text-gray-900 truncate">
+                      {user.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 capitalize">
+                      {formatRole(user.role || "")}
+                    </p>
                   </div>
                 </div>
 
-                {/* Logout Button */}
-                <div className="p-3 border-t border-gray-200">
+                {/* Logout */}
+                <div className="p-3">
                   <button
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
@@ -116,6 +123,7 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
                     {logoutMutation.isPending ? "Logging out..." : "Logout"}
                   </button>
                 </div>
+
               </div>
             )}
           </div>
