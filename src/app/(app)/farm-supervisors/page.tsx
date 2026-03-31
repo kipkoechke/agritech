@@ -1,17 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { MdSupervisorAccount, MdAdd, MdVisibility } from "react-icons/md";
+import { MdSupervisorAccount, MdAdd, MdVisibility, MdEdit, MdDelete } from "react-icons/md";
 import { useState } from "react";
-
-// Dummy data
-const DUMMY_SUPERVISORS = [
-  { id: "S001", name: "Alice Njeri", zone: "Kericho", farms: 3, email: "alice.njeri@example.com" },
-  { id: "S002", name: "Peter Kiptoo", zone: "Nandi", farms: 5, email: "peter.kiptoo@example.com" },
-];
+import { useUsers, useDeleteUser } from "@/hooks/useUser";
 
 export default function FarmsSupervisorsPage() {
-  const [supervisors, setSupervisors] = useState(DUMMY_SUPERVISORS);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: usersResponse, isLoading, error } = useUsers({ 
+    role: "farm_supervisor",
+    per_page: 100 
+  });
+  const deleteUser = useDeleteUser();
+
+  const supervisors = usersResponse?.data || [];
+
+  const filteredSupervisors = supervisors.filter((supervisor: any) =>
+    supervisor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supervisor.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supervisor.phone?.includes(searchTerm)
+  );
+
+  const handleDelete = async (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete supervisor "${name}"?`)) {
+      await deleteUser.mutateAsync(id);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-4">
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+          Failed to load supervisors. Please try again later.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4">
@@ -27,6 +61,24 @@ export default function FarmsSupervisorsPage() {
           <MdAdd className="w-5 h-5" />
           Add Supervisor
         </Link>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-4">
+        <div className="relative max-w-md">
+          <input
+            type="text"
+            placeholder="Search supervisors by name, email, or phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+          />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       {supervisors.length === 0 ? (
@@ -52,13 +104,16 @@ export default function FarmsSupervisorsPage() {
                     Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Zone
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Number of Farms
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                    Employee ID
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -66,27 +121,48 @@ export default function FarmsSupervisorsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {supervisors.map((sup) => (
-                  <tr key={sup.id} className="hover:bg-gray-50">
+                {filteredSupervisors.map((supervisor: any) => (
+                  <tr key={supervisor.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{sup.name}</div>
+                      <div className="text-sm font-medium text-gray-900">{supervisor.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{sup.zone}</div>
+                      <div className="text-sm text-gray-500">{supervisor.email || "-"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{sup.farms}</div>
+                      <div className="text-sm text-gray-500">{supervisor.phone || "-"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{sup.email}</div>
+                      <div className="text-sm text-gray-500">{supervisor.zone?.name || "-"}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{supervisor.employee_id || "-"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <Link
-                        href={`/farm-supervisors/${sup.id}`}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        <MdVisibility className="w-5 h-5" />
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/farm-supervisors/${supervisor.id}`}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          title="View Details"
+                        >
+                          <MdVisibility className="w-5 h-5" />
+                        </Link>
+                        <Link
+                          href={`/farm-supervisors/${supervisor.id}/edit`}
+                          className="text-green-600 hover:text-green-800 transition-colors"
+                          title="Edit Supervisor"
+                        >
+                          <MdEdit className="w-5 h-5" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(supervisor.id, supervisor.name)}
+                          disabled={deleteUser.isPending}
+                          className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50"
+                          title="Delete Supervisor"
+                        >
+                          <MdDelete className="w-5 h-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

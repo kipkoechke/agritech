@@ -1,4 +1,4 @@
-// app/farm-workers/[id]/edit/page.tsx (Fixed)
+// app/farm-workers/[id]/edit/page.tsx (Updated with regular PIN input)
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,7 +7,6 @@ import Link from "next/link";
 import { MdArrowBack, MdSave } from "react-icons/md";
 import { useWorker, useUpdateWorker } from "@/hooks/useWorkers";
 import { useZones } from "@/hooks/useZone";
-import PinDialer from "@/components/common/PinDialer";
 
 export default function EditWorkerPage() {
   const params = useParams();
@@ -28,23 +27,23 @@ export default function EditWorkerPage() {
 
   const worker = workerResponse?.data;
   
-const getZonesArray = () => {
-  const data = zonesData as
-    | { data?: unknown[] }
-    | unknown[]
-    | null
-    | undefined;
+  const getZonesArray = () => {
+    const data = zonesData as
+      | { data?: unknown[] }
+      | unknown[]
+      | null
+      | undefined;
 
-  if (!data) return [];
+    if (!data) return [];
 
-  if (Array.isArray(data)) return data;
+    if (Array.isArray(data)) return data;
 
-  if ("data" in data && Array.isArray(data.data)) {
-    return data.data;
-  }
+    if ("data" in data && Array.isArray(data.data)) {
+      return data.data;
+    }
 
-  return [];
-};
+    return [];
+  };
   
   const zonesList = getZonesArray();
 
@@ -58,6 +57,14 @@ const getZonesArray = () => {
       });
     }
   }, [worker]);
+
+  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 4) {
+      setFormData({ ...formData, pin: value });
+      setIsPinChanged(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,13 +181,15 @@ const getZonesArray = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   PIN (Leave blank to keep current)
                 </label>
-                <PinDialer
+                <input
+                  type="password"
                   value={formData.pin}
-                  onChange={(pin) => {
-                    setFormData({ ...formData, pin });
-                    setIsPinChanged(true);
-                  }}
-                  length={4}
+                  onChange={handlePinChange}
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  placeholder="Enter 4-digit PIN"
+                  maxLength={4}
+                  inputMode="numeric"
+                  pattern="\d{4}"
                 />
                 {!isPinChanged && (
                   <div className="mt-3 p-3 bg-blue-50 rounded-lg">
@@ -196,6 +205,13 @@ const getZonesArray = () => {
                     </p>
                   </div>
                 )}
+                {isPinChanged && formData.pin.length > 0 && formData.pin.length !== 4 && (
+                  <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
+                    <p className="text-xs text-yellow-700">
+                      PIN must be exactly 4 digits. Current length: {formData.pin.length}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -208,7 +224,7 @@ const getZonesArray = () => {
               </Link>
               <button
                 type="submit"
-                disabled={updateWorker.isPending}
+                disabled={updateWorker.isPending || (isPinChanged && formData.pin.length !== 4)}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 <MdSave className="w-5 h-5" />
