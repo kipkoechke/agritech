@@ -127,7 +127,6 @@ export default function FarmMapPage() {
   const [factory, setFactory] = useState("");
   const [isMounted, setIsMounted] = useState(false);
 
-  // Fix for Leaflet icon issue - only run on client
   React.useEffect(() => {
     setIsMounted(true);
     if (typeof window !== "undefined") {

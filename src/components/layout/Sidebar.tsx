@@ -92,13 +92,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname === "/farm-map",
         visibleTo: ["admin", "supervisor"],
       },
-      {
-        name: "My Services",
-        icon: MdDesignServices,
-        href: "/my-services",
-        active: pathname.startsWith("/my-services"),
-        visibleTo: ["admin", "farmer", "supervisor", "plucker"],
-      },
+      // {
+      //   name: "My Services",
+      //   icon: MdDesignServices,
+      //   href: "/my-services",
+      //   active: pathname.startsWith("/my-services"),
+      //   visibleTo: ["admin", "farmer", "supervisor", "plucker"],
+      // },
     ];
 
     // Filter menu items based on user role

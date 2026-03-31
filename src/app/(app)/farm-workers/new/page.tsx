@@ -1,4 +1,4 @@
-// app/farm-workers/new/page.tsx (Fixed)
+// app/farm-workers/new/page.tsx (Updated with regular PIN input)
 "use client";
 
 import { useState } from "react";
@@ -7,30 +7,29 @@ import Link from "next/link";
 import { MdArrowBack, MdSave } from "react-icons/md";
 import { useCreateWorker } from "@/hooks/useWorkers";
 import { useZones } from "@/hooks/useZone";
-import PinDialer from "@/components/common/PinDialer";
 
 export default function CreateWorkerPage() {
   const router = useRouter();
   const createWorker = useCreateWorker();
   const { data: zonesData, isLoading: isLoadingZones } = useZones();
   
-const getZonesArray = () => {
-  const data = zonesData as
-    | { data?: unknown[] }
-    | unknown[]
-    | null
-    | undefined;
+  const getZonesArray = () => {
+    const data = zonesData as
+      | { data?: unknown[] }
+      | unknown[]
+      | null
+      | undefined;
 
-  if (!data) return [];
+    if (!data) return [];
 
-  if (Array.isArray(data)) return data;
+    if (Array.isArray(data)) return data;
 
-  if ("data" in data && Array.isArray(data.data)) {
-    return data.data;
-  }
+    if ("data" in data && Array.isArray(data.data)) {
+      return data.data;
+    }
 
-  return [];
-};
+    return [];
+  };
   
   const zonesList = getZonesArray();
 
@@ -45,6 +44,10 @@ const getZonesArray = () => {
     e.preventDefault();
     if (formData.pin.length !== 4) {
       alert("Please enter a 4-digit PIN");
+      return;
+    }
+    if (!/^\d{4}$/.test(formData.pin)) {
+      alert("PIN must be exactly 4 digits");
       return;
     }
     await createWorker.mutateAsync(formData);
@@ -134,13 +137,24 @@ const getZonesArray = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   PIN (4 digits) *
                 </label>
-                <PinDialer
+                <input
+                  type="password"
                   value={formData.pin}
-                  onChange={(pin) => setFormData({ ...formData, pin })}
-                  length={4}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    if (value.length <= 4) {
+                      setFormData({ ...formData, pin: value });
+                    }
+                  }}
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  required
+                  placeholder="Enter 4-digit PIN"
+                  maxLength={4}
+                  inputMode="numeric"
+                  pattern="\d{4}"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  This PIN will be used for worker authentication
+                  PIN must be exactly 4 digits. This will be used for worker authentication.
                 </p>
               </div>
             </div>
