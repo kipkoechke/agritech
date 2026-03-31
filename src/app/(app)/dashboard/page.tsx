@@ -299,7 +299,8 @@ export default function TeaDashboardPage() {
   }, [filteredData]);
 
   const formatNumber = (num: number) => num.toLocaleString("en-KE");
-  const formatKilos = (kilos: number) => `${kilos.toLocaleString("en-KE")} KG`;
+const formatKilos = (kilos: number) => `${kilos.toLocaleString("en-KE")} KG`;
+const formatKilosLower = (kilos: number) => `${kilos.toLocaleString("en-KE")} kg`;
 
   const uniqueZones = [...new Set(ALL_DATA.map(d => d.zone))];
   const uniqueFarmers = [...new Set(ALL_DATA.map(d => d.farmerName))];
@@ -462,7 +463,10 @@ export default function TeaDashboardPage() {
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
                   <MdScale className="w-4 h-4 md:w-5 md:h-5 text-amber-600" />
                 </div>
-                <div><p className="text-[10px] md:text-xs text-slate-500">Total Tea</p><p className="text-lg md:text-2xl font-bold text-amber-600">{formatKilos(stats.totalKilos)}</p></div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Total Tea</p>
+<p className="text-lg md:text-2xl font-bold text-amber-600">
+  {formatKilosLower(stats.totalKilos)}
+</p>                </div>
               </div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
