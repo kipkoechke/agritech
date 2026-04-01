@@ -4,18 +4,14 @@ import type {
   Product, 
   CreateProductData, 
   UpdateProductData, 
-  PriceHistory,
-  CreatePriceHistoryData,
   ProductsResponse,
-  ProductResponse,
-  PriceHistoryResponse
+  ProductResponse
 } from "@/types/product";
 
 export const getProducts = async (params?: {
   page?: number;
   per_page?: number;
   search?: string;
-  category_id?: string;
 }): Promise<ProductsResponse> => {
   const response = await axiosInstance.get<ProductsResponse>("/products", { params });
   return response.data;
@@ -38,20 +34,5 @@ export const updateProduct = async (id: string, data: UpdateProductData): Promis
 
 export const deleteProduct = async (id: string): Promise<{ message: string }> => {
   const response = await axiosInstance.delete<{ message: string }>(`/products/${id}`);
-  return response.data;
-};
-
-export const getProductPriceHistory = async (productId: string): Promise<PriceHistoryResponse> => {
-  const response = await axiosInstance.get<PriceHistoryResponse>(`/products/${productId}/price-history`);
-  return response.data;
-};
-
-export const addProductPriceHistory = async (data: CreatePriceHistoryData): Promise<{ data: PriceHistory }> => {
-  const response = await axiosInstance.post<{ data: PriceHistory }>(`/products/${data.product_id}/price-history`, data);
-  return response.data;
-};
-
-export const deleteProductPriceHistory = async (id: string): Promise<{ message: string }> => {
-  const response = await axiosInstance.delete<{ message: string }>(`/price-history/${id}`);
   return response.data;
 };

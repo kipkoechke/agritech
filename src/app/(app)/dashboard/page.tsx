@@ -299,7 +299,8 @@ export default function TeaDashboardPage() {
   }, [filteredData]);
 
   const formatNumber = (num: number) => num.toLocaleString("en-KE");
-  const formatKilos = (kilos: number) => `${kilos.toLocaleString("en-KE")} KG`;
+const formatKilos = (kilos: number) => `${kilos.toLocaleString("en-KE")} KG`;
+const formatKilosLower = (kilos: number) => `${kilos.toLocaleString("en-KE")} kg`;
 
   const uniqueZones = [...new Set(ALL_DATA.map(d => d.zone))];
   const uniqueFarmers = [...new Set(ALL_DATA.map(d => d.farmerName))];
@@ -319,10 +320,10 @@ export default function TeaDashboardPage() {
   };
 
   const getDashboardTitle = () => {
-    if (isAdmin) return "Admin Dashboard";
-    if (isFarmer) return "My Farm Dashboard";
+    if (isAdmin) return " Dashboard";
+    if (isFarmer) return "Farm Dashboard";
     if (isSupervisor) return "Supervisor Dashboard";
-    if (isPlucker) return "My Dashboard";
+    if (isPlucker) return "Dashboard";
     return "Dashboard";
   };
 
@@ -462,7 +463,10 @@ export default function TeaDashboardPage() {
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
                   <MdScale className="w-4 h-4 md:w-5 md:h-5 text-amber-600" />
                 </div>
-                <div><p className="text-[10px] md:text-xs text-slate-500">Total Tea</p><p className="text-lg md:text-2xl font-bold text-amber-600">{formatKilos(stats.totalKilos)}</p></div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Total Tea</p>
+<p className="text-lg md:text-2xl font-bold text-amber-600">
+  {formatKilosLower(stats.totalKilos)}
+</p>                </div>
               </div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
@@ -470,7 +474,11 @@ export default function TeaDashboardPage() {
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
                   <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
                 </div>
-                <div><p className="text-[10px] md:text-xs text-slate-500">Avg/Farmer</p><p className="text-lg md:text-2xl font-bold text-teal-600">{formatKilos(Math.round(stats.avgKilosPerFarmer))}</p></div>
+                <div><p className="text-[10px] md:text-xs text-slate-500">Avg/Farmer</p>
+                <p className="text-lg md:text-2xl font-bold text-teal-600">
+  {formatKilosLower(Math.round(stats.avgKilosPerFarmer))}
+</p>
+                </div>
               </div>
             </div>
           </div>
@@ -478,28 +486,28 @@ export default function TeaDashboardPage() {
 
         {/* Tea Collection Trend - Show for Admin and Farmer */}
         {(isAdmin || isFarmer) && (
-          <div className="bg-white rounded-lg border border-slate-200 mb-4">
-            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-                <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                Tea Collection Trend {isFarmer ? "(My Farm)" : "by Zone"}
-              </h2>
-            </div>
-            <div className="p-3 md:p-4">
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `${value} KG`} />
-                  {trendZones.length > 0 && <Legend />}
-                  {trendZones.map((zone) => (
-                    <Line key={zone} type="monotone" dataKey={zone} stroke={ZONE_COLORS[zone]} strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+                    <div className="bg-white rounded-lg border border-slate-200 mb-4">
+  <ResponsiveContainer width="100%" height={260}>
+    <LineChart data={trendData}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="date" />
+      <YAxis />
+      <Tooltip formatter={(value) => `${value} KG`} />
+      {trendZones.length > 0 && <Legend />}
+      {trendZones.map((zone) => (
+        <Line
+          key={zone}
+          type="monotone"
+          dataKey={zone}
+          stroke={ZONE_COLORS[zone]}
+          strokeWidth={2}
+          dot={{ r: 4 }}
+          activeDot={{ r: 6 }}
+        />
+      ))}
+    </LineChart>
+  </ResponsiveContainer>
+</div>
         )}
 
         {/* Rankings - Show for Admin and Farmer */}
@@ -520,44 +528,7 @@ export default function TeaDashboardPage() {
           </div>
         )}
 
-        {/* Farm Locations Map - Show for Admin and Farmer */}
-        {(isAdmin || isFarmer) && (
-          <div className="bg-white rounded-lg border border-slate-200 mb-4">
-            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-                <MdMap className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                {isFarmer ? "My Farm Locations Map" : "Farm Locations Map"}
-              </h2>
-            </div>
-            <div className="p-3 md:p-4">
-              <div className="h-[500px] rounded-lg overflow-hidden border border-gray-200">
-                <MapContainer center={[0.2, 35.5] as L.LatLngExpression} zoom={7} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  {mapMarkers.map((marker) => (
-                    <CircleMarker key={marker.id} center={[marker.lat, marker.lng] as L.LatLngExpression} radius={Math.sqrt(marker.totalKilos) / 2} fillColor={getMarkerColor(marker.totalKilos)} color={getMarkerColor(marker.totalKilos)} weight={2} opacity={1} fillOpacity={0.7}>
-                      <Popup>
-                        <div className="text-sm">
-                          <p className="font-bold text-gray-900">{marker.name}</p>
-                          <p className="text-gray-600">Zone: {marker.zone}</p>
-                          <p className="text-gray-600">Factory: {marker.factory}</p>
-                          <p className="text-gray-600">Supervisor: {marker.supervisor}</p>
-                          <p className="text-primary font-bold mt-1">{marker.totalKilos} KG total</p>
-                        </div>
-                      </Popup>
-                    </CircleMarker>
-                  ))}
-                </MapContainer>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-4 justify-center">
-                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-xs text-gray-600">High (400+ KG)</span></div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-gray-600">Medium (300-399 KG)</span></div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div><span className="text-xs text-gray-600">Low (200-299 KG)</span></div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-xs text-gray-600">Very Low (&lt;200 KG)</span></div>
-                <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs"><span className="text-primary">●</span></div><span className="text-xs text-gray-600">Circle size = total production</span></div>
-              </div>
-            </div>
-          </div>
-        )}
+        
 
         {/* Zone Distribution and Supervisor Performance - Show for Admin and Farmer */}
         {(isAdmin || isFarmer) && (
@@ -606,6 +577,45 @@ export default function TeaDashboardPage() {
           </div>
         )}
 
+        {/* Farm Locations Map - Show for Admin and Farmer */}
+        {(isAdmin || isFarmer) && (
+          <div className="bg-white rounded-lg border border-slate-200 mb-4">
+            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
+              <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
+                <MdMap className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
+                {isFarmer ? "My Farm Locations Map" : "Farm Locations Map"}
+              </h2>
+            </div>
+            <div className="p-3 md:p-4">
+              <div className="h-[500px] rounded-lg overflow-hidden border border-gray-200">
+                <MapContainer center={[0.2, 35.5] as L.LatLngExpression} zoom={7} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  {mapMarkers.map((marker) => (
+                    <CircleMarker key={marker.id} center={[marker.lat, marker.lng] as L.LatLngExpression} radius={Math.sqrt(marker.totalKilos) / 2} fillColor={getMarkerColor(marker.totalKilos)} color={getMarkerColor(marker.totalKilos)} weight={2} opacity={1} fillOpacity={0.7}>
+                      <Popup>
+                        <div className="text-sm">
+                          <p className="font-bold text-gray-900">{marker.name}</p>
+                          <p className="text-gray-600">Zone: {marker.zone}</p>
+                          <p className="text-gray-600">Factory: {marker.factory}</p>
+                          <p className="text-gray-600">Supervisor: {marker.supervisor}</p>
+                          <p className="text-primary font-bold mt-1">{marker.totalKilos} KG total</p>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  ))}
+                </MapContainer>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4 justify-center">
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-xs text-gray-600">High (400+ KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-gray-600">Medium (300-399 KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div><span className="text-xs text-gray-600">Low (200-299 KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-xs text-gray-600">Very Low (&lt;200 KG)</span></div>
+                <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs"><span className="text-primary">●</span></div><span className="text-xs text-gray-600">Circle size = total production</span></div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* For Plucker - Show My Services only */}
         {isPlucker && (
           <div className="bg-white rounded-lg border border-slate-200 p-8 text-center">
@@ -618,3 +628,4 @@ export default function TeaDashboardPage() {
     </div>
   );
 }
+//zone, factory, farmer,cell,  supervisor, plucker, start date, end date,

@@ -7,6 +7,7 @@ export interface User {
   national_id?: string;
   employee_id?: string;
   zone_id?: string;
+  supervisor_id?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -20,6 +21,7 @@ export interface CreateUserData {
   national_id?: string;
   employee_id?: string;
   zone_id?: string;
+  supervisor_id?: string;
 }
 
 export interface UpdateUserData {
@@ -31,4 +33,34 @@ export interface UpdateUserData {
   national_id?: string;
   employee_id?: string;
   zone_id?: string;
+  supervisor_id?: string;
+}
+
+export interface UserFilters {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  role?: string;
+  supervisor_id?: string;
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
+}
+
+export interface UsersResponse {
+  data: User[];
+  pagination?: {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+  };
+}
+
+export interface UserResponse {
+  data: User;
+}
+
+export interface UserRole {
+  id: string;
+  name: string;
 }

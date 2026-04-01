@@ -6,17 +6,12 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  getProductPriceHistory,
-  addProductPriceHistory,
-  deleteProductPriceHistory,
 } from "@/services/productService";
 import type { 
   CreateProductData, 
-  UpdateProductData, 
-  CreatePriceHistoryData,
+  UpdateProductData,
   ProductsResponse,
-  ProductResponse,
-  PriceHistoryResponse
+  ProductResponse
 } from "@/types/product";
 import toast from "react-hot-toast";
 
@@ -24,10 +19,9 @@ import toast from "react-hot-toast";
 export const productQueryKeys = {
   all: ["products"] as const,
   lists: () => [...productQueryKeys.all, "list"] as const,
-  list: (filters?: any) => [...productQueryKeys.lists(), { filters }] as const,
+  list: (params?: any) => [...productQueryKeys.lists(), { params }] as const,
   details: () => [...productQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...productQueryKeys.details(), id] as const,
-  priceHistory: (productId: string) => [...productQueryKeys.detail(productId), "price-history"] as const,
 };
 
 // Get all products with optional filters
@@ -35,7 +29,6 @@ export const useProducts = (params?: {
   page?: number;
   per_page?: number;
   search?: string;
-  category_id?: string;
 }) => {
   return useQuery({
     queryKey: productQueryKeys.list(params),
@@ -49,15 +42,6 @@ export const useProduct = (id: string) => {
     queryKey: productQueryKeys.detail(id),
     queryFn: () => getProduct(id),
     enabled: !!id,
-  });
-};
-
-// Get product price history
-export const useProductPriceHistory = (productId: string) => {
-  return useQuery({
-    queryKey: productQueryKeys.priceHistory(productId),
-    queryFn: () => getProductPriceHistory(productId),
-    enabled: !!productId,
   });
 };
 
@@ -108,71 +92,4 @@ export const useDeleteProduct = () => {
       toast.error(error.response?.data?.message || "Failed to delete product");
     },
   });
-};
-
-// Add product price history
-export const useAddProductPriceHistory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreatePriceHistoryData) => addProductPriceHistory(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: productQueryKeys.priceHistory(variables.product_id) });
-      toast.success("Price history added successfully");
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to add price history");
-    },
-  });
-};
-
-// Delete product price history
-export const useDeleteProductPriceHistory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => deleteProductPriceHistory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productQueryKeys.all });
-      toast.success("Price history deleted successfully");
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to delete price history");
-    },
-  });
-};
-
-// Prefetch products (for SSR or optimistic loading)
-export const usePrefetchProducts = (queryClient: any) => {
-  return (params?: {
-    page?: number;
-    per_page?: number;
-    search?: string;
-    category_id?: string;
-  }) => {
-    queryClient.prefetchQuery({
-      queryKey: productQueryKeys.list(params),
-      queryFn: () => getProducts(params),
-    });
-  };
-};
-
-// Prefetch single product
-export const usePrefetchProduct = (queryClient: any, id: string) => {
-  return () => {
-    queryClient.prefetchQuery({
-      queryKey: productQueryKeys.detail(id),
-      queryFn: () => getProduct(id),
-    });
-  };
-};
-
-// Prefetch product price history
-export const usePrefetchProductPriceHistory = (queryClient: any, productId: string) => {
-  return () => {
-    queryClient.prefetchQuery({
-      queryKey: productQueryKeys.priceHistory(productId),
-      queryFn: () => getProductPriceHistory(productId),
-    });
-  };
 };
