@@ -1,159 +1,164 @@
 "use client";
 
 import { useState } from "react";
-import { MdPerson, MdAdd, MdSearch, MdEdit, MdDelete, MdVisibility } from "react-icons/md";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { MdPerson, MdAdd, MdSearch } from "react-icons/md";
+import { FiEye } from "react-icons/fi";
+import { ActionMenu } from "@/components/common/ActionMenu";
 import Button from "@/components/common/Button";
-import { InputField } from "@/components/common/InputField";
-
-interface Farmer {
-  id: string;
-  name: string;
-  nationalId: string;
-  phone: string;
-  acreage: number;
-  farmCode: string;
-  farmerCode: string;
-  location: string;
-}
-
-const mockFarmers: Farmer[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    nationalId: "12345678",
-    phone: "254712345678",
-    acreage: 5,
-    farmCode: "F001",
-    farmerCode: "FRM001",
-    location: "Zone A",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    nationalId: "87654321",
-    phone: "254798765432",
-    acreage: 10,
-    farmCode: "F002",
-    farmerCode: "FRM002",
-    location: "Zone B",
-  },
-];
+import { useHrisUsers } from "@/hooks/useHrisUser";
 
 export default function FarmersPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [farmers] = useState<Farmer[]>(mockFarmers);
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
-  const filteredFarmers = farmers.filter((farmer) =>
-    farmer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    farmer.farmerCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    farmer.nationalId.includes(searchTerm)
-  );
+  const { data, isLoading, error } = useHrisUsers({
+    page,
+    role: "farmer",
+    search: search || undefined,
+    sort_by: "name",
+    sort_order: "asc",
+  });
+
+  const farmers = data?.data || [];
+  const pagination = data?.pagination;
 
   return (
     <div className="min-h-screen p-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <MdPerson className="w-7 h-7 text-emerald-600" />
+          <MdPerson className="w-6 h-6 text-emerald-600" />
           Farmers
         </h1>
-        <Link href="/farmers/new">
-          <Button type="primary" className="flex items-center gap-2">
-            <MdAdd className="w-5 h-5" />
-            Add New Farmer
-          </Button>
-        </Link>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <div className="relative max-w-md">
-            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search farmers by name, code, or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Search farmers..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
             />
           </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Farmer Code
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  National ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Acreage
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredFarmers.length > 0 ? (
-                filteredFarmers.map((farmer) => (
-                  <tr key={farmer.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-emerald-600">
-                      {farmer.farmerCode}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {farmer.name}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {farmer.nationalId}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {farmer.phone}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {farmer.acreage} acres
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {farmer.location}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded">
-                          <MdVisibility className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded">
-                          <MdEdit className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded">
-                          <MdDelete className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    {searchTerm ? "No farmers found matching your search" : "No farmers registered yet"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <Button
+            type="small"
+            to="/farmers/new"
+            className="flex items-center gap-1"
+          >
+            <MdAdd className="w-4 h-4" />
+            Add Farmer
+          </Button>
         </div>
       </div>
+
+      {isLoading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+          Failed to load farmers. Please try again later.
+        </div>
+      )}
+
+      {!isLoading && farmers.length === 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <MdPerson className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No farmers found</h3>
+          <p className="text-gray-500 mb-4">There are no users with the farmer role.</p>
+        </div>
+      )}
+
+      {farmers.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Account No.
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {farmers.map((farmer) => (
+                  <tr key={farmer.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{farmer.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{farmer.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{farmer.phone}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{farmer.account_number || "\u2014"}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <ActionMenu menuId={`farmer-${farmer.id}`}>
+                        <ActionMenu.Trigger />
+                        <ActionMenu.Content>
+                          <ActionMenu.Item
+                            onClick={() => router.push(`/hris/users/${farmer.id}`)}
+                          >
+                            <FiEye className="h-4 w-4" />
+                            View
+                          </ActionMenu.Item>
+                        </ActionMenu.Content>
+                      </ActionMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {pagination && pagination.total_pages > 1 && (
+            <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                Page {pagination.current_page} of {pagination.total_pages} (
+                {pagination.total_items} items)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={pagination.current_page <= 1}
+                  className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!pagination.next_page}
+                  className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,12 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getWorkers, getWorker, createWorker, updateWorker, deleteWorker } from "@/services/workerService";
+import {
+  getWorkers,
+  getWorker,
+  createWorker,
+  updateWorker,
+  deleteWorker,
+  WorkersParams,
+} from "@/services/workerService";
 import type { CreateWorkerData, UpdateWorkerData } from "@/types/worker";
 import toast from "react-hot-toast";
+import { getApiErrorMessage } from "@/utils/getApiError";
 
-export const useWorkers = () => {
+export const useWorkers = (params: WorkersParams = {}) => {
   return useQuery({
-    queryKey: ["workers"],
-    queryFn: getWorkers,
+    queryKey: ["workers", params],
+    queryFn: () => getWorkers(params),
   });
 };
 
@@ -27,8 +35,8 @@ export const useCreateWorker = () => {
       queryClient.invalidateQueries({ queryKey: ["workers"] });
       toast.success("Worker created successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create worker");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to create worker"));
     },
   });
 };
@@ -37,14 +45,15 @@ export const useUpdateWorker = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateWorkerData }) => updateWorker(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateWorkerData }) =>
+      updateWorker(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["workers"] });
       queryClient.invalidateQueries({ queryKey: ["workers", variables.id] });
       toast.success("Worker updated successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update worker");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to update worker"));
     },
   });
 };
@@ -58,8 +67,8 @@ export const useDeleteWorker = () => {
       queryClient.invalidateQueries({ queryKey: ["workers"] });
       toast.success("Worker deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete worker");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete worker"));
     },
   });
 };

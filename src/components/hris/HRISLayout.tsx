@@ -2,12 +2,8 @@
 
 import React, { ReactNode } from "react";
 import {
-  MdDashboard,
   MdGroup,
-  MdSell,
-  MdBusiness,
-  MdSettings,
-  MdBackup,
+  MdHub,
 } from "react-icons/md";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,12 +28,6 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
 
   const tabs = [
     {
-      name: "Dashboard",
-      icon: MdDashboard,
-      href: "/hris/dashboard",
-      active: pathname === "/hris/dashboard",
-    },
-    {
       name: "User Management",
       icon: MdGroup,
       href: "/hris/users",
@@ -46,34 +36,10 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
         pathname.startsWith("/hris/roles"),
     },
     {
-      name: "Sales Reps",
-      icon: MdSell,
-      href: "/sales-representatives",
-      active: pathname.startsWith("/sales-representatives"),
-    },
-    {
-      name: "Depot Managers",
-      icon: MdBusiness,
-      href: "/depot-managers",
-      active: pathname.startsWith("/depot-managers"),
-    },
-    {
-      name: "Business Managers",
-      icon: MdBusiness,
-      href: "/hris/business-managers",
-      active: pathname.startsWith("/hris/business-managers"),
-    },
-    {
-      name: "Operational Controls",
-      icon: MdSettings,
-      href: "/operational-controls",
-      active: pathname.startsWith("/operational-controls"),
-    },
-    {
-      name: "Backup",
-      icon: MdBackup,
-      href: "/hris/backup",
-      active: pathname.startsWith("/hris/backup"),
+      name: "Clusters",
+      icon: MdHub,
+      href: "/hris/clusters",
+      active: pathname.startsWith("/hris/clusters"),
     },
   ];
 

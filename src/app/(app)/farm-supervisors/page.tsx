@@ -1,100 +1,82 @@
 "use client";
 
-import Link from "next/link";
-import { MdSupervisorAccount, MdAdd, MdVisibility, MdEdit, MdDelete } from "react-icons/md";
 import { useState } from "react";
-import { useUsers, useDeleteUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
+import { MdSupervisorAccount, MdSearch, MdAdd } from "react-icons/md";
+import { FiEye } from "react-icons/fi";
+import { ActionMenu } from "@/components/common/ActionMenu";
+import Button from "@/components/common/Button";
+import { useHrisUsers } from "@/hooks/useHrisUser";
 
 export default function FarmsSupervisorsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const { data: usersResponse, isLoading, error } = useUsers({ 
-    role: "farm_supervisor",
-    per_page: 100 
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading, error } = useHrisUsers({
+    page,
+    role: "supervisor",
+    search: search || undefined,
+    sort_by: "name",
+    sort_order: "asc",
   });
-  const deleteUser = useDeleteUser();
 
-  const supervisors = usersResponse?.data || [];
-
-  const filteredSupervisors = supervisors.filter((supervisor: any) =>
-    supervisor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supervisor.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supervisor.phone?.includes(searchTerm)
-  );
-
-  const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete supervisor "${name}"?`)) {
-      await deleteUser.mutateAsync(id);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-4">
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-          Failed to load supervisors. Please try again later.
-        </div>
-      </div>
-    );
-  }
+  const supervisors = data?.data || [];
+  const pagination = data?.pagination;
 
   return (
     <div className="min-h-screen p-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <MdSupervisorAccount className="w-6 h-6 text-primary" />
           Farm Supervisors
         </h1>
-        <Link
-          href="/farm-supervisors/new"
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          <MdAdd className="w-5 h-5" />
-          Add Supervisor
-        </Link>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-4">
-        <div className="relative max-w-md">
-          <input
-            type="text"
-            placeholder="Search supervisors by name, email, or phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-          />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+        <div className="flex items-center gap-3">
+          <div className="relative w-full sm:w-64">
+            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search supervisors..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+            />
           </div>
+          <Button
+            type="small"
+            to="/farm-supervisors/new"
+            className="flex items-center gap-1"
+          >
+            <MdAdd className="w-4 h-4" />
+            Add Supervisor
+          </Button>
         </div>
       </div>
 
-      {supervisors.length === 0 ? (
+      {isLoading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+          Failed to load supervisors. Please try again later.
+        </div>
+      )}
+
+      {!isLoading && supervisors.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <MdSupervisorAccount className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No supervisors yet</h3>
-          <p className="text-gray-500 mb-4">Get started by adding your first supervisor.</p>
-          <Link
-            href="/farm-supervisors/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <MdAdd className="w-5 h-5" />
-            Add Supervisor
-          </Link>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No supervisors found</h3>
+          <p className="text-gray-500 mb-4">There are no users with the supervisor role.</p>
         </div>
-      ) : (
+      )}
+
+      {supervisors.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -110,10 +92,7 @@ export default function FarmsSupervisorsPage() {
                     Phone
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Zone
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Employee ID
+                    Account No.
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -121,54 +100,63 @@ export default function FarmsSupervisorsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSupervisors.map((supervisor: any) => (
-                  <tr key={supervisor.id} className="hover:bg-gray-50">
+                {supervisors.map((sup) => (
+                  <tr key={sup.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{supervisor.name}</div>
+                      <div className="text-sm font-medium text-gray-900">{sup.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{supervisor.email || "-"}</div>
+                      <div className="text-sm text-gray-500">{sup.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{supervisor.phone || "-"}</div>
+                      <div className="text-sm text-gray-500">{sup.phone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{supervisor.zone?.name || "-"}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{supervisor.employee_id || "-"}</div>
+                      <div className="text-sm text-gray-500">{sup.account_number || "—"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/farm-supervisors/${supervisor.id}`}
-                          className="text-blue-600 hover:text-blue-800 transition-colors"
-                          title="View Details"
-                        >
-                          <MdVisibility className="w-5 h-5" />
-                        </Link>
-                        <Link
-                          href={`/farm-supervisors/${supervisor.id}/edit`}
-                          className="text-green-600 hover:text-green-800 transition-colors"
-                          title="Edit Supervisor"
-                        >
-                          <MdEdit className="w-5 h-5" />
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(supervisor.id, supervisor.name)}
-                          disabled={deleteUser.isPending}
-                          className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50"
-                          title="Delete Supervisor"
-                        >
-                          <MdDelete className="w-5 h-5" />
-                        </button>
-                      </div>
+                      <ActionMenu menuId={`supervisor-${sup.id}`}>
+                        <ActionMenu.Trigger />
+                        <ActionMenu.Content>
+                          <ActionMenu.Item
+                            onClick={() => router.push(`/hris/users/${sup.id}`)}
+                          >
+                            <FiEye className="h-4 w-4" />
+                            View
+                          </ActionMenu.Item>
+                        </ActionMenu.Content>
+                      </ActionMenu>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {pagination && pagination.total_pages > 1 && (
+            <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                Page {pagination.current_page} of {pagination.total_pages} (
+                {pagination.total_items} items)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={pagination.current_page <= 1}
+                  className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!pagination.next_page}
+                  className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

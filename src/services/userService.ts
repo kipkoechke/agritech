@@ -1,51 +1,79 @@
-// services/userService.ts
 import axiosInstance from "@/lib/axios";
-import type { 
-  User, 
-  CreateUserData, 
-  UpdateUserData, 
-  UserFilters,
-  UsersResponse,
-  UserResponse,
-  UserRole
-} from "@/types/user";
+import type { User, CreateUserData, UpdateUserData } from "@/types/user";
+import type {
+  HrisUsersResponse,
+  HrisUserResponse,
+  CreateHrisUserData,
+  UpdateHrisUserData,
+} from "@/types/hrisUser";
 
-export const getUsers = async (params?: UserFilters): Promise<UsersResponse> => {
-  const response = await axiosInstance.get<UsersResponse>("/users", { 
-    params: {
-      page: params?.page,
-      per_page: params?.per_page,
-      search: params?.search,
-      role: params?.role,
-      supervisor_id: params?.supervisor_id,
-      sort_by: params?.sort_by,
-      sort_order: params?.sort_order,
-    }
+export interface HrisUsersParams {
+  page?: number;
+  per_page?: number;
+  supervisor_id?: string;
+  role?: string;
+  search?: string;
+  sort_by?: string;
+  sort_order?: string;
+}
+
+export const getUsers = async (): Promise<User[]> => {
+  const response = await axiosInstance.get<{ data: User[] }>("/users");
+  return response.data.data;
+};
+
+export const getHrisUsers = async (
+  params: HrisUsersParams = {},
+): Promise<HrisUsersResponse> => {
+  const response = await axiosInstance.get<HrisUsersResponse>("/users", {
+    params,
   });
   return response.data;
 };
 
-export const getUser = async (id: string): Promise<UserResponse> => {
-  const response = await axiosInstance.get<UserResponse>(`/users/${id}`);
+export const getUser = async (id: string): Promise<User> => {
+  const response = await axiosInstance.get<{ data: User }>(`/users/${id}`);
+  return response.data.data;
+};
+
+export const getHrisUser = async (id: string): Promise<HrisUserResponse> => {
+  const response = await axiosInstance.get<HrisUserResponse>(`/users/${id}`);
   return response.data;
 };
 
-export const createUser = async (data: CreateUserData): Promise<UserResponse> => {
-  const response = await axiosInstance.post<UserResponse>("/users", data);
+export const createUser = async (data: CreateUserData): Promise<User> => {
+  const response = await axiosInstance.post<{ data: User }>("/users", data);
+  return response.data.data;
+};
+
+export const createHrisUser = async (
+  data: CreateHrisUserData,
+): Promise<HrisUserResponse> => {
+  const response = await axiosInstance.post<HrisUserResponse>("/users", data);
   return response.data;
 };
 
-export const updateUser = async (id: string, data: UpdateUserData): Promise<UserResponse> => {
-  const response = await axiosInstance.put<UserResponse>(`/users/${id}`, data);
+export const updateUser = async (id: string, data: UpdateUserData): Promise<User> => {
+  const response = await axiosInstance.put<{ data: User }>(`/users/${id}`, data);
+  return response.data.data;
+};
+
+export const updateHrisUser = async (
+  id: string,
+  data: UpdateHrisUserData,
+): Promise<HrisUserResponse> => {
+  const response = await axiosInstance.patch<HrisUserResponse>(
+    `/users/${id}`,
+    data,
+  );
   return response.data;
 };
 
-export const deleteUser = async (id: string): Promise<{ message: string }> => {
-  const response = await axiosInstance.delete<{ message: string }>(`/users/${id}`);
-  return response.data;
+export const deleteUser = async (id: string): Promise<void> => {
+  await axiosInstance.delete(`/users/${id}`);
 };
 
-export const getUserRoles = async (): Promise<UserRole[]> => {
-  const response = await axiosInstance.get<{ data: UserRole[] }>("/users/roles");
+export const getUserRoles = async (): Promise<{ id: string; name: string }[]> => {
+  const response = await axiosInstance.get<{ data: { id: string; name: string }[] }>("/users/roles");
   return response.data.data;
 };

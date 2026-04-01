@@ -1,63 +1,41 @@
-// app/farm-supervisors/new/page.tsx (Fixed)
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MdArrowBack, MdSave } from "react-icons/md";
-import { useCreateUser } from "@/hooks/useUser";
-import { useZones } from "@/hooks/useZone";
-import Button from "@/components/common/Button";
+import { useForm } from "react-hook-form";
+import { MdArrowBack, MdSupervisorAccount } from "react-icons/md";
 import { InputField } from "@/components/common/InputField";
+import Button from "@/components/common/Button";
+import { useCreateHrisUser } from "@/hooks/useHrisUser";
+import type { CreateHrisUserData } from "@/types/hrisUser";
+
+interface SupervisorFormData {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+}
 
 export default function NewSupervisorPage() {
   const router = useRouter();
-  const createUser = useCreateUser();
-  const { data: zones, isLoading: zonesLoading } = useZones();
-  
-  const zonesList = zones || [];
+  const createUser = useCreateHrisUser();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    national_id: "",
-    employee_id: "",
-    zone_id: "",
-    role: "farm_supervisor" as const,
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SupervisorFormData>({
+    defaultValues: { name: "", email: "", password: "", phone: "" },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name.trim()) {
-      alert("Please enter supervisor name");
-      return;
-    }
-
-    if (!formData.email.trim()) {
-      alert("Please enter email");
-      return;
-    }
-
-    if (!formData.password || formData.password.length < 6) {
-      alert("Password must be at least 6 characters");
-      return;
-    }
-
-    try {
-      await createUser.mutateAsync(formData);
-      router.push("/farm-supervisors");
-    } catch (error: any) {
-      console.error("Error creating supervisor:", error);
-      alert(error.message || "Failed to create supervisor");
-    }
+  const onSubmit = (data: SupervisorFormData) => {
+    const payload: CreateHrisUserData = {
+      ...data,
+      role: "supervisor",
+    };
+    createUser.mutate(payload, {
+      onSuccess: () => router.push("/farm-supervisors"),
+    });
   };
 
   return (
@@ -65,113 +43,84 @@ export default function NewSupervisorPage() {
       <div className="mb-6">
         <Link
           href="/farm-supervisors"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <MdArrowBack className="w-5 h-5" />
-          Back to Supervisors
+          Back to Farm Supervisors
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Add New Farm Supervisor</h1>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <InputField
-            label="Full Name *"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            placeholder="Enter supervisor's full name"
-          />
-
-          <InputField
-            label="Email *"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            placeholder="supervisor@example.com"
-          />
-
-          <InputField
-            label="Password *"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            placeholder="Minimum 6 characters"
-          />
-
-          <InputField
-            label="Phone Number"
-            name="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="e.g., 0712345678"
-          />
-
-          <InputField
-            label="National ID"
-            name="national_id"
-            value={formData.national_id}
-            onChange={handleChange}
-            placeholder="National ID number"
-          />
-
-          <InputField
-            label="Employee ID"
-            name="employee_id"
-            value={formData.employee_id}
-            onChange={handleChange}
-            placeholder="Employee ID (optional)"
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Zone
-            </label>
-            <select
-              name="zone_id"
-              value={formData.zone_id}
-              onChange={handleChange}
-              disabled={zonesLoading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select a zone</option>
-              {zonesList.map((zone: any) => (
-                <option key={zone.id} value={zone.id}>
-                  {zone.name}
-                </option>
-              ))}
-            </select>
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <MdSupervisorAccount className="w-6 h-6 text-emerald-600" />
+              Add New Supervisor
+            </h1>
+            <p className="text-gray-500 mt-1">Register a new farm supervisor in the system</p>
           </div>
 
-          <div className="flex gap-4 pt-4">
-            <Button 
-              type="primary" 
-              htmlType="submit" 
-              disabled={createUser.isPending}
-            >
-              {createUser.isPending ? (
-                "Creating..."
-              ) : (
-                <>
-                  <MdSave className="w-5 h-5" />
-                  Create Supervisor
-                </>
-              )}
-            </Button>
-            <Link
-              href="/farm-supervisors"
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+            <InputField
+              label="Name"
+              placeholder="Full name"
+              register={register("name", { required: "Name is required" })}
+              error={errors.name?.message}
+              required
+            />
+
+            <InputField
+              label="Email"
+              type="email"
+              placeholder="supervisor@example.com"
+              register={register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Invalid email address",
+                },
+              })}
+              error={errors.email?.message}
+              required
+            />
+
+            <InputField
+              label="Password"
+              type="password"
+              placeholder="Enter password"
+              register={register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              })}
+              error={errors.password?.message}
+              required
+            />
+
+            <InputField
+              label="Phone"
+              placeholder="e.g. 0700000000"
+              register={register("phone", { required: "Phone is required" })}
+              error={errors.phone?.message}
+              required
+            />
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <Button type="secondary" to="/farm-supervisors">
+                Cancel
+              </Button>
+              <button
+                type="submit"
+                disabled={createUser.isPending}
+                className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {createUser.isPending ? "Creating..." : "Create Supervisor"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

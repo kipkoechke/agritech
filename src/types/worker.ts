@@ -1,13 +1,15 @@
+export interface WorkerRef {
+  id: string;
+  name: string;
+}
+
 export interface Worker {
   id: string;
   name: string;
   phone: string;
-  pin: string;
-  zone_id: string;
-  zone?: {
-    id: string;
-    name: string;
-  };
+  zone?: WorkerRef;
+  factory?: WorkerRef;
+  cluster?: WorkerRef;
   created_at?: string;
   updated_at?: string;
 }
@@ -16,22 +18,29 @@ export interface CreateWorkerData {
   name: string;
   phone: string;
   pin: string;
-  zone_id: string;
 }
 
 export interface UpdateWorkerData {
   name?: string;
   phone?: string;
   pin?: string;
-  zone_id?: string;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  pagination?: {
-    current_page: number;
-    per_page: number;
-    first_page: number;
-  };
+export interface WorkerPagination {
+  current_page: number;
+  next_page: number | null;
+  per_page: number;
+  first_page: number;
+  last_page: number;
+  total_pages: number;
+  total_items: number;
+}
+
+export interface WorkersResponse {
+  data: Worker[];
+  pagination: WorkerPagination;
+}
+
+export interface WorkerResponse {
+  data: Worker;
 }

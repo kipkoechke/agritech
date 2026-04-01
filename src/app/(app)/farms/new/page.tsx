@@ -1,335 +1,215 @@
-// app/farms/new/page.tsx (Fixed with Farmer Users)
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useForm } from "react-hook-form";
 import { MdAgriculture, MdArrowBack } from "react-icons/md";
+import { InputField } from "@/components/common/InputField";
+import { SearchableSelect } from "@/components/common/SearchableSelect";
+import Button from "@/components/common/Button";
 import { useCreateFarm } from "@/hooks/useFarm";
 import { useZones } from "@/hooks/useZone";
 import { useProducts } from "@/hooks/useProduct";
-import { useUsers } from "@/hooks/useUser";
+import { useHrisUsers } from "@/hooks/useHrisUser";
 import type { CreateFarmData } from "@/types/farm";
 import "leaflet/dist/leaflet.css";
 
-// Dynamic imports for Leaflet
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
+  { ssr: false },
 );
 const TileLayer = dynamic(
   () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
+  { ssr: false },
 );
 const Marker = dynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
+  { ssr: false },
 );
 
-// Location marker component
-function LocationMarker({ 
-  position, 
-  onLocationSelect 
-}: { 
-  position: { lat: number; lng: number } | null;
-  onLocationSelect: (coords: { lat: number; lng: number }) => void;
-}) {
-  const { useMapEvents } = require("react-leaflet");
-  
-  useMapEvents({
-    click(e: any) {
-      onLocationSelect({ lat: e.latlng.lat, lng: e.latlng.lng });
-    },
-  });
+import { useMapEvents } from "react-leaflet";
 
-  return position ? <Marker position={position} /> : null;
+interface FarmFormData {
+  name: string;
+  size: string;
 }
 
 export default function NewFarmPage() {
   const router = useRouter();
   const createFarm = useCreateFarm();
-  const { data: zones, isLoading: zonesLoading } = useZones();
-  const { data: productsResponse, isLoading: productsLoading } = useProducts();
-  const { data: usersResponse, isLoading: usersLoading } = useUsers({ 
-    role: "farmer",
-    per_page: 100 
+  const { data: zonesData, isLoading: zonesLoading } = useZones();
+  const { data: productsData, isLoading: productsLoading } = useProducts();
+  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({ role: "farmer" });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FarmFormData>({
+    defaultValues: { name: "", size: "" },
   });
 
-  const products = productsResponse?.data || [];
-  const zonesList = zones || [];
-  const farmers = usersResponse?.data || [];
+  const [zoneId, setZoneId] = useState("");
+  const [productId, setProductId] = useState("");
+  const [ownerId, setOwnerId] = useState("");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    size: 0,
-    zone_id: "",
-    product_id: "",
-    owner_id: "",
-  });
+  const zoneOptions = Array.isArray(zonesData)
+    ? zonesData.map((z: { id: string; name: string }) => ({
+        value: z.id,
+        label: z.name,
+      }))
+    : [];
 
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const productOptions =
+    productsData?.data?.map((p) => ({ value: p.id, label: p.name })) || [];
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "size" ? parseFloat(value) || 0 : value,
-    }));
-  };
+  const farmerOptions =
+    farmersData?.data?.map((u) => ({ value: u.id, label: u.name, description: u.phone })) || [];
 
-  const handleLocationSelect = (coords: { lat: number; lng: number }) => {
-    setCoordinates(coords);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validation
-    if (!formData.name.trim()) {
-      alert("Please enter farm name");
-      return;
-    }
-
-    if (formData.size <= 0) {
-      alert("Please enter a valid farm size");
-      return;
-    }
-
-    if (!formData.zone_id) {
-      alert("Please select a zone");
-      return;
-    }
-
-    if (!formData.product_id) {
-      alert("Please select a product");
-      return;
-    }
-
-    if (!formData.owner_id) {
-      alert("Please select an owner");
-      return;
-    }
-
-    if (!coordinates) {
+  const onSubmit = (data: FarmFormData) => {
+    if (!coords) {
       alert("Please pick coordinates on the map");
       return;
     }
 
-    // Prepare data for API - exactly matching the required format
-    const data: CreateFarmData = {
-      name: formData.name,
-      size: formData.size,
-      zone_id: formData.zone_id,
-      product_id: formData.product_id,
-      owner_id: formData.owner_id,
-      coordinates: {
-        lat: coordinates.lat,
-        lng: coordinates.lng
-      }
+    const payload: CreateFarmData = {
+      name: data.name,
+      size: parseFloat(data.size) || 0,
+      coordinates: coords,
+      zone_id: zoneId,
+      product_id: productId,
     };
-
-    try {
-      await createFarm.mutateAsync(data);
-      router.push("/farms");
-    } catch (error: any) {
-      console.error("Error creating farm:", error);
-      alert(error.message || "Failed to create farm");
+    if (ownerId) {
+      payload.owner_id = ownerId;
     }
+
+    createFarm.mutate(payload, {
+      onSuccess: () => router.push("/farms"),
+    });
   };
 
+  function LocationMarker() {
+    useMapEvents({
+      click(e) {
+        setCoords(e.latlng);
+      },
+    });
+    return coords ? <Marker position={coords} /> : null;
+  }
+
   return (
-    <div className="min-h-screen p-4 bg-gray-50">
+    <div className="min-h-screen p-4">
       <div className="mb-6">
         <Link
           href="/farms"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <MdArrowBack className="w-5 h-5" />
           Back to Farms
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <MdAgriculture className="w-6 h-6 text-primary" />
-          Add New Farm
-        </h1>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Farm Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Farm Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <MdAgriculture className="w-6 h-6 text-emerald-600" />
+              Add New Farm
+            </h1>
+            <p className="text-gray-500 mt-1">Create a new farm</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+            <InputField
+              label="Farm Name"
               placeholder="Enter farm name"
+              register={register("name", { required: "Name is required" })}
+              error={errors.name?.message}
+              required
             />
-          </div>
 
-          {/* Farm Size */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Size (Hectares) *
-            </label>
-            <input
+            <InputField
+              label="Size (Ha)"
               type="number"
-              name="size"
-              value={formData.size || ""}
-              onChange={handleChange}
-              required
-              min="0.01"
-              step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="Enter farm size"
+              register={register("size", { required: "Size is required" })}
+              error={errors.size?.message}
+              required
             />
-          </div>
 
-          {/* Zone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Zone *
-            </label>
-            <select
-              name="zone_id"
-              value={formData.zone_id}
-              onChange={handleChange}
-              disabled={zonesLoading}
+            <SearchableSelect
+              label="Zone"
+              options={zoneOptions}
+              value={zoneId}
+              onChange={setZoneId}
+              placeholder="Select a zone"
+              isLoading={zonesLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select a zone</option>
-              {zonesList.map((zone: any) => (
-                <option key={zone.id} value={zone.id}>
-                  {zone.name}
-                </option>
-              ))}
-            </select>
-            {zonesLoading && (
-              <p className="text-xs text-gray-500 mt-1">Loading zones...</p>
-            )}
-            {!zonesLoading && zonesList.length === 0 && (
-              <p className="text-xs text-red-500 mt-1">
-                No zones available. Please create a zone first.
-              </p>
-            )}
-          </div>
+            />
 
-          {/* Product */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product *
-            </label>
-            <select
-              name="product_id"
-              value={formData.product_id}
-              onChange={handleChange}
-              disabled={productsLoading}
+            <SearchableSelect
+              label="Product"
+              options={productOptions}
+              value={productId}
+              onChange={setProductId}
+              placeholder="Select a product"
+              isLoading={productsLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select a product</option>
-              {products.map((product: any) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-            {productsLoading && (
-              <p className="text-xs text-gray-500 mt-1">Loading products...</p>
-            )}
-            {!productsLoading && products.length === 0 && (
-              <p className="text-xs text-red-500 mt-1">
-                No products available. Please create a product first.
-              </p>
-            )}
-          </div>
+            />
 
-          {/* Owner - Farmer Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Owner (Farmer) *
-            </label>
-            <select
-              name="owner_id"
-              value={formData.owner_id}
-              onChange={handleChange}
-              disabled={usersLoading}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select a farmer</option>
-              {farmers.map((farmer: any) => (
-                <option key={farmer.id} value={farmer.id}>
-                  {farmer.name} {farmer.email ? `(${farmer.email})` : ""}
-                </option>
-              ))}
-            </select>
-            {usersLoading && (
-              <p className="text-xs text-gray-500 mt-1">Loading farmers...</p>
-            )}
-            {!usersLoading && farmers.length === 0 && (
-              <p className="text-xs text-red-500 mt-1">
-                No farmers available. Please create a farmer user first.
-              </p>
-            )}
-          </div>
+            <SearchableSelect
+              label="Owner (Farmer)"
+              options={farmerOptions}
+              value={ownerId}
+              onChange={setOwnerId}
+              placeholder="Select farm owner"
+              isLoading={farmersLoading}
+            />
 
-          {/* Map for picking coordinates */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Farm Location *
-            </label>
-            <div className="h-64 w-full border rounded-md overflow-hidden bg-gray-100">
-              <MapContainer
-                center={[-1.2921, 36.8219]}
-                zoom={13}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <LocationMarker
-                  position={coordinates}
-                  onLocationSelect={handleLocationSelect}
-                />
-              </MapContainer>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pick Coordinates <span className="text-red-500">*</span>
+              </label>
+              <div className="h-72 w-full border border-gray-300 rounded-lg overflow-hidden">
+                <MapContainer
+                  center={[0.0236, 37.9062]}
+                  zoom={6}
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <LocationMarker />
+                </MapContainer>
+              </div>
+              {coords && (
+                <p className="mt-2 text-sm text-gray-600">
+                  Selected: Lat {coords.lat.toFixed(5)}, Lng{" "}
+                  {coords.lng.toFixed(5)}
+                </p>
+              )}
+              {!coords && (
+                <p className="mt-2 text-sm text-gray-500">
+                  Click on the map to pick coordinates
+                </p>
+              )}
             </div>
-            {coordinates && (
-              <p className="mt-2 text-sm text-gray-700">
-                Selected location: {coordinates.lat.toFixed(5)}° N,{" "}
-                {coordinates.lng.toFixed(5)}° E
-              </p>
-            )}
-            {!coordinates && (
-              <p className="mt-2 text-xs text-gray-500">
-                Click on the map to select farm location
-              </p>
-            )}
-          </div>
 
-          {/* Buttons */}
-          <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={createFarm.isPending}
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              {createFarm.isPending ? "Creating..." : "Create Farm"}
-            </button>
-            <Link
-              href="/farms"
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+              <Button type="secondary" to="/farms">
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={createFarm.isPending}
+              >
+                {createFarm.isPending ? "Creating..." : "Create Farm"}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

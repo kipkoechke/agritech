@@ -12,6 +12,9 @@ import {
   MdSupervisorAccount,
   MdPerson,
   MdDesignServices,
+  MdGroup,
+  MdSchedule,
+  MdBookOnline,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -51,11 +54,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         visibleTo: ["admin", "farmer"],
       },
       {
-        name: "Farmers",
-        icon: MdPerson,
-        href: "/farmers",
-        active: pathname.startsWith("/farmers"),
-        visibleTo: ["admin"],
+        name: "Farm Workers",
+        icon: MdPeople,
+        href: "/farm-workers",
+        active: pathname.startsWith("/farm-workers"),
+        visibleTo: ["admin", "supervisor"],
       },
       {
         name: "Farm Supervisors",
@@ -65,29 +68,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         visibleTo: ["admin", "farmer"],
       },
       {
-        name: "Farm Workers",
-        icon: MdPeople,
-        href: "/farm-workers",
-        active: pathname.startsWith("/farm-workers"),
-        visibleTo: ["admin", "supervisor"],
-      },    
+        name: "Farmers",
+        icon: MdPerson,
+        href: "/farmers",
+        active: pathname.startsWith("/farmers"),
+        visibleTo: ["admin"],
+      },
       {
         name: "Factory",
         icon: MdFactory,
-        href: "/factory",
-        active: pathname.startsWith("/factory"),
+        href: "/factories",
+        active: pathname.startsWith("/factories"),
         visibleTo: ["admin", "farmer"],
       },
       {
-        name: "Factory Clerks",
-        icon: MdFactory,
-        href: "/clerks",
-        active: pathname.startsWith("/clerks"),
+        name: "Schedules",
+        icon: MdSchedule,
+        href: "/schedules",
+        active: pathname.startsWith("/schedules"),
         visibleTo: ["admin", "farmer"],
       },
-
       {
-        name: "Collection Centers",
+        name: "Bookings",
+        icon: MdBookOnline,
+        href: "/bookings",
+        active: pathname.startsWith("/bookings"),
+        visibleTo: ["admin", "farmer"],
+      },
+      {
+        name: "Weighing Points",
         icon: MdScale,
         href: "/weighing-points",
         active: pathname.startsWith("/weighing-points"),
@@ -100,13 +109,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname === "/farm-map",
         visibleTo: ["admin", "supervisor"],
       },
-      // {
-      //   name: "My Services",
-      //   icon: MdDesignServices,
-      //   href: "/my-services",
-      //   active: pathname.startsWith("/my-services"),
-      //   visibleTo: ["admin", "farmer", "supervisor", "plucker"],
-      // },
+      {
+        name: "My Services",
+        icon: MdDesignServices,
+        href: "/my-services",
+        active: pathname.startsWith("/my-services"),
+        visibleTo: ["admin", "farmer", "supervisor", "plucker"],
+      },
+      {
+        name: "HRIS",
+        icon: MdGroup,
+        href: "/hris/users",
+        active: pathname.startsWith("/hris"),
+        visibleTo: ["admin"],
+      },
     ];
 
     // Filter menu items based on user role
