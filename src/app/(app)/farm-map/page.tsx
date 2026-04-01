@@ -52,16 +52,16 @@ import React from "react";
 
 // Dummy farm data
 const FARMS_DATA = [
-  { id: "F001", name: "Highland Farm", owner: "John Doe", size: 12, zone: "Highland", lat: -1.2921, lng: 36.8219, totalKilos: 450, supervisor: "Kiprotich", factory: "Momul Tea Factory", rating: 4.8 },
-  { id: "F002", name: "Lowland Farm", owner: "Jane Smith", size: 8, zone: "Lowland", lat: -1.3000, lng: 36.8200, totalKilos: 320, supervisor: "Langat", factory: "Tegat Tea Factory", rating: 4.2 },
-  { id: "F003", name: "Midland Farm", owner: "Peter Mwangi", size: 15, zone: "Midland", lat: -1.2950, lng: 36.8250, totalKilos: 580, supervisor: "Kipkemboi", factory: "Toror Tea Factory", rating: 4.9 },
-  { id: "F004", name: "Riverside Farm", owner: "Alice Wanjiku", size: 20, zone: "Lowland", lat: -1.2880, lng: 36.8300, totalKilos: 280, supervisor: "Cherono", factory: "Litein Tea Factory", rating: 3.9 },
-  { id: "F005", name: "Sunset Farm", owner: "Michael Kariuki", size: 10, zone: "Highland", lat: -1.2980, lng: 36.8100, totalKilos: 620, supervisor: "Koech", factory: "Chelal Tea Factory", rating: 5.0 },
-  { id: "F006", name: "Valley Farm", owner: "Grace Njeri", size: 18, zone: "Midland", lat: -1.2935, lng: 36.8280, totalKilos: 490, supervisor: "Mutai", factory: "Kipkoimet Tea Factory", rating: 4.6 },
-  { id: "F007", name: "Forest Farm", owner: "David Otieno", size: 14, zone: "Highland", lat: -1.2900, lng: 36.8150, totalKilos: 380, supervisor: "Bett", factory: "Chemomi Tea Factory", rating: 4.3 },
-  { id: "F008", name: "Meadow Farm", owner: "Lilian Achieng", size: 9, zone: "Lowland", lat: -1.2960, lng: 36.8180, totalKilos: 290, supervisor: "Kiplagat", factory: "Kapsumbeiwa Tea Factory", rating: 4.0 },
-  { id: "F009", name: "Hilltop Farm", owner: "Kevin Mworia", size: 11, zone: "Highland", lat: -1.2890, lng: 36.8230, totalKilos: 350, supervisor: "Rono", factory: "Sotik Tea Factory", rating: 4.1 },
-  { id: "F010", name: "Lakeside Farm", owner: "Sarah Wambui", size: 16, zone: "Midland", lat: -1.2975, lng: 36.8275, totalKilos: 420, supervisor: "Korir", factory: "Kapsuser Tea Factory", rating: 4.4 },
+  { id: "F001", name: "Highland Farm", farmer: "John Doe", size: 12, zone: "Highland", lat: -1.2921, lng: 36.8219, totalKilos: 450, supervisor: "Kiprotich", factory: "Momul Tea Factory", rating: 4.8 },
+  { id: "F002", name: "Lowland Farm", farmer: "Jane Smith", size: 8, zone: "Lowland", lat: -1.3000, lng: 36.8200, totalKilos: 320, supervisor: "Langat", factory: "Tegat Tea Factory", rating: 4.2 },
+  { id: "F003", name: "Midland Farm", farmer: "Peter Mwangi", size: 15, zone: "Midland", lat: -1.2950, lng: 36.8250, totalKilos: 580, supervisor: "Kipkemboi", factory: "Toror Tea Factory", rating: 4.9 },
+  { id: "F004", name: "Riverside Farm", farmer: "Alice Wanjiku", size: 20, zone: "Lowland", lat: -1.2880, lng: 36.8300, totalKilos: 280, supervisor: "Cherono", factory: "Litein Tea Factory", rating: 3.9 },
+  { id: "F005", name: "Sunset Farm", farmer: "Michael Kariuki", size: 10, zone: "Highland", lat: -1.2980, lng: 36.8100, totalKilos: 620, supervisor: "Koech", factory: "Chelal Tea Factory", rating: 5.0 },
+  { id: "F006", name: "Valley Farm", farmer: "Grace Njeri", size: 18, zone: "Midland", lat: -1.2935, lng: 36.8280, totalKilos: 490, supervisor: "Mutai", factory: "Kipkoimet Tea Factory", rating: 4.6 },
+  { id: "F007", name: "Forest Farm", farmer: "David Otieno", size: 14, zone: "Highland", lat: -1.2900, lng: 36.8150, totalKilos: 380, supervisor: "Bett", factory: "Chemomi Tea Factory", rating: 4.3 },
+  { id: "F008", name: "Meadow Farm", farmer: "Lilian Achieng", size: 9, zone: "Lowland", lat: -1.2960, lng: 36.8180, totalKilos: 290, supervisor: "Kiplagat", factory: "Kapsumbeiwa Tea Factory", rating: 4.0 },
+  { id: "F009", name: "Hilltop Farm", farmer: "Kevin Mworia", size: 11, zone: "Highland", lat: -1.2890, lng: 36.8230, totalKilos: 350, supervisor: "Rono", factory: "Sotik Tea Factory", rating: 4.1 },
+  { id: "F010", name: "Lakeside Farm", farmer: "Sarah Wambui", size: 16, zone: "Midland", lat: -1.2975, lng: 36.8275, totalKilos: 420, supervisor: "Korir", factory: "Kapsuser Tea Factory", rating: 4.4 },
 ];
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
@@ -386,7 +386,7 @@ export default function FarmMapPage() {
                     <Popup>
                       <div className="text-sm">
                         <p className="font-bold text-gray-900">{farm.name}</p>
-                        <p className="text-gray-600">Owner: {farm.owner}</p>
+                        <p className="text-gray-600">Farmer: {farm.farmer}</p>
                         <p className="text-gray-600">Zone: {farm.zone}</p>
                         <p className="text-gray-600">Factory: {farm.factory}</p>
                         <p className="text-gray-600">Supervisor: {farm.supervisor}</p>

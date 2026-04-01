@@ -50,9 +50,9 @@ function hasRouteAccess(role: string, pathname: string): boolean {
 
   // Role-specific route restrictions
   const restrictedPaths: Record<string, string[]> = {
-    farmer: ["/farms", "/farm-workers", "/farm-supervisors", "/farmers", "/factory", "/weighing-points", "/farm-map"],
-    supervisor: ["/farms", "/farmers", "/factory"],
-    plucker: ["/farms", "/farm-workers", "/farm-supervisors", "/farmers", "/factory", "/weighing-points", "/farm-map", "/orders", "/products"],
+    farmer: ["/farm-workers", "/farmers", "/farm-map", "/hris"],
+    supervisor: ["/farms", "/farmers", "/factory", "/hris"],
+    plucker: ["/farms", "/farm-workers", "/farm-supervisors", "/farmers", "/factory", "/weighing-points", "/farm-map", "/orders", "/products", "/hris"],
   };
 
   const restricted = restrictedPaths[role] || [];

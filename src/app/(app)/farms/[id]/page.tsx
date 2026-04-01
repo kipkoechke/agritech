@@ -87,138 +87,120 @@ export default function FarmDetailsPage() {
           </div>
         </div>
 
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">
-                Farm Information
-              </h2>
-
-              <div className="flex items-start gap-3">
-                <MdAgriculture className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Size</p>
-                  <p className="text-gray-900 font-medium">
-                    {parseFloat(farm.size).toLocaleString()} Hectares
-                  </p>
-                </div>
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="flex items-center gap-2">
+              <MdAgriculture className="w-4 h-4 text-gray-400 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500">Size</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {parseFloat(farm.size).toLocaleString()} Ha
+                </p>
               </div>
-
-              <div className="flex items-start gap-3">
-                <MdFactory className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Zone</p>
-                  <p className="text-gray-900 font-medium">
-                    {farm.zone?.name || "Not assigned"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MdAgriculture className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Product</p>
-                  <p className="text-gray-900 font-medium">
-                    {farm.product?.name || "Not assigned"}
-                  </p>
-                </div>
-              </div>
-
-              {farm.factory && (
-                <div className="flex items-start gap-3">
-                  <MdFactory className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-500">Factory</p>
-                    <p className="text-gray-900 font-medium">
-                      {farm.factory.name} ({farm.factory.code})
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {farm.cluster && (
-                <div className="flex items-start gap-3">
-                  <MdFactory className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-500">Cluster</p>
-                    <p className="text-gray-900 font-medium">
-                      {farm.cluster.name} ({farm.cluster.code})
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {hasCoords && (
-                <div className="flex items-start gap-3">
-                  <MdLocationOn className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-500">Coordinates</p>
-                    <p className="text-gray-900 font-medium">
-                      Lat: {farm.coordinates!.latitude}, Lng:{" "}
-                      {farm.coordinates!.longitude}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">
-                People
-              </h2>
-
-              <div className="flex items-start gap-3">
-                <MdPerson className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Owner</p>
-                  <p className="text-gray-900 font-medium">
-                    {farm.owner?.name || "Not assigned"}
-                  </p>
-                </div>
+            <div className="flex items-center gap-2">
+              <MdFactory className="w-4 h-4 text-gray-400 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500">Zone</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {farm.zone?.name || "—"}
+                </p>
               </div>
-
-              <div className="flex items-start gap-3">
-                <MdPerson className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Supervisor</p>
-                  <p className="text-gray-900 font-medium">
-                    {farm.supervisor?.name || "Not assigned"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MdCalendarToday className="w-5 h-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Created At</p>
-                  <p className="text-gray-900 font-medium">
-                    {new Date(farm.created_at).toLocaleDateString()} at{" "}
-                    {new Date(farm.created_at).toLocaleTimeString()}
-                  </p>
-                </div>
-              </div>
-
-              {farm.updated_at !== farm.created_at && (
-                <div className="flex items-start gap-3">
-                  <MdCalendarToday className="w-5 h-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-500">Last Updated</p>
-                    <p className="text-gray-900 font-medium">
-                      {new Date(farm.updated_at).toLocaleDateString()} at{" "}
-                      {new Date(farm.updated_at).toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
+
+            <div className="flex items-center gap-2">
+              <MdAgriculture className="w-4 h-4 text-gray-400 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500">Product</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {farm.product?.name || "—"}
+                </p>
+              </div>
+            </div>
+
+            {farm.factory && (
+              <div className="flex items-center gap-2">
+                <MdFactory className="w-4 h-4 text-gray-400 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">Factory</p>
+                  <p className="text-sm text-gray-900 font-medium">
+                    {farm.factory.name}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {farm.cluster && (
+              <div className="flex items-center gap-2">
+                <MdFactory className="w-4 h-4 text-gray-400 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">Cluster</p>
+                  <p className="text-sm text-gray-900 font-medium">
+                    {farm.cluster.name}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <MdPerson className="w-4 h-4 text-gray-400 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500">Farmer</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {farm.farmer?.name || "—"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <MdPerson className="w-4 h-4 text-gray-400 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500">Supervisor</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {farm.supervisor?.name || "—"}
+                </p>
+              </div>
+            </div>
+
+            {hasCoords && (
+              <div className="flex items-center gap-2">
+                <MdLocationOn className="w-4 h-4 text-gray-400 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">Coordinates</p>
+                  <p className="text-sm text-gray-900 font-medium">
+                    {farm.coordinates!.latitude}, {farm.coordinates!.longitude}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <MdCalendarToday className="w-4 h-4 text-gray-400 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-500">Created</p>
+                <p className="text-sm text-gray-900 font-medium">
+                  {new Date(farm.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            {farm.updated_at !== farm.created_at && (
+              <div className="flex items-center gap-2">
+                <MdCalendarToday className="w-4 h-4 text-gray-400 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">Updated</p>
+                  <p className="text-sm text-gray-900 font-medium">
+                    {new Date(farm.updated_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {hasCoords && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">
-                Location Map
-              </h2>
-              <div className="h-[400px] rounded-lg overflow-hidden border border-gray-200">
+            <div className="mt-4">
+              <div className="h-[350px] rounded-lg overflow-hidden border border-gray-200">
                 <MapContainer
                   center={[
                     Number(farm.coordinates!.latitude),

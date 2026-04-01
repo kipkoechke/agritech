@@ -86,14 +86,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdSchedule,
         href: "/schedules",
         active: pathname.startsWith("/schedules"),
-        visibleTo: ["admin", "farmer"],
+        visibleTo: ["admin", "farmer", "supervisor"],
       },
       {
         name: "Bookings",
         icon: MdBookOnline,
         href: "/bookings",
         active: pathname.startsWith("/bookings"),
-        visibleTo: ["admin", "farmer"],
+        visibleTo: ["admin", "farmer", "supervisor"],
       },
       {
         name: "Weighing Points",

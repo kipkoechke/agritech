@@ -45,7 +45,9 @@ export default function EditFarmPage() {
   const updateFarm = useUpdateFarm();
   const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: productsData, isLoading: productsLoading } = useProducts();
-  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({ role: "farmer" });
+  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
+    role: "farmer",
+  });
 
   const farm = farmResponse?.data;
 
@@ -54,9 +56,7 @@ export default function EditFarmPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FarmFormData>({
-    values: farm
-      ? { name: farm.name, size: String(farm.size) }
-      : undefined,
+    values: farm ? { name: farm.name, size: String(farm.size) } : undefined,
   });
 
   const [zoneId, setZoneId] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export default function EditFarmPage() {
 
   const zoneValue = zoneId ?? (farm?.zone?.id || "");
   const productValue = productId ?? (farm?.product?.id || "");
-  const ownerValue = ownerId ?? (farm?.owner?.id || "");
+  const ownerValue = ownerId ?? (farm?.farmer?.id || "");
 
   const existingCoords =
     farm?.coordinates?.latitude && farm?.coordinates?.longitude
@@ -90,7 +90,11 @@ export default function EditFarmPage() {
     productsData?.data?.map((p) => ({ value: p.id, label: p.name })) || [];
 
   const farmerOptions =
-    farmersData?.data?.map((u) => ({ value: u.id, label: u.name, description: u.phone })) || [];
+    farmersData?.data?.map((u) => ({
+      value: u.id,
+      label: u.name,
+      description: u.phone,
+    })) || [];
 
   const onSubmit = (data: FarmFormData) => {
     const payload: UpdateFarmData = {

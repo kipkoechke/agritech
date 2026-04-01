@@ -19,7 +19,7 @@ export interface Farm {
   factory?: FarmRef & { code: string };
   cluster?: FarmRef & { code: string };
   product?: FarmRef;
-  owner?: FarmRef;
+  farmer?: FarmRef;
   supervisor?: FarmRef;
   created_at: string;
   updated_at: string;

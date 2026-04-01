@@ -41,7 +41,9 @@ export default function NewFarmPage() {
   const createFarm = useCreateFarm();
   const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: productsData, isLoading: productsLoading } = useProducts();
-  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({ role: "farmer" });
+  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
+    role: "farmer",
+  });
 
   const {
     register,
@@ -54,7 +56,9 @@ export default function NewFarmPage() {
   const [zoneId, setZoneId] = useState("");
   const [productId, setProductId] = useState("");
   const [ownerId, setOwnerId] = useState("");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
 
   const zoneOptions = Array.isArray(zonesData)
     ? zonesData.map((z: { id: string; name: string }) => ({
@@ -67,7 +71,11 @@ export default function NewFarmPage() {
     productsData?.data?.map((p) => ({ value: p.id, label: p.name })) || [];
 
   const farmerOptions =
-    farmersData?.data?.map((u) => ({ value: u.id, label: u.name, description: u.phone })) || [];
+    farmersData?.data?.map((u) => ({
+      value: u.id,
+      label: u.name,
+      description: u.phone,
+    })) || [];
 
   const onSubmit = (data: FarmFormData) => {
     if (!coords) {
