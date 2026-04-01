@@ -40,7 +40,7 @@ export default function NewFactoryPage() {
   const [zoneId, setZoneId] = useState("");
   const [userId, setUserId] = useState("");
 
-  const zones = zonesData?.data || [];
+  const zones = zonesData || [];
   const users = usersData?.data || [];
 
   const zoneOptions = zones.map((z) => ({ value: z.id, label: z.name }));

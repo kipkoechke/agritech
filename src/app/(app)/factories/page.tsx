@@ -32,7 +32,7 @@ export default function FactoriesPage() {
 
   const factories = data?.data || [];
   const pagination = data?.pagination;
-  const zones = zonesData?.data || [];
+  const zones = zonesData || [];
 
   const zoneOptions = [
     { value: "", label: "All Zones" },

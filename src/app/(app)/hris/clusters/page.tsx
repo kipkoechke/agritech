@@ -37,7 +37,7 @@ export default function ClustersPage() {
 
   const clusters = data?.data || [];
   const pagination = data?.pagination;
-  const zones = zonesData?.data || [];
+  const zones = zonesData || [];
   const factories = factoriesData?.data || [];
 
   const zoneOptions = [

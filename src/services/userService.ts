@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import type { User, CreateUserData, UpdateUserData } from "@/types/user";
+import type { User, CreateUserData, UpdateUserData, UserFilters, UsersResponse } from "@/types/user";
 import type {
   HrisUsersResponse,
   HrisUserResponse,
@@ -17,9 +17,9 @@ export interface HrisUsersParams {
   sort_order?: string;
 }
 
-export const getUsers = async (): Promise<User[]> => {
-  const response = await axiosInstance.get<{ data: User[] }>("/users");
-  return response.data.data;
+export const getUsers = async (params?: UserFilters): Promise<UsersResponse> => {
+  const response = await axiosInstance.get<UsersResponse>("/users", { params });
+  return response.data;
 };
 
 export const getHrisUsers = async (

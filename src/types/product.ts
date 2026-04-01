@@ -42,4 +42,3 @@ export interface ProductResponse {
 export interface PriceHistoryResponse {
   data: any[];
 }
-export interface PriceHistoryResponse extends ApiResponse<PriceHistory[]> {}

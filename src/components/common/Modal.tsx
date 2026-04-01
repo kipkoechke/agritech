@@ -98,13 +98,28 @@ function Window({ children, name }: WindowProps) {
   );
 }
 
+interface CloseProps {
+  children: ReactElement;
+}
+
+function Close({ children }: CloseProps) {
+  const context = useContext(ModalContext);
+  if (!context) {
+    throw new Error("Modal.Close must be used within a Modal");
+  }
+  const { close } = context;
+  return cloneElement(children as ReactElement<any>, { onClick: close });
+}
+
 // Add types to the Modal component
 interface Modal extends React.FC<ModalProps> {
   Open: React.FC<OpenProps>;
   Window: React.FC<WindowProps>;
+  Close: React.FC<CloseProps>;
 }
 
 Modal.Open = Open;
 Modal.Window = Window;
+Modal.Close = Close;
 
 export default Modal;

@@ -55,7 +55,7 @@ export default function EditFactoryPage() {
   const zoneValue = zoneId ?? (factory?.zone?.id || "");
   const userValue = userId ?? (factory?.admin?.id || "");
 
-  const zones = zonesData?.data || [];
+  const zones = zonesData || [];
   const users = usersData?.data || [];
 
   const zoneOptions = zones.map((z) => ({ value: z.id, label: z.name }));
