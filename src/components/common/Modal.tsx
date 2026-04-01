@@ -51,7 +51,12 @@ function Open({ children, opens: opensWindowName }: OpenProps) {
   }
 
   const { open } = context;
-  return cloneElement(typedChildren, { onClick: () => open(opensWindowName) });
+  return cloneElement(typedChildren, {
+    onClick: (...args: unknown[]) => {
+      typedChildren.props.onClick?.(...args);
+      open(opensWindowName);
+    },
+  });
 }
 
 interface WindowProps {
