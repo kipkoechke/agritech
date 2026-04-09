@@ -43,9 +43,7 @@ export default function WorkGroupDetailPage() {
   const group = groupResponse?.data;
   const members = membersResponse?.data || [];
 
-  const existingMemberUserIds = new Set(
-    members.map((m) => m.farm_worker?.id),
-  );
+  const existingMemberUserIds = new Set(members.map((m) => m.farm_worker?.id));
   const availableUsers =
     workersData?.data
       ?.filter((w) => !existingMemberUserIds.has(w.id))
@@ -179,7 +177,9 @@ export default function WorkGroupDetailPage() {
                 {selectedMemberIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {selectedMemberIds.map((uid) => {
-                      const worker = workersData?.data?.find((w) => w.id === uid);
+                      const worker = workersData?.data?.find(
+                        (w) => w.id === uid,
+                      );
                       return (
                         <span
                           key={uid}
