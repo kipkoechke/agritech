@@ -35,7 +35,9 @@ export default function WorkerPaymentsPage() {
       )
     : summaries;
 
-  const totalKgs = summary?.total_kgs ?? filtered.reduce((sum, s) => sum + (s.total_kgs || 0), 0);
+  const totalKgs =
+    summary?.total_kgs ??
+    filtered.reduce((sum, s) => sum + (s.total_kgs || 0), 0);
   const totalJobs = filtered.reduce((sum, s) => sum + (s.total_jobs || 0), 0);
 
   return (
