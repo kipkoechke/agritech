@@ -1,11 +1,11 @@
 export interface WorkerPaymentSummary {
-  worker_id: string;
-  worker_name: string;
-  worker_phone: string;
-  total_kg: number;
-  rate_per_kg: number;
-  total_amount: number;
-  days_worked: number;
+  worker: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+  total_kgs: number;
+  total_jobs: number;
 }
 
 export interface WorkerPaymentSummaryParams {
@@ -15,4 +15,8 @@ export interface WorkerPaymentSummaryParams {
 
 export interface WorkerPaymentSummaryResponse {
   data: WorkerPaymentSummary[];
+  summary: {
+    total_workers: number;
+    total_kgs: number;
+  };
 }

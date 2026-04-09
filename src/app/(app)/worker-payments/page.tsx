@@ -25,20 +25,18 @@ export default function WorkerPaymentsPage() {
   });
 
   const summaries = data?.data || [];
+  const summary = data?.summary;
 
   const filtered = search
     ? summaries.filter(
         (s) =>
-          s.worker_name?.toLowerCase().includes(search.toLowerCase()) ||
-          s.worker_phone?.includes(search),
+          s.worker?.name?.toLowerCase().includes(search.toLowerCase()) ||
+          s.worker?.phone?.includes(search),
       )
     : summaries;
 
-  const totalAmount = filtered.reduce(
-    (sum, s) => sum + (s.total_amount || 0),
-    0,
-  );
-  const totalKg = filtered.reduce((sum, s) => sum + (s.total_kg || 0), 0);
+  const totalKgs = summary?.total_kgs ?? filtered.reduce((sum, s) => sum + (s.total_kgs || 0), 0);
+  const totalJobs = filtered.reduce((sum, s) => sum + (s.total_jobs || 0), 0);
 
   return (
     <div className="min-h-screen p-4 space-y-4">
@@ -100,19 +98,19 @@ export default function WorkerPaymentsPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-xs text-gray-500">Total Workers</p>
           <p className="text-lg font-semibold text-gray-900">
-            {filtered.length}
+            {summary?.total_workers ?? filtered.length}
           </p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Total Kg</p>
+          <p className="text-xs text-gray-500">Total Kgs</p>
           <p className="text-lg font-semibold text-gray-900">
-            {totalKg.toLocaleString()}
+            {totalKgs.toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Total Amount</p>
+          <p className="text-xs text-gray-500">Total Jobs</p>
           <p className="text-lg font-semibold text-emerald-600">
-            KES {totalAmount.toLocaleString()}
+            {totalJobs.toLocaleString()}
           </p>
         </div>
       </div>
@@ -154,50 +152,34 @@ export default function WorkerPaymentsPage() {
                     Phone
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Days Worked
+                    Total Kgs
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total Kg
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rate/Kg
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total Amount
+                    Total Jobs
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filtered.map((summary) => (
-                  <tr key={summary.worker_id} className="hover:bg-gray-50">
+                {filtered.map((item) => (
+                  <tr key={item.worker.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {summary.worker_name}
+                        {item.worker.name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {summary.worker_phone}
+                        {item.worker.phone}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="text-sm text-gray-900">
-                        {summary.days_worked}
+                        {item.total_kgs?.toLocaleString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="text-sm text-gray-900">
-                        {summary.total_kg?.toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="text-sm text-gray-500">
-                        {summary.rate_per_kg?.toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="text-sm font-medium text-emerald-600">
-                        KES {summary.total_amount?.toLocaleString()}
+                        {item.total_jobs}
                       </div>
                     </td>
                   </tr>
@@ -206,17 +188,16 @@ export default function WorkerPaymentsPage() {
               <tfoot className="bg-gray-50">
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={2}
                     className="px-6 py-3 text-right text-sm font-semibold text-gray-700"
                   >
                     Totals
                   </td>
                   <td className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                    {totalKg.toLocaleString()}
+                    {totalKgs.toLocaleString()}
                   </td>
-                  <td className="px-6 py-3" />
-                  <td className="px-6 py-3 text-right text-sm font-semibold text-emerald-600">
-                    KES {totalAmount.toLocaleString()}
+                  <td className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
+                    {totalJobs.toLocaleString()}
                   </td>
                 </tr>
               </tfoot>
