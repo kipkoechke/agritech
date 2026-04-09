@@ -127,7 +127,9 @@ export default function NewWorkGroupPage() {
                 htmlType="submit"
                 disabled={createWorkGroup.isPending}
               >
-                {createWorkGroup.isPending ? "Creating..." : "Create Work Group"}
+                {createWorkGroup.isPending
+                  ? "Creating..."
+                  : "Create Work Group"}
               </Button>
             </div>
           </form>

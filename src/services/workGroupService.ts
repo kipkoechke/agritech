@@ -33,9 +33,7 @@ export const getWorkGroups = async (
   return response.data;
 };
 
-export const getWorkGroup = async (
-  id: string,
-): Promise<WorkGroupResponse> => {
+export const getWorkGroup = async (id: string): Promise<WorkGroupResponse> => {
   const response = await axiosInstance.get<WorkGroupResponse>(
     `/work-groups/${id}`,
   );

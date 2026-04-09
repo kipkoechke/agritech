@@ -118,23 +118,23 @@ export default function BookingsPage() {
                       <tr key={booking.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            {booking.worker.name}
+                            {booking.worker?.name ?? "—"}
                           </div>
                           <div className="text-xs text-gray-400">
-                            {booking.worker.phone}
+                            {booking.worker?.phone ?? "—"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {booking.schedule.reference_code}
+                            {booking.schedule?.reference_code ?? "—"}
                           </div>
                           <div className="text-xs text-gray-400">
-                            {booking.schedule.activity.name}
+                            {booking.schedule?.activity?.name ?? "—"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-500">
-                            {booking.schedule.farm.name}
+                            {booking.schedule?.farm?.name ?? "—"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

@@ -43,7 +43,9 @@ export default function WorkGroupDetailPage() {
   const group = groupResponse?.data;
   const members = membersResponse?.data || [];
 
-  const existingMemberUserIds = new Set(members.map((m) => m.user?.id || m.user_id));
+  const existingMemberUserIds = new Set(
+    members.map((m) => m.user?.id || m.user_id),
+  );
   const availableUsers =
     usersData?.data
       ?.filter((u) => !existingMemberUserIds.has(u.id))
