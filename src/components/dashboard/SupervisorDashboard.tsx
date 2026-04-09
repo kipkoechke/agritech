@@ -104,8 +104,8 @@ export default function SupervisorDashboard() {
               >
                 <option value="">All Farms</option>
                 {assignedFarms.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.name}
+                  <option key={f.farm.id} value={f.farm.id}>
+                    {f.farm.name}
                   </option>
                 ))}
               </select>
@@ -120,7 +120,7 @@ export default function SupervisorDashboard() {
           <StatCard
             icon={MdAgriculture}
             label="Assigned Farms"
-            value={summary.assigned_farms}
+            value={summary.total_assigned_farms}
           />
           <StatCard
             icon={MdPeople}
@@ -181,7 +181,7 @@ export default function SupervisorDashboard() {
                         Date
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                        Schedule
+                        Activity
                       </th>
                     </tr>
                   </thead>
@@ -189,14 +189,14 @@ export default function SupervisorDashboard() {
                     {tasks.unconfirmed_attendance.map((t) => (
                       <tr key={t.booking_id}>
                         <td className="px-3 py-1.5 text-gray-900">
-                          {t.worker_name}
+                          {t.worker.name}
                         </td>
                         <td className="px-3 py-1.5 text-gray-500">
-                          {t.farm_name}
+                          {t.farm}
                         </td>
                         <td className="px-3 py-1.5 text-gray-500">{t.date}</td>
                         <td className="px-3 py-1.5 text-gray-500">
-                          {t.schedule_name}
+                          {t.activity}
                         </td>
                       </tr>
                     ))}
@@ -237,14 +237,14 @@ export default function SupervisorDashboard() {
                     {tasks.pending_quantity_capture.map((t) => (
                       <tr key={t.booking_id}>
                         <td className="px-3 py-1.5 text-gray-900">
-                          {t.worker_name}
+                          {t.worker.name}
                         </td>
                         <td className="px-3 py-1.5 text-gray-500">
-                          {t.farm_name}
+                          {t.farm}
                         </td>
                         <td className="px-3 py-1.5 text-gray-500">{t.date}</td>
                         <td className="px-3 py-1.5 text-gray-500">
-                          {t.activity_name}
+                          {t.activity}
                         </td>
                       </tr>
                     ))}
@@ -272,8 +272,8 @@ export default function SupervisorDashboard() {
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
                     Owner
                   </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Workers
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                    Zone
                   </th>
                   <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
                     Total Kgs
@@ -285,19 +285,17 @@ export default function SupervisorDashboard() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {assignedFarms.map((f) => (
-                  <tr key={f.id}>
+                  <tr key={f.farm.id}>
                     <td className="px-4 py-2 font-medium text-gray-900">
-                      {f.name}
+                      {f.farm.name}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{f.owner_name}</td>
-                    <td className="px-4 py-2 text-right text-gray-900">
-                      {f.workers}
-                    </td>
+                    <td className="px-4 py-2 text-gray-500">{f.owner}</td>
+                    <td className="px-4 py-2 text-gray-500">{f.zone}</td>
                     <td className="px-4 py-2 text-right text-emerald-600 font-medium">
                       {f.total_kgs.toLocaleString()}
                     </td>
                     <td className="px-4 py-2 text-right text-gray-900">
-                      {f.bookings}
+                      {f.total_bookings}
                     </td>
                   </tr>
                 ))}
@@ -334,9 +332,9 @@ export default function SupervisorDashboard() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="bookings"
+                  dataKey="jobs"
                   stroke="#0891b2"
-                  name="Bookings"
+                  name="Jobs"
                   strokeWidth={2}
                 />
               </LineChart>
@@ -351,14 +349,14 @@ export default function SupervisorDashboard() {
               Worker Performance
             </h3>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={charts.worker_performance}>
+              <BarChart data={charts.worker_performance.map((w) => ({ name: w.worker.name, total_kgs: w.total_kgs, total_jobs: w.total_jobs }))}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="worker_name" tick={{ fontSize: 10 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="total_kgs" fill="#059669" name="Kgs" />
-                <Bar dataKey="jobs" fill="#0891b2" name="Jobs" />
+                <Bar dataKey="total_jobs" fill="#0891b2" name="Jobs" />
               </BarChart>
             </ResponsiveContainer>
           </div>

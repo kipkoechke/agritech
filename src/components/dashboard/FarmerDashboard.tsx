@@ -193,9 +193,9 @@ export default function FarmerDashboard() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="bookings"
+                  dataKey="jobs"
                   stroke="#0891b2"
-                  name="Bookings"
+                  name="Jobs"
                   strokeWidth={2}
                 />
               </LineChart>
@@ -210,9 +210,9 @@ export default function FarmerDashboard() {
               Worker Payments
             </h3>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={charts.worker_payments}>
+              <BarChart data={charts.worker_payments.map((w) => ({ name: w.worker.name, total_kgs: w.total_kgs, total_jobs: w.total_jobs }))}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="worker_name" tick={{ fontSize: 10 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend />
@@ -236,16 +236,16 @@ export default function FarmerDashboard() {
                     Farm
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    Location
+                    Zone
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                    Factory
                   </th>
                   <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
                     Size
                   </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Workers
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Total Kgs
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                    Supervisor
                   </th>
                 </tr>
               </thead>
@@ -255,15 +255,13 @@ export default function FarmerDashboard() {
                     <td className="px-4 py-2 font-medium text-gray-900">
                       {f.name}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{f.location}</td>
+                    <td className="px-4 py-2 text-gray-500">{f.zone}</td>
+                    <td className="px-4 py-2 text-gray-500">{f.factory}</td>
                     <td className="px-4 py-2 text-right text-gray-900">
                       {f.size}
                     </td>
-                    <td className="px-4 py-2 text-right text-gray-900">
-                      {f.workers}
-                    </td>
-                    <td className="px-4 py-2 text-right text-emerald-600 font-medium">
-                      {f.total_kgs.toLocaleString()}
+                    <td className="px-4 py-2 text-gray-500">
+                      {f.supervisor.name}
                     </td>
                   </tr>
                 ))}
@@ -287,7 +285,7 @@ export default function FarmerDashboard() {
                     Group
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    Farm
+                    Code
                   </th>
                   <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
                     Members
@@ -306,9 +304,9 @@ export default function FarmerDashboard() {
                     <td className="px-4 py-2 font-medium text-gray-900">
                       {g.name}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{g.farm_name}</td>
+                    <td className="px-4 py-2 text-gray-500">{g.code}</td>
                     <td className="px-4 py-2 text-right text-gray-900">
-                      {g.members}
+                      {g.members_count}
                     </td>
                     <td className="px-4 py-2 text-right text-emerald-600 font-medium">
                       {g.total_kgs.toLocaleString()}
@@ -343,30 +341,30 @@ export default function FarmerDashboard() {
                       Farm
                     </th>
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-                      Kgs
+                      Total Kgs
                     </th>
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
                       Bookings
                     </th>
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-                      Workers
+                      Completed
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {charts.farm_performance.map((f) => (
-                    <tr key={f.farm_id}>
+                    <tr key={f.farm.id}>
                       <td className="px-3 py-1.5 text-gray-900">
-                        {f.farm_name}
+                        {f.farm.name}
                       </td>
                       <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">
                         {f.total_kgs.toLocaleString()}
                       </td>
                       <td className="px-3 py-1.5 text-right text-gray-900">
-                        {f.bookings}
+                        {f.total_bookings}
                       </td>
                       <td className="px-3 py-1.5 text-right text-gray-900">
-                        {f.workers}
+                        {f.completed}
                       </td>
                     </tr>
                   ))}
@@ -387,10 +385,13 @@ export default function FarmerDashboard() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                      Farm
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
                       Activity
                     </th>
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-                      Bookings
+                      Jobs
                     </th>
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
                       Kgs
@@ -398,13 +399,16 @@ export default function FarmerDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {charts.activity_breakdown.map((a) => (
-                    <tr key={a.activity_id}>
+                  {charts.activity_breakdown.map((a, i) => (
+                    <tr key={i}>
                       <td className="px-3 py-1.5 text-gray-900">
-                        {a.activity_name}
+                        {a.farm}
+                      </td>
+                      <td className="px-3 py-1.5 text-gray-900">
+                        {a.activity}
                       </td>
                       <td className="px-3 py-1.5 text-right text-gray-900">
-                        {a.bookings}
+                        {a.total_jobs}
                       </td>
                       <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">
                         {a.total_kgs.toLocaleString()}
