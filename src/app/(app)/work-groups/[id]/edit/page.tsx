@@ -10,6 +10,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useWorkGroup, useUpdateWorkGroup } from "@/hooks/useWorkGroup";
 import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useIsFarmer } from "@/hooks/useAuth";
 import type { UpdateWorkGroupData } from "@/types/workGroup";
 
 interface WorkGroupFormData {
@@ -24,7 +25,10 @@ export default function EditWorkGroupPage() {
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const updateWorkGroup = useUpdateWorkGroup();
-  const { data: usersData, isLoading: usersLoading } = useHrisUsers({});
+  const isFarmer = useIsFarmer();
+  const { data: usersData, isLoading: usersLoading } = useHrisUsers(
+    !isFarmer ? {} : (undefined as any),
+  );
 
   const {
     register,
@@ -44,7 +48,7 @@ export default function EditWorkGroupPage() {
     if (group) {
       reset({ name: group.name, description: group.description });
       setOwnerId(group.owner_id || "");
-      setActive(group.active);
+      setActive(group.active ?? true);
     }
   }, [group, reset]);
 
@@ -60,7 +64,7 @@ export default function EditWorkGroupPage() {
       name: data.name,
       description: data.description,
       active,
-      owner_id: ownerId || undefined,
+      owner_id: !isFarmer ? ownerId || undefined : undefined,
     };
 
     updateWorkGroup.mutate(
@@ -125,15 +129,17 @@ export default function EditWorkGroupPage() {
               error={errors.description?.message}
             />
 
-            <SearchableSelect
-              label="Owner"
-              options={ownerOptions}
-              value={ownerId}
-              onChange={setOwnerId}
-              placeholder="Select owner"
-              isLoading={usersLoading}
-              required
-            />
+            {!isFarmer && (
+              <SearchableSelect
+                label="Owner"
+                options={ownerOptions}
+                value={ownerId}
+                onChange={setOwnerId}
+                placeholder="Select owner"
+                isLoading={usersLoading}
+                required
+              />
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

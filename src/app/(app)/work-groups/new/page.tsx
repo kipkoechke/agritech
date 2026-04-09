@@ -10,6 +10,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateWorkGroup } from "@/hooks/useWorkGroup";
 import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useAuth, useIsFarmer } from "@/hooks/useAuth";
 import type { CreateWorkGroupData } from "@/types/workGroup";
 
 interface WorkGroupFormData {
@@ -20,7 +21,11 @@ interface WorkGroupFormData {
 export default function NewWorkGroupPage() {
   const router = useRouter();
   const createWorkGroup = useCreateWorkGroup();
-  const { data: usersData, isLoading: usersLoading } = useHrisUsers({});
+  const { user } = useAuth();
+  const isFarmer = useIsFarmer();
+  const { data: usersData, isLoading: usersLoading } = useHrisUsers(
+    !isFarmer ? {} : (undefined as any),
+  );
 
   const {
     register,
@@ -45,7 +50,7 @@ export default function NewWorkGroupPage() {
       name: data.name,
       description: data.description,
       active,
-      owner_id: ownerId,
+      owner_id: !isFarmer ? ownerId : user?.id || "",
     };
 
     createWorkGroup.mutate(payload, {
@@ -93,15 +98,17 @@ export default function NewWorkGroupPage() {
               error={errors.description?.message}
             />
 
-            <SearchableSelect
-              label="Owner"
-              options={ownerOptions}
-              value={ownerId}
-              onChange={setOwnerId}
-              placeholder="Select owner"
-              isLoading={usersLoading}
-              required
-            />
+            {!isFarmer && (
+              <SearchableSelect
+                label="Owner"
+                options={ownerOptions}
+                value={ownerId}
+                onChange={setOwnerId}
+                placeholder="Select owner"
+                isLoading={usersLoading}
+                required
+              />
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
