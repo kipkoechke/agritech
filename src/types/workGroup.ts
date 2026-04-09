@@ -1,8 +1,10 @@
 export interface WorkGroup {
   id: string;
+  code: string;
   name: string;
   description: string;
-  active: boolean;
+  active: boolean | null;
+  members: number;
   owner_id: string;
   owner?: {
     id: string;
@@ -47,13 +49,12 @@ export interface WorkGroupResponse {
 
 export interface WorkGroupMember {
   id: string;
-  user_id: string;
+  active: boolean;
   work_group_id: string;
-  user?: {
+  farm_worker: {
     id: string;
     name: string;
-    phone?: string;
-    role?: string;
+    phone: string;
   };
   created_at: string;
   updated_at: string;

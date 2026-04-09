@@ -21,7 +21,7 @@ import {
   useAddWorkGroupMembers,
   useDeleteWorkGroupMember,
 } from "@/hooks/useWorkGroup";
-import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useWorkers } from "@/hooks/useWorkers";
 import type { WorkGroupMember } from "@/types/workGroup";
 
 export default function WorkGroupDetailPage() {
@@ -33,7 +33,7 @@ export default function WorkGroupDetailPage() {
     useWorkGroupMembers(id);
   const addMembers = useAddWorkGroupMembers();
   const deleteMember = useDeleteWorkGroupMember();
-  const { data: usersData, isLoading: usersLoading } = useHrisUsers({});
+  const { data: workersData, isLoading: workersLoading } = useWorkers({});
 
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [selectedMember, setSelectedMember] = useState<WorkGroupMember | null>(
@@ -44,15 +44,15 @@ export default function WorkGroupDetailPage() {
   const members = membersResponse?.data || [];
 
   const existingMemberUserIds = new Set(
-    members.map((m) => m.user?.id || m.user_id),
+    members.map((m) => m.farm_worker?.id),
   );
   const availableUsers =
-    usersData?.data
-      ?.filter((u) => !existingMemberUserIds.has(u.id))
-      .map((u) => ({
-        value: u.id,
-        label: u.name,
-        description: u.phone,
+    workersData?.data
+      ?.filter((w) => !existingMemberUserIds.has(w.id))
+      .map((w) => ({
+        value: w.id,
+        label: w.name,
+        description: w.phone,
       })) || [];
 
   const handleAddMembers = () => {
@@ -173,19 +173,19 @@ export default function WorkGroupDetailPage() {
                       setSelectedMemberIds((prev) => [...prev, val]);
                     }
                   }}
-                  placeholder="Select users to add"
-                  isLoading={usersLoading}
+                  placeholder="Select workers to add"
+                  isLoading={workersLoading}
                 />
                 {selectedMemberIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {selectedMemberIds.map((uid) => {
-                      const user = usersData?.data?.find((u) => u.id === uid);
+                      const worker = workersData?.data?.find((w) => w.id === uid);
                       return (
                         <span
                           key={uid}
                           className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs"
                         >
-                          {user?.name || uid}
+                          {worker?.name || uid}
                           <button
                             type="button"
                             onClick={() =>
@@ -242,7 +242,7 @@ export default function WorkGroupDetailPage() {
                       Phone
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Role
+                      Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Added
@@ -257,18 +257,24 @@ export default function WorkGroupDetailPage() {
                     <tr key={member.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {member.user?.name || "—"}
+                          {member.farm_worker?.name || "—"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {member.user?.phone || "—"}
+                          {member.farm_worker?.phone || "—"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500 capitalize">
-                          {member.user?.role || "—"}
-                        </div>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            member.active
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {member.active ? "Active" : "Inactive"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
@@ -297,7 +303,7 @@ export default function WorkGroupDetailPage() {
       <Modal.Window name="delete-member">
         {selectedMember ? (
           <DeleteConfirmationModal
-            itemName={selectedMember.user?.name || "this member"}
+            itemName={selectedMember.farm_worker?.name || "this member"}
             itemType="Member"
             onConfirm={() =>
               deleteMember.mutateAsync({

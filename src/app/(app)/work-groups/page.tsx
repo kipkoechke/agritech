@@ -119,13 +119,13 @@ export default function WorkGroupsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Code
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Owner
+                      Members
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
@@ -139,18 +139,18 @@ export default function WorkGroupsPage() {
                   {workGroups.map((group) => (
                     <tr key={group.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 font-mono">
+                          {group.code}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {group.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-500 max-w-xs truncate">
-                          {group.description || "—"}
-                        </div>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {group.owner?.name || "—"}
+                          {group.members}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
