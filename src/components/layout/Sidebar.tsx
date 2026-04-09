@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdDashboard,
         href: "/dashboard",
         active: pathname === "/dashboard",
-        visibleTo: ["admin", "farmer"],
+        visibleTo: ["admin", "farmer", "supervisor"],
       },
       {
         name: "Farms",

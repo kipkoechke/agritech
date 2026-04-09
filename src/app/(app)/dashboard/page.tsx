@@ -1149,8 +1149,8 @@ export default function TeaDashboardPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 md:px-4 py-2 pb-20 md:pb-4">
-        {/* Stats Cards - Only show for Admin and Farmer */}
-        {(isAdmin || isFarmer) && (
+        {/* Stats Cards - Show for Admin, Farmer, and Supervisor */}
+        {(isAdmin || isFarmer || isSupervisor) && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
               <div className="flex items-center gap-2 md:gap-3">
@@ -1203,9 +1203,7 @@ export default function TeaDashboardPage() {
                   <MdAgriculture className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] md:text-xs text-slate-500">
-                    Farms
-                  </p>
+                  <p className="text-[10px] md:text-xs text-slate-500">Farms</p>
                   <p className="text-lg md:text-2xl font-bold text-emerald-600">
                     {formatNumber(stats.farms)}
                   </p>
@@ -1230,8 +1228,8 @@ export default function TeaDashboardPage() {
           </div>
         )}
 
-        {/* Tea Collection Trend - Show for Admin and Farmer */}
-        {(isAdmin || isFarmer) && (
+        {/* Tea Collection Trend - Show for Admin, Farmer, and Supervisor */}
+        {(isAdmin || isFarmer || isSupervisor) && (
           <div className="bg-white rounded-lg border border-slate-200 mb-4">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={trendData}>
@@ -1256,8 +1254,8 @@ export default function TeaDashboardPage() {
           </div>
         )}
 
-        {/* Rankings - Show for Admin and Farmer */}
-        {(isAdmin || isFarmer) && (
+        {/* Rankings - Show for Admin, Farmer, and Supervisor */}
+        {(isAdmin || isFarmer || isSupervisor) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <RankingChart
               data={topFactories}
@@ -1282,8 +1280,8 @@ export default function TeaDashboardPage() {
           </div>
         )}
 
-        {/* Zone Distribution and Supervisor Performance - Show for Admin and Farmer */}
-        {(isAdmin || isFarmer) && (
+        {/* Zone Distribution and Supervisor Performance - Show for Admin, Farmer, and Supervisor */}
+        {(isAdmin || isFarmer || isSupervisor) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="bg-white rounded-lg border border-slate-200">
               <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
@@ -1349,8 +1347,8 @@ export default function TeaDashboardPage() {
           </div>
         )}
 
-        {/* Farm Locations Map - Show for Admin and Farmer */}
-        {(isAdmin || isFarmer) && (
+        {/* Farm Locations Map - Show for Admin, Farmer, and Supervisor */}
+        {(isAdmin || isFarmer || isSupervisor) && (
           <div className="bg-white rounded-lg border border-slate-200 mb-4">
             <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
               <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
