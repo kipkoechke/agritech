@@ -78,8 +78,13 @@ export const useAssignSupervisor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, supervisor_id }: { id: string; supervisor_id: string }) =>
-      assignSupervisor(id, supervisor_id),
+    mutationFn: ({
+      id,
+      supervisor_id,
+    }: {
+      id: string;
+      supervisor_id: string;
+    }) => assignSupervisor(id, supervisor_id),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["farms"] });
       queryClient.invalidateQueries({ queryKey: ["farms", variables.id] });

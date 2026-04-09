@@ -57,7 +57,9 @@ export default function NewFarmerPage() {
               <MdPerson className="w-6 h-6 text-emerald-600" />
               Add New Farmer
             </h1>
-            <p className="text-gray-500 mt-1">Register a new farmer in the system</p>
+            <p className="text-gray-500 mt-1">
+              Register a new farmer in the system
+            </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">

@@ -60,7 +60,11 @@ export default function WorkersPage() {
             </div>
           }
           action={
-            <Button type="small" to="/farm-workers/new" className="flex items-center gap-1">
+            <Button
+              type="small"
+              to="/farm-workers/new"
+              className="flex items-center gap-1"
+            >
               <MdAdd className="w-4 h-4" />
               Add Worker
             </Button>
@@ -160,13 +164,17 @@ export default function WorkersPage() {
                           <ActionMenu.Trigger />
                           <ActionMenu.Content>
                             <ActionMenu.Item
-                              onClick={() => router.push(`/farm-workers/${worker.id}`)}
+                              onClick={() =>
+                                router.push(`/farm-workers/${worker.id}`)
+                              }
                             >
                               <FiEye className="h-4 w-4" />
                               View
                             </ActionMenu.Item>
                             <ActionMenu.Item
-                              onClick={() => router.push(`/farm-workers/${worker.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/farm-workers/${worker.id}/edit`)
+                              }
                             >
                               <FiEdit className="h-4 w-4" />
                               Edit

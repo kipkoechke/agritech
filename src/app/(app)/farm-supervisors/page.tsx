@@ -71,8 +71,12 @@ export default function FarmsSupervisorsPage() {
       {!isLoading && supervisors.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <MdSupervisorAccount className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No supervisors found</h3>
-          <p className="text-gray-500 mb-4">There are no users with the supervisor role.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No supervisors found
+          </h3>
+          <p className="text-gray-500 mb-4">
+            There are no users with the supervisor role.
+          </p>
         </div>
       )}
 
@@ -103,7 +107,9 @@ export default function FarmsSupervisorsPage() {
                 {supervisors.map((sup) => (
                   <tr key={sup.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{sup.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {sup.name}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{sup.email}</div>
@@ -112,7 +118,9 @@ export default function FarmsSupervisorsPage() {
                       <div className="text-sm text-gray-500">{sup.phone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{sup.account_number || "—"}</div>
+                      <div className="text-sm text-gray-500">
+                        {sup.account_number || "—"}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <ActionMenu menuId={`supervisor-${sup.id}`}>

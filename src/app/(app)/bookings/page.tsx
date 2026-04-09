@@ -34,7 +34,9 @@ export default function BookingsPage() {
             <MdBookOnline className="w-6 h-6 text-emerald-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Bookings</h1>
-              <p className="text-sm text-gray-500">Manage worker bookings for schedules</p>
+              <p className="text-sm text-gray-500">
+                Manage worker bookings for schedules
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -158,9 +160,7 @@ export default function BookingsPage() {
                             <ActionMenu.Content>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/bookings/${booking.id}`,
-                                  )
+                                  router.push(`/bookings/${booking.id}`)
                                 }
                               >
                                 <FiEye className="h-4 w-4" />
@@ -168,9 +168,7 @@ export default function BookingsPage() {
                               </ActionMenu.Item>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/bookings/${booking.id}/edit`,
-                                  )
+                                  router.push(`/bookings/${booking.id}/edit`)
                                 }
                               >
                                 <FiEdit className="h-4 w-4" />
@@ -227,9 +225,7 @@ export default function BookingsPage() {
             <DeleteConfirmationModal
               itemName={`${selectedBooking.worker.name} — ${selectedBooking.schedule.reference_code}`}
               itemType="Booking"
-              onConfirm={() =>
-                deleteBooking.mutateAsync(selectedBooking.id)
-              }
+              onConfirm={() => deleteBooking.mutateAsync(selectedBooking.id)}
               isDeleting={deleteBooking.isPending}
             />
           ) : (

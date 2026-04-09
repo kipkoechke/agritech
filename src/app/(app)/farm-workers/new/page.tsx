@@ -72,7 +72,9 @@ export default function CreateWorkerPage() {
               <MdPerson className="w-6 h-6 text-emerald-600" />
               Add New Farm Worker
             </h1>
-            <p className="text-gray-500 mt-1">Create a new farm worker account</p>
+            <p className="text-gray-500 mt-1">
+              Create a new farm worker account
+            </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">

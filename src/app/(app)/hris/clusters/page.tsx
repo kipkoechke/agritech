@@ -213,9 +213,7 @@ export default function ClustersPage() {
                             <ActionMenu.Content>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/hris/clusters/${cluster.id}`,
-                                  )
+                                  router.push(`/hris/clusters/${cluster.id}`)
                                 }
                               >
                                 <FiEye className="h-4 w-4" />
@@ -282,9 +280,7 @@ export default function ClustersPage() {
             <DeleteConfirmationModal
               itemName={selectedCluster.name}
               itemType="Cluster"
-              onConfirm={() =>
-                deleteCluster.mutateAsync(selectedCluster.id)
-              }
+              onConfirm={() => deleteCluster.mutateAsync(selectedCluster.id)}
               isDeleting={deleteCluster.isPending}
             />
           ) : (

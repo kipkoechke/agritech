@@ -47,7 +47,9 @@ export default function FactoriesPage() {
             <MdFactory className="w-6 h-6 text-emerald-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Factories</h1>
-              <p className="text-sm text-gray-500">Manage processing factories</p>
+              <p className="text-sm text-gray-500">
+                Manage processing factories
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -176,9 +178,7 @@ export default function FactoriesPage() {
                             <ActionMenu.Content>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/factories/${factory.id}`,
-                                  )
+                                  router.push(`/factories/${factory.id}`)
                                 }
                               >
                                 <FiEye className="h-4 w-4" />
@@ -186,9 +186,7 @@ export default function FactoriesPage() {
                               </ActionMenu.Item>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/factories/${factory.id}/edit`,
-                                  )
+                                  router.push(`/factories/${factory.id}/edit`)
                                 }
                               >
                                 <FiEdit className="h-4 w-4" />
@@ -245,9 +243,7 @@ export default function FactoriesPage() {
             <DeleteConfirmationModal
               itemName={selectedFactory.name}
               itemType="Factory"
-              onConfirm={() =>
-                deleteFactory.mutateAsync(selectedFactory.id)
-              }
+              onConfirm={() => deleteFactory.mutateAsync(selectedFactory.id)}
               isDeleting={deleteFactory.isPending}
             />
           ) : (

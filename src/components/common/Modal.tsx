@@ -94,7 +94,7 @@ function Window({ children, name }: WindowProps) {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 

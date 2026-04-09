@@ -20,7 +20,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React, { useMemo } from "react";
-import { useLogout, useAuth, useIsAdmin, useIsFarmer, useIsSupervisor, useIsPlucker } from "@/hooks/useAuth";
+import {
+  useLogout,
+  useAuth,
+  useIsAdmin,
+  useIsFarmer,
+  useIsSupervisor,
+  useIsPlucker,
+} from "@/hooks/useAuth";
 
 interface SidebarProps {
   isMobileMenuOpen?: boolean;
@@ -127,8 +134,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
 
     // Filter menu items based on user role
     const role = user?.role;
-    
-    return allMenuItems.filter(item => {
+
+    return allMenuItems.filter((item) => {
       if (isAdmin) return true; // Admin sees everything
       if (role && item.visibleTo.includes(role)) return true;
       return false;
@@ -215,9 +222,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
                 >
                   <item.icon className="w-3.5 h-3.5" />
                 </div>
-                <span className="font-medium text-[13px]">
-                  {item.name}
-                </span>
+                <span className="font-medium text-[13px]">{item.name}</span>
               </Link>
             </li>
           ))}

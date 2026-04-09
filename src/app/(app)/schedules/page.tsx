@@ -46,7 +46,9 @@ export default function SchedulesPage() {
             <MdSchedule className="w-6 h-6 text-emerald-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Schedules</h1>
-              <p className="text-sm text-gray-500">Manage farm activity schedules</p>
+              <p className="text-sm text-gray-500">
+                Manage farm activity schedules
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -189,9 +191,7 @@ export default function SchedulesPage() {
                             <ActionMenu.Content>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/schedules/${schedule.id}`,
-                                  )
+                                  router.push(`/schedules/${schedule.id}`)
                                 }
                               >
                                 <FiEye className="h-4 w-4" />
@@ -199,9 +199,7 @@ export default function SchedulesPage() {
                               </ActionMenu.Item>
                               <ActionMenu.Item
                                 onClick={() =>
-                                  router.push(
-                                    `/schedules/${schedule.id}/edit`,
-                                  )
+                                  router.push(`/schedules/${schedule.id}/edit`)
                                 }
                               >
                                 <FiEdit className="h-4 w-4" />
@@ -220,9 +218,7 @@ export default function SchedulesPage() {
                               )}
                               <Modal.Open opens="delete-schedule">
                                 <ActionMenu.Item
-                                  onClick={() =>
-                                    setSelectedSchedule(schedule)
-                                  }
+                                  onClick={() => setSelectedSchedule(schedule)}
                                   className="text-red-600"
                                 >
                                   <FiTrash className="h-4 w-4" />
@@ -271,9 +267,7 @@ export default function SchedulesPage() {
             <DeleteConfirmationModal
               itemName={selectedSchedule.reference_code}
               itemType="Schedule"
-              onConfirm={() =>
-                deleteSchedule.mutateAsync(selectedSchedule.id)
-              }
+              onConfirm={() => deleteSchedule.mutateAsync(selectedSchedule.id)}
               isDeleting={deleteSchedule.isPending}
             />
           ) : (

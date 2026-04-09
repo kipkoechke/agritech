@@ -71,8 +71,12 @@ export default function FarmersPage() {
       {!isLoading && farmers.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <MdPerson className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No farmers found</h3>
-          <p className="text-gray-500 mb-4">There are no users with the farmer role.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No farmers found
+          </h3>
+          <p className="text-gray-500 mb-4">
+            There are no users with the farmer role.
+          </p>
         </div>
       )}
 
@@ -103,23 +107,33 @@ export default function FarmersPage() {
                 {farmers.map((farmer) => (
                   <tr key={farmer.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{farmer.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {farmer.name}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{farmer.email}</div>
+                      <div className="text-sm text-gray-500">
+                        {farmer.email}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{farmer.phone}</div>
+                      <div className="text-sm text-gray-500">
+                        {farmer.phone}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{farmer.account_number || "\u2014"}</div>
+                      <div className="text-sm text-gray-500">
+                        {farmer.account_number || "\u2014"}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <ActionMenu menuId={`farmer-${farmer.id}`}>
                         <ActionMenu.Trigger />
                         <ActionMenu.Content>
                           <ActionMenu.Item
-                            onClick={() => router.push(`/hris/users/${farmer.id}`)}
+                            onClick={() =>
+                              router.push(`/hris/users/${farmer.id}`)
+                            }
                           >
                             <FiEye className="h-4 w-4" />
                             View

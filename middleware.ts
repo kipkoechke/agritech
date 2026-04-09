@@ -42,7 +42,7 @@ function hasRouteAccess(role: string, pathname: string): boolean {
 
   // Routes that are accessible by all authenticated users
   const publicForAllRoles = ["/dashboard", "/my-services", "/unauthorized"];
-  
+
   // Check if it's a public route for all roles
   if (publicForAllRoles.some((route) => pathname.startsWith(route))) {
     return true;
@@ -52,16 +52,27 @@ function hasRouteAccess(role: string, pathname: string): boolean {
   const restrictedPaths: Record<string, string[]> = {
     farmer: ["/farm-workers", "/farmers", "/farm-map", "/hris"],
     supervisor: ["/farms", "/farmers", "/factory", "/hris"],
-    plucker: ["/farms", "/farm-workers", "/farm-supervisors", "/farmers", "/factory", "/weighing-points", "/farm-map", "/orders", "/products", "/hris"],
+    plucker: [
+      "/farms",
+      "/farm-workers",
+      "/farm-supervisors",
+      "/farmers",
+      "/factory",
+      "/weighing-points",
+      "/farm-map",
+      "/orders",
+      "/products",
+      "/hris",
+    ],
   };
 
   const restricted = restrictedPaths[role] || [];
-  
+
   // Check if current path is restricted for this role
   // If path is in restricted list, deny access (return false)
   // Otherwise allow access (return true)
   const isRestricted = restricted.some((path) => pathname.startsWith(path));
-  
+
   return !isRestricted;
 }
 

@@ -92,7 +92,9 @@ export default function BookingDetailsPage() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 disabled:opacity-50 transition-colors"
               >
                 <MdCheckCircle className="w-4 h-4" />
-                {confirmAttendance.isPending ? "Confirming..." : "Confirm Attendance"}
+                {confirmAttendance.isPending
+                  ? "Confirming..."
+                  : "Confirm Attendance"}
               </button>
             )}
             {!booking.worker_signed && (
@@ -122,7 +124,9 @@ export default function BookingDetailsPage() {
               : "bg-yellow-100 text-yellow-800"
           }`}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${booking.is_confirmed ? "bg-green-500" : "bg-yellow-500"}`} />
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${booking.is_confirmed ? "bg-green-500" : "bg-yellow-500"}`}
+          />
           {booking.is_confirmed ? "Attendance Confirmed" : "Attendance Pending"}
         </span>
         <span
@@ -132,7 +136,9 @@ export default function BookingDetailsPage() {
               : "bg-gray-100 text-gray-600"
           }`}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${booking.worker_signed ? "bg-green-500" : "bg-gray-400"}`} />
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${booking.worker_signed ? "bg-green-500" : "bg-gray-400"}`}
+          />
           {booking.worker_signed ? "Worker Signed Off" : "Not Signed Off"}
         </span>
         {booking.is_confirmed && booking.worker_signed && (
@@ -152,41 +158,64 @@ export default function BookingDetailsPage() {
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <MdPerson className="w-4 h-4 text-gray-400" />
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Worker</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Worker
+                  </h3>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">{booking.worker.name}</p>
-                <p className="text-sm text-gray-500 mt-0.5">{booking.worker.phone}</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {booking.worker.name}
+                </p>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {booking.worker.phone}
+                </p>
               </div>
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <MdSchedule className="w-4 h-4 text-gray-400" />
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Schedule</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Schedule
+                  </h3>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">{booking.schedule.reference_code}</p>
-                <p className="text-sm text-gray-500 mt-0.5">{booking.schedule.activity.name}</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {booking.schedule.reference_code}
+                </p>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {booking.schedule.activity.name}
+                </p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 border-t border-gray-100">
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <MdAgriculture className="w-4 h-4 text-gray-400" />
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Farm</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Farm
+                  </h3>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">{booking.schedule.farm.name}</p>
-                <p className="text-sm text-gray-500 mt-0.5">{booking.schedule.farm.zone.name}</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {booking.schedule.farm.name}
+                </p>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {booking.schedule.farm.zone.name}
+                </p>
               </div>
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <MdCalendarToday className="w-4 h-4 text-gray-400" />
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled Date</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Scheduled Date
+                  </h3>
                 </div>
                 <p className="text-sm font-semibold text-gray-900">
-                  {new Date(booking.schedule.scheduled_date).toLocaleDateString("en-GB", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {new Date(booking.schedule.scheduled_date).toLocaleDateString(
+                    "en-GB",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    },
+                  )}
                 </p>
               </div>
             </div>
@@ -195,13 +224,17 @@ export default function BookingDetailsPage() {
           {/* Quantities */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-900">Quantities</h2>
+              <h2 className="text-sm font-semibold text-gray-900">
+                Quantities
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
               {/* Farm Quantity */}
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Farm Quantity</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Farm Quantity
+                  </h3>
                   {!showFarmQtyForm && (
                     <button
                       onClick={() => setShowFarmQtyForm(true)}
@@ -213,7 +246,9 @@ export default function BookingDetailsPage() {
                 </div>
                 {!showFarmQtyForm ? (
                   <p className="text-2xl font-bold text-gray-900">
-                    {booking.farm_qty ?? <span className="text-gray-300">—</span>}
+                    {booking.farm_qty ?? (
+                      <span className="text-gray-300">—</span>
+                    )}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -232,7 +267,12 @@ export default function BookingDetailsPage() {
                           if (!isNaN(qty)) {
                             captureFarmQty.mutate(
                               { id, farm_qty: qty },
-                              { onSuccess: () => { setShowFarmQtyForm(false); setFarmQtyInput(""); } },
+                              {
+                                onSuccess: () => {
+                                  setShowFarmQtyForm(false);
+                                  setFarmQtyInput("");
+                                },
+                              },
                             );
                           }
                         }}
@@ -242,7 +282,10 @@ export default function BookingDetailsPage() {
                         {captureFarmQty.isPending ? "Saving..." : "Save"}
                       </button>
                       <button
-                        onClick={() => { setShowFarmQtyForm(false); setFarmQtyInput(""); }}
+                        onClick={() => {
+                          setShowFarmQtyForm(false);
+                          setFarmQtyInput("");
+                        }}
                         className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
                       >
                         Cancel
@@ -255,7 +298,9 @@ export default function BookingDetailsPage() {
               {/* Factory Quantity */}
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Factory Quantity</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Factory Quantity
+                  </h3>
                   {!showFactoryQtyForm && (
                     <button
                       onClick={() => setShowFactoryQtyForm(true)}
@@ -267,7 +312,9 @@ export default function BookingDetailsPage() {
                 </div>
                 {!showFactoryQtyForm ? (
                   <p className="text-2xl font-bold text-gray-900">
-                    {booking.factory_qty ?? <span className="text-gray-300">—</span>}
+                    {booking.factory_qty ?? (
+                      <span className="text-gray-300">—</span>
+                    )}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -286,17 +333,27 @@ export default function BookingDetailsPage() {
                           if (!isNaN(qty)) {
                             captureFactoryQty.mutate(
                               { id, factory_qty: qty },
-                              { onSuccess: () => { setShowFactoryQtyForm(false); setFactoryQtyInput(""); } },
+                              {
+                                onSuccess: () => {
+                                  setShowFactoryQtyForm(false);
+                                  setFactoryQtyInput("");
+                                },
+                              },
                             );
                           }
                         }}
-                        disabled={captureFactoryQty.isPending || !factoryQtyInput}
+                        disabled={
+                          captureFactoryQty.isPending || !factoryQtyInput
+                        }
                         className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50"
                       >
                         {captureFactoryQty.isPending ? "Saving..." : "Save"}
                       </button>
                       <button
-                        onClick={() => { setShowFactoryQtyForm(false); setFactoryQtyInput(""); }}
+                        onClick={() => {
+                          setShowFactoryQtyForm(false);
+                          setFactoryQtyInput("");
+                        }}
                         className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
                       >
                         Cancel
@@ -318,28 +375,40 @@ export default function BookingDetailsPage() {
             <div className="p-5 space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Worker</span>
-                <span className="text-sm font-medium text-gray-900">{booking.worker.name}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {booking.worker.name}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Activity</span>
-                <span className="text-sm font-medium text-gray-900">{booking.schedule.activity.name}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {booking.schedule.activity.name}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Farm</span>
-                <span className="text-sm font-medium text-gray-900">{booking.schedule.farm.name}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {booking.schedule.farm.name}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Zone</span>
-                <span className="text-sm font-medium text-gray-900">{booking.schedule.farm.zone.name}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {booking.schedule.farm.zone.name}
+                </span>
               </div>
               <hr className="border-gray-100" />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Farm Qty</span>
-                <span className="text-sm font-bold text-gray-900">{booking.farm_qty ?? "—"}</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {booking.farm_qty ?? "—"}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Factory Qty</span>
-                <span className="text-sm font-bold text-gray-900">{booking.factory_qty ?? "—"}</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {booking.factory_qty ?? "—"}
+                </span>
               </div>
             </div>
           </div>

@@ -41,9 +41,11 @@ export default function FarmsPage() {
   const deleteFarm = useDeleteFarm();
   const assignSupervisor = useAssignSupervisor();
 
-  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
-    role: "supervisor",
-  });
+  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers(
+    {
+      role: "supervisor",
+    },
+  );
   const supervisorOptions =
     supervisorsData?.data?.map((u) => ({ value: u.id, label: u.name })) || [];
 
@@ -92,7 +94,11 @@ export default function FarmsPage() {
             </div>
           }
           action={
-            <Button type="small" to="/farms/new" className="flex items-center gap-1">
+            <Button
+              type="small"
+              to="/farms/new"
+              className="flex items-center gap-1"
+            >
               <MdAdd className="w-4 h-4" />
               Add Farm
             </Button>
@@ -234,7 +240,9 @@ export default function FarmsPage() {
                               View
                             </ActionMenu.Item>
                             <ActionMenu.Item
-                              onClick={() => router.push(`/farms/${farm.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/farms/${farm.id}/edit`)
+                              }
                             >
                               <FiEdit className="h-4 w-4" />
                               Edit

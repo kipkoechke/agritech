@@ -34,9 +34,7 @@ export default function EditWorkerPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<WorkerFormData>({
-    values: worker
-      ? { name: worker.name, phone: worker.phone }
-      : undefined,
+    values: worker ? { name: worker.name, phone: worker.phone } : undefined,
   });
 
   const [zoneId, setZoneId] = useState<string | null>(null);
@@ -154,7 +152,8 @@ export default function EditWorkerPage() {
               />
               {!isPinChanged && (
                 <p className="text-xs text-blue-600 mt-2">
-                  Current PIN is hidden for security. Enter a new 4-digit PIN to change it.
+                  Current PIN is hidden for security. Enter a new 4-digit PIN to
+                  change it.
                 </p>
               )}
               {isPinChanged && pin.length === 4 && (
@@ -176,7 +175,9 @@ export default function EditWorkerPage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={updateWorker.isPending || (isPinChanged && pin.length !== 4)}
+                disabled={
+                  updateWorker.isPending || (isPinChanged && pin.length !== 4)
+                }
               >
                 {updateWorker.isPending ? "Saving..." : "Save Changes"}
               </Button>

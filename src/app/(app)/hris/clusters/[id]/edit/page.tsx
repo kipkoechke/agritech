@@ -70,8 +70,7 @@ export default function EditClusterPage() {
     setCoords({ lat: cluster.coordinates[0], lng: cluster.coordinates[1] });
   }
 
-  const factoryValue =
-    factoryId ?? (cluster?.factory?.id || "");
+  const factoryValue = factoryId ?? (cluster?.factory?.id || "");
 
   const factories = factoriesData?.data || [];
 
@@ -173,7 +172,10 @@ export default function EditClusterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location <span className="text-gray-400 font-normal">(click map to set)</span>
+                Location{" "}
+                <span className="text-gray-400 font-normal">
+                  (click map to set)
+                </span>
               </label>
               {coords && (
                 <p className="text-sm text-gray-600 mb-2">
@@ -182,11 +184,7 @@ export default function EditClusterPage() {
               )}
               <div className="h-[300px] rounded-lg overflow-hidden border border-gray-200">
                 <MapContainer
-                  center={
-                    coords
-                      ? [coords.lat, coords.lng]
-                      : [-0.3, 35.3]
-                  }
+                  center={coords ? [coords.lat, coords.lng] : [-0.3, 35.3]}
                   zoom={coords ? 13 : 7}
                   style={{ height: "100%", width: "100%" }}
                   scrollWheelZoom={true}

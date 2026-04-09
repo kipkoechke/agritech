@@ -1,5 +1,11 @@
 import axiosInstance from "@/lib/axios";
-import type { User, CreateUserData, UpdateUserData, UserFilters, UsersResponse } from "@/types/user";
+import type {
+  User,
+  CreateUserData,
+  UpdateUserData,
+  UserFilters,
+  UsersResponse,
+} from "@/types/user";
 import type {
   HrisUsersResponse,
   HrisUserResponse,
@@ -17,7 +23,9 @@ export interface HrisUsersParams {
   sort_order?: string;
 }
 
-export const getUsers = async (params?: UserFilters): Promise<UsersResponse> => {
+export const getUsers = async (
+  params?: UserFilters,
+): Promise<UsersResponse> => {
   const response = await axiosInstance.get<UsersResponse>("/users", { params });
   return response.data;
 };
@@ -53,8 +61,14 @@ export const createHrisUser = async (
   return response.data;
 };
 
-export const updateUser = async (id: string, data: UpdateUserData): Promise<User> => {
-  const response = await axiosInstance.put<{ data: User }>(`/users/${id}`, data);
+export const updateUser = async (
+  id: string,
+  data: UpdateUserData,
+): Promise<User> => {
+  const response = await axiosInstance.put<{ data: User }>(
+    `/users/${id}`,
+    data,
+  );
   return response.data.data;
 };
 
@@ -73,7 +87,11 @@ export const deleteUser = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/users/${id}`);
 };
 
-export const getUserRoles = async (): Promise<{ id: string; name: string }[]> => {
-  const response = await axiosInstance.get<{ data: { id: string; name: string }[] }>("/users/roles");
+export const getUserRoles = async (): Promise<
+  { id: string; name: string }[]
+> => {
+  const response = await axiosInstance.get<{
+    data: { id: string; name: string }[];
+  }>("/users/roles");
   return response.data.data;
 };
