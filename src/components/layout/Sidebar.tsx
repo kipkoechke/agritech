@@ -102,13 +102,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname.startsWith("/bookings"),
         visibleTo: ["admin", "farmer", "supervisor"],
       },
-      {
-        name: "Weighing Points",
-        icon: MdScale,
-        href: "/weighing-points",
-        active: pathname.startsWith("/weighing-points"),
-        visibleTo: ["admin", "farmer", "supervisor"],
-      },
+      // {
+      //   name: "Weighing Points",
+      //   icon: MdScale,
+      //   href: "/weighing-points",
+      //   active: pathname.startsWith("/weighing-points"),
+      //   visibleTo: ["admin", "farmer", "supervisor"],
+      // },
       {
         name: "Farm Map",
         icon: MdMap,
@@ -116,13 +116,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname === "/farm-map",
         visibleTo: ["admin", "supervisor"],
       },
-      {
-        name: "My Services",
-        icon: MdDesignServices,
-        href: "/my-services",
-        active: pathname.startsWith("/my-services"),
-        visibleTo: ["admin", "farmer", "supervisor", "plucker"],
-      },
+      // {
+      //   name: "My Services",
+      //   icon: MdDesignServices,
+      //   href: "/my-services",
+      //   active: pathname.startsWith("/my-services"),
+      //   visibleTo: ["admin", "farmer", "supervisor", "plucker"],
+      // },
       {
         name: "HRIS",
         icon: MdGroup,
