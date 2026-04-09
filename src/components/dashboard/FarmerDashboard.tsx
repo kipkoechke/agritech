@@ -145,11 +145,6 @@ export default function FarmerDashboard() {
           />
           <StatCard
             icon={MdTrendingUp}
-            label="Active Activities"
-            value={summary.active_activities}
-          />
-          <StatCard
-            icon={MdTrendingUp}
             label="This Month"
             value={`${summary.monthly_comparison.current_month_kgs.toLocaleString()} kg`}
             color="text-emerald-600"
