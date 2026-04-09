@@ -1,0 +1,77 @@
+export interface WorkGroup {
+  id: string;
+  name: string;
+  description: string;
+  active: boolean;
+  owner_id: string;
+  owner?: {
+    id: string;
+    name: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateWorkGroupData {
+  name: string;
+  description: string;
+  active: boolean;
+  owner_id: string;
+}
+
+export interface UpdateWorkGroupData {
+  name?: string;
+  description?: string;
+  active?: boolean;
+  owner_id?: string;
+}
+
+export interface WorkGroupPagination {
+  current_page: number;
+  next_page: number | null;
+  per_page: number;
+  first_page: number;
+  last_page: number;
+  total_pages: number;
+  total_items: number;
+}
+
+export interface WorkGroupsResponse {
+  data: WorkGroup[];
+  pagination: WorkGroupPagination;
+}
+
+export interface WorkGroupResponse {
+  data: WorkGroup;
+}
+
+export interface WorkGroupMember {
+  id: string;
+  user_id: string;
+  work_group_id: string;
+  user?: {
+    id: string;
+    name: string;
+    phone?: string;
+    role?: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AddMembersData {
+  members: string[];
+}
+
+export interface UpdateMemberData {
+  role?: string;
+}
+
+export interface WorkGroupMembersResponse {
+  data: WorkGroupMember[];
+  pagination: WorkGroupPagination;
+}
+
+export interface WorkGroupMemberResponse {
+  data: WorkGroupMember;
+}

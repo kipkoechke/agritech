@@ -15,6 +15,7 @@ import {
   MdGroup,
   MdSchedule,
   MdBookOnline,
+  MdGroupWork,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,6 +124,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       //   active: pathname.startsWith("/my-services"),
       //   visibleTo: ["admin", "farmer", "supervisor", "plucker"],
       // },
+      {
+        name: "Work Groups",
+        icon: MdGroupWork,
+        href: "/work-groups",
+        active: pathname.startsWith("/work-groups"),
+        visibleTo: ["admin", "farmer", "supervisor"],
+      },
       {
         name: "HRIS",
         icon: MdGroup,
