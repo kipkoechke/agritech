@@ -21,6 +21,7 @@ import {
   MdPerson,
   MdDesignServices,
   MdPeople,
+  MdGroup,
 } from "react-icons/md";
 import {
   LineChart,
@@ -80,6 +81,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Momul Tea Factory",
+    cluster: "Momul Cluster",
+    farm: "Kiprotich Tea Farm",
     supervisor: "Wilson Kipruto",
     plucker: "James Kipkemoi",
     kilos: 145,
@@ -92,6 +95,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Momul Tea Factory",
+    cluster: "Momul Cluster",
+    farm: "Kiprotich Tea Farm",
     supervisor: "Wilson Kipruto",
     plucker: "James Kipkemoi",
     kilos: 152,
@@ -104,6 +109,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Momul Tea Factory",
+    cluster: "Momul Cluster",
+    farm: "Kiprotich Tea Farm",
     supervisor: "Wilson Kipruto",
     plucker: "James Kipkemoi",
     kilos: 148,
@@ -116,6 +123,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Tegat Tea Factory",
+    cluster: "Tegat Cluster",
+    farm: "Langat Tea Farm",
     supervisor: "Joseph Langat",
     plucker: "Peter Kiprono",
     kilos: 98,
@@ -128,6 +137,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Tegat Tea Factory",
+    cluster: "Tegat Cluster",
+    farm: "Langat Tea Farm",
     supervisor: "Joseph Langat",
     plucker: "Peter Kiprono",
     kilos: 105,
@@ -140,6 +151,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Tegat Tea Factory",
+    cluster: "Tegat Cluster",
+    farm: "Langat Tea Farm",
     supervisor: "Joseph Langat",
     plucker: "Peter Kiprono",
     kilos: 112,
@@ -152,6 +165,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Toror Tea Factory",
+    cluster: "Toror Cluster",
+    farm: "Kipkemboi Tea Farm",
     supervisor: "David Kipkemboi",
     plucker: "Samuel Kipkurui",
     kilos: 180,
@@ -164,6 +179,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Toror Tea Factory",
+    cluster: "Toror Cluster",
+    farm: "Kipkemboi Tea Farm",
     supervisor: "David Kipkemboi",
     plucker: "Samuel Kipkurui",
     kilos: 175,
@@ -176,6 +193,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Toror Tea Factory",
+    cluster: "Toror Cluster",
+    farm: "Kipkemboi Tea Farm",
     supervisor: "David Kipkemboi",
     plucker: "Samuel Kipkurui",
     kilos: 190,
@@ -188,6 +207,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Litein Tea Factory",
+    cluster: "Litein Cluster",
+    farm: "Cherono Tea Farm",
     supervisor: "Grace Cherono",
     plucker: "Esther Chepchumba",
     kilos: 75,
@@ -200,6 +221,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Litein Tea Factory",
+    cluster: "Litein Cluster",
+    farm: "Cherono Tea Farm",
     supervisor: "Grace Cherono",
     plucker: "Esther Chepchumba",
     kilos: 82,
@@ -212,6 +235,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Litein Tea Factory",
+    cluster: "Litein Cluster",
+    farm: "Cherono Tea Farm",
     supervisor: "Grace Cherono",
     plucker: "Esther Chepchumba",
     kilos: 78,
@@ -224,6 +249,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Chelal Tea Factory",
+    cluster: "Chelal Cluster",
+    farm: "Koech Tea Farm",
     supervisor: "Daniel Koech",
     plucker: "Joseph Kipngetich",
     kilos: 210,
@@ -236,6 +263,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Chelal Tea Factory",
+    cluster: "Chelal Cluster",
+    farm: "Koech Tea Farm",
     supervisor: "Daniel Koech",
     plucker: "Joseph Kipngetich",
     kilos: 205,
@@ -248,6 +277,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Chelal Tea Factory",
+    cluster: "Chelal Cluster",
+    farm: "Koech Tea Farm",
     supervisor: "Daniel Koech",
     plucker: "Joseph Kipngetich",
     kilos: 215,
@@ -262,6 +293,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kipkoimet Tea Factory",
+    cluster: "Kipkoimet Cluster",
+    farm: "Mutai Tea Farm",
     supervisor: "Joshua Mutai",
     plucker: "Wilson Kipsang",
     kilos: 160,
@@ -274,6 +307,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kipkoimet Tea Factory",
+    cluster: "Kipkoimet Cluster",
+    farm: "Mutai Tea Farm",
     supervisor: "Joshua Mutai",
     plucker: "Wilson Kipsang",
     kilos: 155,
@@ -286,6 +321,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kipkoimet Tea Factory",
+    cluster: "Kipkoimet Cluster",
+    farm: "Mutai Tea Farm",
     supervisor: "Joshua Mutai",
     plucker: "Wilson Kipsang",
     kilos: 168,
@@ -298,6 +335,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Chemomi Tea Factory",
+    cluster: "Chemomi Cluster",
+    farm: "Bett Tea Farm",
     supervisor: "Catherine Bett",
     plucker: "Eliud Kipchoge",
     kilos: 130,
@@ -310,6 +349,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Chemomi Tea Factory",
+    cluster: "Chemomi Cluster",
+    farm: "Bett Tea Farm",
     supervisor: "Catherine Bett",
     plucker: "Eliud Kipchoge",
     kilos: 125,
@@ -322,6 +363,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Chemomi Tea Factory",
+    cluster: "Chemomi Cluster",
+    farm: "Bett Tea Farm",
     supervisor: "Catherine Bett",
     plucker: "Eliud Kipchoge",
     kilos: 135,
@@ -334,6 +377,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kapsumbeiwa Tea Factory",
+    cluster: "Kapsumbeiwa Cluster",
+    farm: "Kiplagat Tea Farm",
     supervisor: "Fredrick Kiplagat",
     plucker: "Hellen Chebet",
     kilos: 95,
@@ -346,6 +391,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kapsumbeiwa Tea Factory",
+    cluster: "Kapsumbeiwa Cluster",
+    farm: "Kiplagat Tea Farm",
     supervisor: "Fredrick Kiplagat",
     plucker: "Hellen Chebet",
     kilos: 100,
@@ -358,6 +405,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kapsumbeiwa Tea Factory",
+    cluster: "Kapsumbeiwa Cluster",
+    farm: "Kiplagat Tea Farm",
     supervisor: "Fredrick Kiplagat",
     plucker: "Hellen Chebet",
     kilos: 92,
@@ -372,6 +421,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Sotik Tea Factory",
+    cluster: "Sotik Cluster",
+    farm: "Rono Tea Farm",
     supervisor: "Patrick Rono",
     plucker: "Moses Kirui",
     kilos: 112,
@@ -384,6 +435,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Sotik Tea Factory",
+    cluster: "Sotik Cluster",
+    farm: "Rono Tea Farm",
     supervisor: "Patrick Rono",
     plucker: "Moses Kirui",
     kilos: 118,
@@ -396,6 +449,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Sotik Tea Factory",
+    cluster: "Sotik Cluster",
+    farm: "Rono Tea Farm",
     supervisor: "Patrick Rono",
     plucker: "Moses Kirui",
     kilos: 115,
@@ -408,6 +463,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Kapsuser Tea Factory",
+    cluster: "Kapsuser Cluster",
+    farm: "Korir Tea Farm",
     supervisor: "Nancy Korir",
     plucker: "Beatrice Chepngeno",
     kilos: 88,
@@ -420,6 +477,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Kapsuser Tea Factory",
+    cluster: "Kapsuser Cluster",
+    farm: "Korir Tea Farm",
     supervisor: "Nancy Korir",
     plucker: "Beatrice Chepngeno",
     kilos: 92,
@@ -432,6 +491,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Kapsuser Tea Factory",
+    cluster: "Kapsuser Cluster",
+    farm: "Korir Tea Farm",
     supervisor: "Nancy Korir",
     plucker: "Beatrice Chepngeno",
     kilos: 85,
@@ -446,6 +507,8 @@ const ALL_DATA = [
   {
     zone: "Kiambu",
     factory: "Githambo Tea Factory",
+    cluster: "Githambo Cluster",
+    farm: "Mwangi Tea Farm",
     supervisor: "Peter Mwangi",
     plucker: "John Kamau",
     kilos: 67,
@@ -458,6 +521,8 @@ const ALL_DATA = [
   {
     zone: "Kiambu",
     factory: "Githambo Tea Factory",
+    cluster: "Githambo Cluster",
+    farm: "Mwangi Tea Farm",
     supervisor: "Peter Mwangi",
     plucker: "John Kamau",
     kilos: 72,
@@ -470,6 +535,8 @@ const ALL_DATA = [
   {
     zone: "Kiambu",
     factory: "Githambo Tea Factory",
+    cluster: "Githambo Cluster",
+    farm: "Mwangi Tea Farm",
     supervisor: "Peter Mwangi",
     plucker: "John Kamau",
     kilos: 70,
@@ -482,6 +549,8 @@ const ALL_DATA = [
   {
     zone: "Kiambu",
     factory: "Kiamara Tea Factory",
+    cluster: "Kiamara Cluster",
+    farm: "Wanjiku Tea Farm",
     supervisor: "Lucy Wanjiku",
     plucker: "Grace Njeri",
     kilos: 54,
@@ -494,6 +563,8 @@ const ALL_DATA = [
   {
     zone: "Kiambu",
     factory: "Kiamara Tea Factory",
+    cluster: "Kiamara Cluster",
+    farm: "Wanjiku Tea Farm",
     supervisor: "Lucy Wanjiku",
     plucker: "Grace Njeri",
     kilos: 58,
@@ -506,6 +577,8 @@ const ALL_DATA = [
   {
     zone: "Kiambu",
     factory: "Kiamara Tea Factory",
+    cluster: "Kiamara Cluster",
+    farm: "Wanjiku Tea Farm",
     supervisor: "Lucy Wanjiku",
     plucker: "Grace Njeri",
     kilos: 56,
@@ -520,6 +593,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Momul Tea Factory",
+    cluster: "Momul Cluster",
+    farm: "Kiprotich Tea Farm",
     supervisor: "Wilson Kipruto",
     plucker: "James Kipkemoi",
     kilos: 158,
@@ -532,6 +607,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Momul Tea Factory",
+    cluster: "Momul Cluster",
+    farm: "Kiprotich Tea Farm",
     supervisor: "Wilson Kipruto",
     plucker: "James Kipkemoi",
     kilos: 162,
@@ -544,6 +621,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Chelal Tea Factory",
+    cluster: "Chelal Cluster",
+    farm: "Koech Tea Farm",
     supervisor: "Daniel Koech",
     plucker: "Joseph Kipngetich",
     kilos: 225,
@@ -556,6 +635,8 @@ const ALL_DATA = [
   {
     zone: "Kericho",
     factory: "Chelal Tea Factory",
+    cluster: "Chelal Cluster",
+    farm: "Koech Tea Farm",
     supervisor: "Daniel Koech",
     plucker: "Joseph Kipngetich",
     kilos: 230,
@@ -568,6 +649,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kipkoimet Tea Factory",
+    cluster: "Kipkoimet Cluster",
+    farm: "Mutai Tea Farm",
     supervisor: "Joshua Mutai",
     plucker: "Wilson Kipsang",
     kilos: 175,
@@ -580,6 +663,8 @@ const ALL_DATA = [
   {
     zone: "Nandi",
     factory: "Kipkoimet Tea Factory",
+    cluster: "Kipkoimet Cluster",
+    farm: "Mutai Tea Farm",
     supervisor: "Joshua Mutai",
     plucker: "Wilson Kipsang",
     kilos: 180,
@@ -592,6 +677,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Sotik Tea Factory",
+    cluster: "Sotik Cluster",
+    farm: "Rono Tea Farm",
     supervisor: "Patrick Rono",
     plucker: "Moses Kirui",
     kilos: 125,
@@ -604,6 +691,8 @@ const ALL_DATA = [
   {
     zone: "Bomet",
     factory: "Sotik Tea Factory",
+    cluster: "Sotik Cluster",
+    farm: "Rono Tea Farm",
     supervisor: "Patrick Rono",
     plucker: "Moses Kirui",
     kilos: 130,
@@ -706,10 +795,9 @@ export default function TeaDashboardPage() {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [zone, setZone] = useState("");
-  const [farmer, setFarmer] = useState("");
   const [factory, setFactory] = useState("");
-  const [supervisor, setSupervisor] = useState("");
-  const [plucker, setPlucker] = useState("");
+  const [cluster, setCluster] = useState("");
+  const [farm, setFarm] = useState("");
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -718,10 +806,9 @@ export default function TeaDashboardPage() {
 
   const handleClearFilters = () => {
     setZone("");
-    setFarmer("");
     setFactory("");
-    setSupervisor("");
-    setPlucker("");
+    setCluster("");
+    setFarm("");
     setStartDate("");
     setEndDate("");
   };
@@ -738,10 +825,9 @@ export default function TeaDashboardPage() {
 
     return data.filter((item) => {
       const matchesZone = !zone || item.zone === zone;
-      const matchesFarmer = !farmer || item.farmerName === farmer;
       const matchesFactory = !factory || item.factory === factory;
-      const matchesSupervisor = !supervisor || item.supervisor === supervisor;
-      const matchesPlucker = !plucker || item.plucker === plucker;
+      const matchesCluster = !cluster || item.cluster === cluster;
+      const matchesFarm = !farm || item.farm === farm;
       let matchesDate = true;
       if (startDate && endDate) {
         const itemDate = new Date(item.date);
@@ -751,19 +837,17 @@ export default function TeaDashboardPage() {
       }
       return (
         matchesZone &&
-        matchesFarmer &&
         matchesFactory &&
-        matchesSupervisor &&
-        matchesPlucker &&
+        matchesCluster &&
+        matchesFarm &&
         matchesDate
       );
     });
   }, [
     zone,
-    farmer,
     factory,
-    supervisor,
-    plucker,
+    cluster,
+    farm,
     startDate,
     endDate,
     user,
@@ -772,19 +856,17 @@ export default function TeaDashboardPage() {
   ]);
 
   const stats = useMemo(() => {
-    const farmers = new Set(filteredData.map((d) => d.plucker)).size;
-    const supervisors = new Set(filteredData.map((d) => d.supervisor)).size;
-    const factories = new Set(filteredData.map((d) => d.factory)).size;
     const zones = new Set(filteredData.map((d) => d.zone)).size;
-    const totalKilos = filteredData.reduce((sum, d) => sum + d.kilos, 0);
-    const avgKilosPerFarmer = farmers > 0 ? totalKilos / farmers : 0;
+    const factories = new Set(filteredData.map((d) => d.factory)).size;
+    const clusters = new Set(filteredData.map((d) => d.cluster)).size;
+    const farms = new Set(filteredData.map((d) => d.farm)).size;
+    const farmWorkers = new Set(filteredData.map((d) => d.plucker)).size;
     return {
-      farmers,
-      supervisors,
-      factories,
       zones,
-      totalKilos,
-      avgKilosPerFarmer,
+      factories,
+      clusters,
+      farms,
+      farmWorkers,
     };
   }, [filteredData]);
 
@@ -878,10 +960,9 @@ export default function TeaDashboardPage() {
     `${kilos.toLocaleString("en-KE")} kg`;
 
   const uniqueZones = [...new Set(ALL_DATA.map((d) => d.zone))];
-  const uniqueFarmers = [...new Set(ALL_DATA.map((d) => d.farmerName))];
   const uniqueFactories = [...new Set(ALL_DATA.map((d) => d.factory))];
-  const uniqueSupervisors = [...new Set(ALL_DATA.map((d) => d.supervisor))];
-  const uniquePluckers = [...new Set(ALL_DATA.map((d) => d.plucker))];
+  const uniqueClusters = [...new Set(ALL_DATA.map((d) => d.cluster))];
+  const uniqueFarms = [...new Set(ALL_DATA.map((d) => d.farm))];
 
   const dateRangeText =
     startDate && endDate
@@ -973,23 +1054,6 @@ export default function TeaDashboardPage() {
               </div>
               <div>
                 <label className="text-gray-700 mb-1 flex text-xs font-medium">
-                  Farmer
-                </label>
-                <select
-                  value={farmer}
-                  onChange={(e) => setFarmer(e.target.value)}
-                  className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
-                >
-                  <option value="">All Farmers</option>
-                  {uniqueFarmers.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-gray-700 mb-1 flex text-xs font-medium">
                   Factory
                 </label>
                 <select
@@ -1007,39 +1071,39 @@ export default function TeaDashboardPage() {
               </div>
               <div>
                 <label className="text-gray-700 mb-1 flex text-xs font-medium">
-                  Supervisor
+                  Cluster
                 </label>
                 <select
-                  value={supervisor}
-                  onChange={(e) => setSupervisor(e.target.value)}
+                  value={cluster}
+                  onChange={(e) => setCluster(e.target.value)}
                   className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
                 >
-                  <option value="">All Supervisors</option>
-                  {uniqueSupervisors.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                  <option value="">All Clusters</option>
+                  {uniqueClusters.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="text-gray-700 mb-1 flex text-xs font-medium">
-                  Farm Worker/Plucker
+                  Farm
                 </label>
                 <select
-                  value={plucker}
-                  onChange={(e) => setPlucker(e.target.value)}
+                  value={farm}
+                  onChange={(e) => setFarm(e.target.value)}
                   className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
                 >
-                  <option value="">All Workers</option>
-                  {uniquePluckers.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
+                  <option value="">All Farms</option>
+                  {uniqueFarms.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
                     </option>
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 lg:col-span-2">
                 <div>
                   <label className="text-gray-700 mb-1 flex text-xs font-medium">
                     Start Date
@@ -1069,10 +1133,9 @@ export default function TeaDashboardPage() {
                 onClick={handleClearFilters}
                 disabled={
                   !zone &&
-                  !farmer &&
                   !factory &&
-                  !supervisor &&
-                  !plucker &&
+                  !cluster &&
+                  !farm &&
                   !startDate &&
                   !endDate
                 }
@@ -1088,33 +1151,18 @@ export default function TeaDashboardPage() {
       <div className="flex-1 overflow-y-auto px-3 md:px-4 py-2 pb-20 md:pb-4">
         {/* Stats Cards - Only show for Admin and Farmer */}
         {(isAdmin || isFarmer) && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                  <MdAgriculture className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                  <MdLocationOn className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-[10px] md:text-xs text-slate-500">
-                    Total Farmers
+                    Total Zones
                   </p>
-                  <p className="text-lg md:text-2xl font-bold text-slate-900">
-                    {formatNumber(stats.farmers)}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                  <MdSupervisorAccount className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-[10px] md:text-xs text-slate-500">
-                    Supervisors
-                  </p>
-                  <p className="text-lg md:text-2xl font-bold text-emerald-600">
-                    {formatNumber(stats.supervisors)}
+                  <p className="text-lg md:text-2xl font-bold text-orange-600">
+                    {formatNumber(stats.zones)}
                   </p>
                 </div>
               </div>
@@ -1136,43 +1184,45 @@ export default function TeaDashboardPage() {
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                  <MdLocationOn className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                  <MdGroup className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-[10px] md:text-xs text-slate-500">Zones</p>
-                  <p className="text-lg md:text-2xl font-bold text-orange-600">
-                    {formatNumber(stats.zones)}
+                  <p className="text-[10px] md:text-xs text-slate-500">
+                    Clusters
+                  </p>
+                  <p className="text-lg md:text-2xl font-bold text-blue-600">
+                    {formatNumber(stats.clusters)}
                   </p>
                 </div>
               </div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
-                  <MdScale className="w-4 h-4 md:w-5 md:h-5 text-amber-600" />
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                  <MdAgriculture className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
                 </div>
                 <div>
                   <p className="text-[10px] md:text-xs text-slate-500">
-                    Total Tea
+                    Farms
                   </p>
-                  <p className="text-lg md:text-2xl font-bold text-amber-600">
-                    {formatKilosLower(stats.totalKilos)}
-                  </p>{" "}
+                  <p className="text-lg md:text-2xl font-bold text-emerald-600">
+                    {formatNumber(stats.farms)}
+                  </p>
                 </div>
               </div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
-                  <MdTrendingUp className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
+                  <MdPeople className="w-4 h-4 md:w-5 md:h-5 text-teal-600" />
                 </div>
                 <div>
                   <p className="text-[10px] md:text-xs text-slate-500">
-                    Avg/Farmer
+                    Farm Workers
                   </p>
                   <p className="text-lg md:text-2xl font-bold text-teal-600">
-                    {formatKilosLower(Math.round(stats.avgKilosPerFarmer))}
+                    {formatNumber(stats.farmWorkers)}
                   </p>
                 </div>
               </div>
