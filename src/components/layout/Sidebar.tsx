@@ -5,13 +5,10 @@ import {
   MdLogout,
   MdClose,
   MdPeople,
-  MdAgriculture,
   MdFactory,
-  MdScale,
   MdMap,
   MdSupervisorAccount,
   MdPerson,
-  MdDesignServices,
   MdGroup,
   MdSchedule,
   MdBookOnline,
@@ -28,7 +25,6 @@ import {
   useIsAdmin,
   useIsFarmer,
   useIsSupervisor,
-  useIsPlucker,
 } from "@/hooks/useAuth";
 
 interface SidebarProps {
@@ -43,9 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   const isAdmin = useIsAdmin();
   const isFarmer = useIsFarmer();
   const isSupervisor = useIsSupervisor();
-  const isPlucker = useIsPlucker();
   
-  // Add client-side only state to prevent hydration mismatch
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -53,124 +47,127 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   }, []);
 
   const menuItems = useMemo(() => {
-    // All menu items definition
+    // Define items with proper role-based visibility
     const allMenuItems = [
+      // Common items for all roles
       {
         name: "Dashboard",
         icon: MdDashboard,
         href: "/dashboard",
         active: pathname === "/dashboard",
-        visibleTo: ["admin", "farmer", "supervisor"],
+        roles: ["admin", "farmer", "supervisor"],
       },
+      // Admin only items
       {
         name: "Farm Workers",
         icon: MdPeople,
         href: "/farm-workers",
         active: pathname.startsWith("/farm-workers"),
-        visibleTo: ["admin"],
-      },
-      {
-        name: "Farm Supervisors",
-        icon: MdSupervisorAccount,
-        href: "/farm-supervisors",
-        active: pathname.startsWith("/farm-supervisors"),
-        visibleTo: ["admin", "farmer"],
+        roles: ["admin"],
       },
       {
         name: "Farmers",
         icon: MdPerson,
         href: "/farmers",
         active: pathname.startsWith("/farmers"),
-        visibleTo: ["admin"],
-      },
-      {
-        name: "Factory",
-        icon: MdFactory,
-        href: "/factories",
-        active: pathname.startsWith("/factories"),
-        visibleTo: ["admin", "farmer"],
-      },
-      {
-        name: "Schedules",
-        icon: MdSchedule,
-        href: "/schedules",
-        active: pathname.startsWith("/schedules"),
-        visibleTo: ["admin", "farmer"],
-      },
-      {
-        name: "My Schedules",
-        icon: MdSchedule,
-        href: "/schedules",
-        active: pathname.startsWith("/schedules"),
-        visibleTo: ["supervisor"],
-      },
-      {
-        name: "Bookings",
-        icon: MdBookOnline,
-        href: "/bookings",
-        active: pathname.startsWith("/bookings"),
-        visibleTo: ["admin", "farmer"],
-      },
-      {
-        name: "My Bookings",
-        icon: MdBookOnline,
-        href: "/bookings",
-        active: pathname.startsWith("/bookings"),
-        visibleTo: ["supervisor"],
-      },
-      {
-        name: "Farms",
-        icon: MdMap,
-        href: "/farm-map",
-        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
-        visibleTo: ["admin"],
-      },
-      {
-        name: "My Farms",
-        icon: MdMap,
-        href: "/farm-map",
-        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
-        visibleTo: ["supervisor"],
-      },
-      {
-        name: "Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        visibleTo: ["admin", "farmer"],
-      },
-      {
-        name: "My Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        visibleTo: ["supervisor"],
-      },
-      {
-        name: "Worker Payments",
-        icon: MdPayments,
-        href: "/worker-payments",
-        active: pathname.startsWith("/worker-payments"),
-        visibleTo: ["admin", "farmer"],
+        roles: ["admin"],
       },
       {
         name: "HRIS",
         icon: MdGroup,
         href: "/hris/users",
         active: pathname.startsWith("/hris"),
-        visibleTo: ["admin"],
+        roles: ["admin"],
+      },
+      // Admin & Farmer items (management views)
+      {
+        name: "Farm Supervisors",
+        icon: MdSupervisorAccount,
+        href: "/farm-supervisors",
+        active: pathname.startsWith("/farm-supervisors"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Factory",
+        icon: MdFactory,
+        href: "/factories",
+        active: pathname.startsWith("/factories"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Schedules",
+        icon: MdSchedule,
+        href: "/schedules",
+        active: pathname.startsWith("/schedules"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Bookings",
+        icon: MdBookOnline,
+        href: "/bookings",
+        active: pathname.startsWith("/bookings"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Farms",
+        icon: MdMap,
+        href: "/farm-map",
+        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
+        roles: ["admin"],
+      },
+      {
+        name: "Work Groups",
+        icon: MdGroupWork,
+        href: "/work-groups",
+        active: pathname.startsWith("/work-groups"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Worker Payments",
+        icon: MdPayments,
+        href: "/worker-payments",
+        active: pathname.startsWith("/worker-payments"),
+        roles: ["admin", "farmer"],
+      },
+      // Supervisor only items (personal views)
+      {
+        name: "My Schedules",
+        icon: MdSchedule,
+        href: "/schedules",
+        active: pathname.startsWith("/schedules"),
+        roles: ["supervisor"],
+      },
+      {
+        name: "My Bookings",
+        icon: MdBookOnline,
+        href: "/bookings",
+        active: pathname.startsWith("/bookings"),
+        roles: ["supervisor"],
+      },
+      {
+        name: "My Farms",
+        icon: MdMap,
+        href: "/farm-map",
+        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
+        roles: ["supervisor"],
+      },
+      {
+        name: "My Work Groups",
+        icon: MdGroupWork,
+        href: "/work-groups",
+        active: pathname.startsWith("/work-groups"),
+        roles: ["supervisor"],
       },
     ];
 
-    // Filter menu items based on user role
+    // Get user role
     const role = user?.role;
-
+    
+    // Filter based on role - NO special admin override
     return allMenuItems.filter((item) => {
-      if (isAdmin) return true; // Admin sees everything
-      if (role && item.visibleTo.includes(role)) return true;
-      return false;
+      return role && item.roles.includes(role);
     });
-  }, [pathname, user, isAdmin]);
+  }, [pathname, user]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -182,7 +179,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
     }
   };
 
-  // Show loading state only on client, or a consistent placeholder on server
   if (!isClient || isLoading) {
     return (
       <div className="bg-primary-hover border-r border-primary-hover/20 h-full flex items-center justify-center">
@@ -234,7 +230,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       <nav className="flex-1 py-2 px-3">
         <ul className="flex flex-col space-y-0.5">
           {menuItems.map((item) => (
-            <li key={item.href}>
+            <li key={`${item.href}-${item.name}`}>
               <Link
                 href={item.href}
                 onClick={handleLinkClick}
