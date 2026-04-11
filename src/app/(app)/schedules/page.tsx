@@ -14,6 +14,11 @@ import {
   MdChevronLeft,
   MdChevronRight,
   MdToday,
+  MdAgriculture,
+  MdLocationOn,
+  MdPerson,
+  MdCheckCircle,
+  MdCancel as MdCancelIcon,
 } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
@@ -27,6 +32,54 @@ import {
   useCancelSchedule,
 } from "@/hooks/useSchedule";
 import type { Schedule } from "@/types/schedule";
+
+// Activity color mapping
+const getActivityColor = (activityName: string) => {
+  const colors: Record<string, { bg: string; text: string; border: string; light: string }> = {
+    Plucking: {
+      bg: "bg-emerald-500",
+      text: "text-emerald-700",
+      border: "border-emerald-200",
+      light: "bg-emerald-50",
+    },
+    Pruning: {
+      bg: "bg-blue-500",
+      text: "text-blue-700",
+      border: "border-blue-200",
+      light: "bg-blue-50",
+    },
+    Spraying: {
+      bg: "bg-purple-500",
+      text: "text-purple-700",
+      border: "border-purple-200",
+      light: "bg-purple-50",
+    },
+    Fertilizing: {
+      bg: "bg-amber-500",
+      text: "text-amber-700",
+      border: "border-amber-200",
+      light: "bg-amber-50",
+    },
+    Harvesting: {
+      bg: "bg-rose-500",
+      text: "text-rose-700",
+      border: "border-rose-200",
+      light: "bg-rose-50",
+    },
+    Weeding: {
+      bg: "bg-teal-500",
+      text: "text-teal-700",
+      border: "border-teal-200",
+      light: "bg-teal-50",
+    },
+  };
+  return colors[activityName] || {
+    bg: "bg-gray-500",
+    text: "text-gray-700",
+    border: "border-gray-200",
+    light: "bg-gray-50",
+  };
+};
 
 // Calendar View Component
 const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
@@ -76,15 +129,17 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
     "July", "August", "September", "October", "November", "December"
   ];
 
-  const days = getDaysInMonth(currentDate);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const days = getDaysInMonth(currentDate);
 
   const goToPreviousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setSelectedDate(null);
   };
 
   const goToNextMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setSelectedDate(null);
   };
 
   const goToToday = () => {
@@ -93,14 +148,40 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
   };
 
   const selectedDateSchedules = selectedDate ? getSchedulesForDate(selectedDate) : [];
+  const totalSchedules = schedules.length;
+  const completedSchedules = schedules.filter(s => s.status !== "cancelled").length;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
-        {/* Calendar */}
-        <div className="lg:col-span-2 p-4">
-          {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+      {/* Calendar Header with Stats */}
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Activity Calendar</h2>
+            <p className="text-sm text-gray-500 mt-0.5">View and manage farm schedules</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{totalSchedules}</p>
+              <p className="text-xs text-gray-500">Total Schedules</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-green-600">{completedSchedules}</p>
+              <p className="text-xs text-gray-500">Active</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-red-500">{totalSchedules - completedSchedules}</p>
+              <p className="text-xs text-gray-500">Cancelled</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        {/* Calendar Grid */}
+        <div className="lg:col-span-2 p-6 border-r border-gray-200">
+          {/* Calendar Navigation */}
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <button
                 onClick={goToPreviousMonth}
@@ -108,7 +189,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
               >
                 <MdChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-900 min-w-[180px] text-center">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h2>
               <button
@@ -120,7 +201,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
             </div>
             <button
               onClick={goToToday}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
             >
               <MdToday className="w-4 h-4" />
               Today
@@ -128,63 +209,93 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           </div>
 
           {/* Week Days Header */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {weekDays.map((day) => (
-              <div key={day} className="text-center py-2 text-xs font-medium text-gray-500">
+          <div className="grid grid-cols-7 gap-2 mb-3">
+            {weekDays.map((day, index) => (
+              <div
+                key={day}
+                className={`text-center py-2 text-xs font-semibold rounded-lg ${
+                  index === 0 || index === 6
+                    ? "text-rose-500 bg-rose-50"
+                    : "text-gray-500 bg-gray-50"
+                }`}
+              >
                 {day}
               </div>
             ))}
           </div>
 
           {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-2">
             {days.map((day, index) => {
               if (!day) {
-                return <div key={`empty-${index}`} className="min-h-[100px] bg-gray-50 rounded-lg" />;
+                return (
+                  <div
+                    key={`empty-${index}`}
+                    className="min-h-[120px] bg-gray-50 rounded-xl border border-gray-100"
+                  />
+                );
               }
 
               const daySchedules = getSchedulesForDate(day);
               const isToday = new Date().toDateString() === day.toDateString();
               const isSelected = selectedDate?.toDateString() === day.toDateString();
+              const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
               return (
                 <button
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
-                  className={`min-h-[100px] p-2 rounded-lg border transition-all text-left ${
-                    isSelected
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                  className={`
+                    min-h-[120px] p-2 rounded-xl border-2 transition-all text-left
+                    ${isSelected
+                      ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
                       : isToday
-                      ? "border-primary/50 bg-primary/5"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
+                      ? "border-primary/40 bg-gradient-to-br from-primary/5 to-transparent"
+                      : isWeekend
+                      ? "border-rose-100 bg-rose-50/30 hover:bg-rose-50"
+                      : "border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50"
+                    }
+                  `}
                 >
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-2">
                     <span
-                      className={`text-sm font-medium ${
-                        isToday ? "text-primary" : "text-gray-700"
-                      }`}
+                      className={`
+                        text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full
+                        ${isToday
+                          ? "bg-primary text-white"
+                          : isWeekend
+                          ? "text-rose-600"
+                          : "text-gray-700"
+                        }
+                      `}
                     >
                       {day.getDate()}
                     </span>
                     {daySchedules.length > 0 && (
-                      <span className="text-xs font-medium text-primary">
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
                         {daySchedules.length}
                       </span>
                     )}
                   </div>
-                  <div className="space-y-1">
-                    {daySchedules.slice(0, 2).map((schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="text-xs truncate px-1.5 py-0.5 rounded bg-gray-100 text-gray-700"
-                        title={schedule.reference_code}
-                      >
-                        {schedule.activity.name}
-                      </div>
-                    ))}
+
+                  <div className="space-y-1.5">
+                    {daySchedules.slice(0, 2).map((schedule) => {
+                      const colors = getActivityColor(schedule.activity.name);
+                      return (
+                        <div
+                          key={schedule.id}
+                          className={`text-xs truncate px-1.5 py-1 rounded-lg ${colors.light} ${colors.text} border ${colors.border}`}
+                          title={`${schedule.reference_code} - ${schedule.activity.name}`}
+                        >
+                          <span className="font-medium">{schedule.activity.name.substring(0, 8)}</span>
+                          {schedule.status === "cancelled" && (
+                            <MdCancelIcon className="w-3 h-3 inline ml-1 text-red-500" />
+                          )}
+                        </div>
+                      );
+                    })}
                     {daySchedules.length > 2 && (
-                      <div className="text-xs text-gray-400 px-1.5">
+                      <div className="text-xs text-gray-400 text-center pt-1">
                         +{daySchedules.length - 2} more
                       </div>
                     )}
@@ -195,67 +306,114 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           </div>
         </div>
 
-        {/* Selected Date Details */}
-        <div className="p-4">
-          <div className="mb-4">
-            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-              <MdEvent className="w-5 h-5 text-primary" />
-              {selectedDate ? (
-                selectedDate.toLocaleDateString("en-KE", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
-              ) : (
-                "Select a date"
-              )}
-            </h3>
+        {/* Selected Date Details Panel */}
+        <div className="p-6 bg-gradient-to-br from-gray-50 to-white">
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MdEvent className="w-4 h-4 text-primary" />
+              </div>
+              <h3 className="font-semibold text-gray-900">
+                {selectedDate ? (
+                  selectedDate.toLocaleDateString("en-KE", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                ) : (
+                  "Select a date"
+                )}
+              </h3>
+            </div>
           </div>
 
           {selectedDate && selectedDateSchedules.length === 0 && (
-            <div className="text-center py-8">
-              <MdSchedule className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">No schedules for this date</p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MdSchedule className="w-8 h-8 text-gray-300" />
+              </div>
+              <p className="text-gray-500 font-medium">No schedules for this date</p>
+              <p className="text-xs text-gray-400 mt-1">Click the + button to create one</p>
             </div>
           )}
 
           {selectedDate && selectedDateSchedules.length > 0 && (
             <div className="space-y-3">
-              {selectedDateSchedules.map((schedule) => (
-                <div
-                  key={schedule.id}
-                  className="p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">
-                        {schedule.reference_code}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {schedule.activity.name}
-                      </p>
+              {selectedDateSchedules.map((schedule) => {
+                const colors = getActivityColor(schedule.activity.name);
+                return (
+                  <div
+                    key={schedule.id}
+                    className={`p-4 rounded-xl border-2 ${colors.border} ${colors.light} hover:shadow-md transition-all cursor-pointer`}
+                    onClick={() => window.location.href = `/schedules/${schedule.id}`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-2 h-2 rounded-full ${colors.bg}`} />
+                          <p className="font-semibold text-gray-900 text-sm">
+                            {schedule.reference_code}
+                          </p>
+                        </div>
+                        <p className={`text-xs font-medium ${colors.text}`}>
+                          {schedule.activity.name}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                          schedule.status
+                        )}`}
+                      >
+                        {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
+                      </span>
                     </div>
-                    <span
-                      className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
-                        schedule.status
-                      )}`}
-                    >
-                      {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
-                    </span>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <MdAgriculture className="w-3.5 h-3.5 text-gray-400" />
+                        <span className="text-gray-600">{schedule.farm.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        <MdLocationOn className="w-3.5 h-3.5 text-gray-400" />
+                        <span className="text-gray-600">{schedule.farm.zone.name}</span>
+                      </div>
+                      {schedule.created_by && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <MdPerson className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="text-gray-600">{schedule.created_by.name}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {schedule.notes && (
+                      <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-200">
+                        {schedule.notes}
+                      </p>
+                    )}
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-600">
-                      <span className="font-medium">Farm:</span> {schedule.farm.name}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      <span className="font-medium">Zone:</span> {schedule.farm.zone.name}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
+
+          {/* Activity Legend */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              Activity Legend
+            </p>
+            <div className="space-y-2">
+              {["Plucking", "Pruning", "Spraying", "Fertilizing", "Harvesting", "Weeding"].map((activity) => {
+                const colors = getActivityColor(activity);
+                return (
+                  <div key={activity} className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${colors.bg}`} />
+                    <span className={`text-xs ${colors.text}`}>{activity}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -287,280 +445,293 @@ export default function SchedulesPage() {
 
   return (
     <Modal>
-      <div className="min-h-screen p-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <MdSchedule className="w-6 h-6 text-emerald-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Schedules</h1>
-              <p className="text-sm text-gray-500">
-                Manage farm activity schedules
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search schedules..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-              />
-            </div>
-            <Button
-              type="small"
-              to="/schedules/new"
-              className="flex items-center gap-1"
-            >
-              <MdAdd className="w-4 h-4" />
-              Add Schedule
-            </Button>
-          </div>
-        </div>
-
-        {/* Tab Bar */}
-        <div className="mb-4">
-          <div className="flex gap-2 border-b border-gray-200">
-            <button
-              onClick={() => setViewMode("list")}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
-                viewMode === "list"
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <MdViewList className="w-4 h-4" />
-              List View
-            </button>
-            <button
-              onClick={() => setViewMode("calendar")}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
-                viewMode === "calendar"
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <MdCalendarViewMonth className="w-4 h-4" />
-              Calendar View
-            </button>
-          </div>
-        </div>
-
-        {/* Filters (only show in list view) */}
-        {viewMode === "list" && (
-          <div className="flex gap-2 items-center mb-4">
-            <div className="w-44">
-              <SearchableSelect
-                label=""
-                options={[
-                  { value: "", label: "All Statuses" },
-                  { value: "scheduled", label: "Scheduled" },
-                  { value: "cancelled", label: "Cancelled" },
-                ]}
-                value={statusFilter}
-                onChange={(val) => {
-                  setStatusFilter(val);
-                  setPage(1);
-                }}
-                placeholder="Filter by status"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* List View */}
-        {viewMode === "list" && (
-          <>
-            {isLoading && (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+      <div className="min-h-screen p-4 bg-gray-50">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
+                <MdSchedule className="w-5 h-5 text-white" />
               </div>
-            )}
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-                Failed to load schedules. Please try again later.
-              </div>
-            )}
-
-            {!isLoading && schedules.length === 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-                <MdSchedule className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No schedules yet
-                </h3>
-                <p className="text-gray-500 mb-4">
-                  Get started by creating your first schedule.
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Schedules</h1>
+                <p className="text-sm text-gray-500">
+                  Manage farm activity schedules
                 </p>
               </div>
-            )}
-
-            {schedules.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Reference
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Activity
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Farm
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {schedules.map((schedule) => (
-                        <tr key={schedule.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {schedule.reference_code}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {schedule.activity.name}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {schedule.farm.name}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {schedule.farm.zone.name}
-                            </div>
-                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {new Date(
-                                schedule.scheduled_date,
-                              ).toLocaleDateString()}
-                            </div>
-                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                                schedule.status === "cancelled"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-green-100 text-green-800"
-                              }`}
-                            >
-                              {schedule.status.charAt(0).toUpperCase() +
-                                schedule.status.slice(1)}
-                            </span>
-                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            <ActionMenu menuId={`schedule-${schedule.id}`}>
-                              <ActionMenu.Trigger />
-                              <ActionMenu.Content>
-                                <ActionMenu.Item
-                                  onClick={() =>
-                                    router.push(`/schedules/${schedule.id}`)
-                                  }
-                                >
-                                  <FiEye className="h-4 w-4" />
-                                  View
-                                </ActionMenu.Item>
-                                <ActionMenu.Item
-                                  onClick={() =>
-                                    router.push(`/schedules/${schedule.id}/edit`)
-                                  }
-                                >
-                                  <FiEdit className="h-4 w-4" />
-                                  Edit
-                                </ActionMenu.Item>
-                                {schedule.status !== "cancelled" && (
-                                  <ActionMenu.Item
-                                    onClick={() =>
-                                      cancelSchedule.mutate(schedule.id)
-                                    }
-                                    className="text-orange-600"
-                                  >
-                                    <MdCancel className="h-4 w-4" />
-                                    Cancel
-                                  </ActionMenu.Item>
-                                )}
-                                <Modal.Open opens="delete-schedule">
-                                  <ActionMenu.Item
-                                    onClick={() => setSelectedSchedule(schedule)}
-                                    className="text-red-600"
-                                  >
-                                    <FiTrash className="h-4 w-4" />
-                                    Delete
-                                  </ActionMenu.Item>
-                                </Modal.Open>
-                              </ActionMenu.Content>
-                            </ActionMenu>
-                           </td>
-                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {pagination && pagination.total_pages > 1 && (
-                  <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-                    <p className="text-sm text-gray-500">
-                      Page {pagination.current_page} of {pagination.total_pages} (
-                      {pagination.total_items} items)
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={pagination.current_page <= 1}
-                        className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => setPage((p) => p + 1)}
-                        disabled={!pagination.next_page}
-                        className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search schedules..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-64 pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary text-gray-900 placeholder:text-gray-500"
+                />
               </div>
-            )}
-          </>
-        )}
+              <Button
+                type="small"
+                to="/schedules/new"
+                className="flex items-center gap-1 bg-primary hover:bg-primary/90"
+              >
+                <MdAdd className="w-4 h-4" />
+                Add Schedule
+              </Button>
+            </div>
+          </div>
 
-        {/* Calendar View */}
-        {viewMode === "calendar" && (
-          <CalendarView schedules={schedules} />
-        )}
+          {/* Tab Bar */}
+          <div className="mb-6">
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  viewMode === "list"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <MdViewList className="w-4 h-4" />
+                List View
+              </button>
+              <button
+                onClick={() => setViewMode("calendar")}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  viewMode === "calendar"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <MdCalendarViewMonth className="w-4 h-4" />
+                Calendar View
+              </button>
+            </div>
+          </div>
 
-        <Modal.Window name="delete-schedule">
-          {selectedSchedule ? (
-            <DeleteConfirmationModal
-              itemName={selectedSchedule.reference_code}
-              itemType="Schedule"
-              onConfirm={() => deleteSchedule.mutateAsync(selectedSchedule.id)}
-              isDeleting={deleteSchedule.isPending}
-            />
-          ) : (
-            <div />
+          {/* Filters (only show in list view) */}
+          {viewMode === "list" && (
+            <div className="flex gap-2 items-center mb-4">
+              <div className="w-48">
+                <SearchableSelect
+                  label=""
+                  options={[
+                    { value: "", label: "All Statuses" },
+                    { value: "scheduled", label: "Scheduled" },
+                    { value: "cancelled", label: "Cancelled" },
+                  ]}
+                  value={statusFilter}
+                  onChange={(val) => {
+                    setStatusFilter(val);
+                    setPage(1);
+                  }}
+                  placeholder="Filter by status"
+                />
+              </div>
+            </div>
           )}
-        </Modal.Window>
+
+          {/* List View */}
+          {viewMode === "list" && (
+            <>
+              {isLoading && (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                </div>
+              )}
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+                  Failed to load schedules. Please try again later.
+                </div>
+              )}
+
+              {!isLoading && schedules.length === 0 && (
+                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MdSchedule className="w-10 h-10 text-gray-300" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No schedules yet
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Get started by creating your first schedule.
+                  </p>
+                  <Button to="/schedules/new" className="mx-auto">
+                    <MdAdd className="w-4 h-4" />
+                    Create Schedule
+                  </Button>
+                </div>
+              )}
+
+              {schedules.length > 0 && (
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gradient-to-r from-gray-50 to-white">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Reference
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Activity
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Farm
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {schedules.map((schedule) => {
+                          const colors = getActivityColor(schedule.activity.name);
+                          return (
+                            <tr key={schedule.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {schedule.reference_code}
+                                </div>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colors.light} ${colors.text}`}>
+                                  {schedule.activity.name}
+                                </span>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {schedule.farm.name}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {schedule.farm.zone.name}
+                                </div>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {new Date(
+                                    schedule.scheduled_date,
+                                  ).toLocaleDateString()}
+                                </div>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                                    schedule.status === "cancelled"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-green-100 text-green-800"
+                                  }`}
+                                >
+                                  {schedule.status.charAt(0).toUpperCase() +
+                                    schedule.status.slice(1)}
+                                </span>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right">
+                                <ActionMenu menuId={`schedule-${schedule.id}`}>
+                                  <ActionMenu.Trigger />
+                                  <ActionMenu.Content>
+                                    <ActionMenu.Item
+                                      onClick={() =>
+                                        router.push(`/schedules/${schedule.id}`)
+                                      }
+                                    >
+                                      <FiEye className="h-4 w-4" />
+                                      View
+                                    </ActionMenu.Item>
+                                    <ActionMenu.Item
+                                      onClick={() =>
+                                        router.push(`/schedules/${schedule.id}/edit`)
+                                      }
+                                    >
+                                      <FiEdit className="h-4 w-4" />
+                                      Edit
+                                    </ActionMenu.Item>
+                                    {schedule.status !== "cancelled" && (
+                                      <ActionMenu.Item
+                                        onClick={() =>
+                                          cancelSchedule.mutate(schedule.id)
+                                        }
+                                        className="text-orange-600"
+                                      >
+                                        <MdCancel className="h-4 w-4" />
+                                        Cancel
+                                      </ActionMenu.Item>
+                                    )}
+                                    <Modal.Open opens="delete-schedule">
+                                      <ActionMenu.Item
+                                        onClick={() => setSelectedSchedule(schedule)}
+                                        className="text-red-600"
+                                      >
+                                        <FiTrash className="h-4 w-4" />
+                                        Delete
+                                      </ActionMenu.Item>
+                                    </Modal.Open>
+                                  </ActionMenu.Content>
+                                </ActionMenu>
+                               </td>
+                             </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {pagination && pagination.total_pages > 1 && (
+                    <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+                      <p className="text-sm text-gray-500">
+                        Page {pagination.current_page} of {pagination.total_pages} (
+                        {pagination.total_items} items)
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          disabled={pagination.current_page <= 1}
+                          className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setPage((p) => p + 1)}
+                          disabled={!pagination.next_page}
+                          className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Calendar View */}
+          {viewMode === "calendar" && (
+            <CalendarView schedules={schedules} />
+          )}
+
+          <Modal.Window name="delete-schedule">
+            {selectedSchedule ? (
+              <DeleteConfirmationModal
+                itemName={selectedSchedule.reference_code}
+                itemType="Schedule"
+                onConfirm={() => deleteSchedule.mutateAsync(selectedSchedule.id)}
+                isDeleting={deleteSchedule.isPending}
+              />
+            ) : (
+              <div />
+            )}
+          </Modal.Window>
+        </div>
       </div>
     </Modal>
   );
