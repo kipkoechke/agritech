@@ -5,7 +5,6 @@ import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
-  MdClose,
   MdMap,
   MdRefresh,
   MdFilterList,
@@ -19,16 +18,12 @@ import {
   MdArrowForward,
   MdClear,
   MdStore,
-  MdPinDrop,
-  MdStar,
-  MdVerified,
 } from "react-icons/md";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
 import type { Farm } from "@/types/farm";
 import "leaflet/dist/leaflet.css";
 
-// Dynamically import Leaflet components with no SSR
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
   { ssr: false }
