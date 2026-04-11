@@ -1,3 +1,4 @@
+// components/dashboard/FarmerDashboard.tsx
 "use client";
 
 import { useState } from "react";
@@ -120,49 +121,55 @@ export default function FarmerDashboard() {
           <StatCard
             icon={MdAgriculture}
             label="Total Farms"
-            value={summary.total_farms}
+            value={summary.total_farms || 0}
           />
           <StatCard
             icon={MdPeople}
             label="Total Workers"
-            value={summary.total_workers}
+            value={summary.total_workers || 0}
           />
           <StatCard
             icon={MdScale}
             label="Total Kgs"
-            value={summary.total_kgs.toLocaleString()}
+            value={summary.total_kgs?.toLocaleString() || 0}
             color="text-emerald-600"
           />
           <StatCard
             icon={MdTrendingUp}
             label="Total Bookings"
-            value={summary.total_bookings}
+            value={summary.total_bookings || 0}
           />
           <StatCard
             icon={MdGroups}
             label="Work Groups"
-            value={summary.total_work_groups}
+            value={summary.total_work_groups || 0}
           />
-          <StatCard
-            icon={MdTrendingUp}
-            label="This Month"
-            value={`${summary.monthly_comparison.current_month_kgs.toLocaleString()} kg`}
-            color="text-emerald-600"
-          />
-          <StatCard
-            icon={
-              summary.monthly_comparison.change_percentage >= 0
-                ? MdTrendingUp
-                : MdTrendingDown
-            }
-            label="vs Last Month"
-            value={`${summary.monthly_comparison.change_percentage >= 0 ? "+" : ""}${summary.monthly_comparison.change_percentage.toFixed(1)}%`}
-            color={
-              summary.monthly_comparison.change_percentage >= 0
-                ? "text-green-600"
-                : "text-red-600"
-            }
-          />
+          
+          {/* Monthly Comparison Cards with null checks */}
+          {summary.monthly_comparison && (
+            <>
+              <StatCard
+                icon={MdTrendingUp}
+                label="This Month"
+                value={`${summary.monthly_comparison.current_month_kgs?.toLocaleString() || 0} kg`}
+                color="text-emerald-600"
+              />
+              <StatCard
+                icon={
+                  (summary.monthly_comparison.change_percentage || 0) >= 0
+                    ? MdTrendingUp
+                    : MdTrendingDown
+                }
+                label="vs Last Month"
+                value={`${(summary.monthly_comparison.change_percentage || 0) >= 0 ? "+" : ""}${(summary.monthly_comparison.change_percentage || 0).toFixed(1)}%`}
+                color={
+                  (summary.monthly_comparison.change_percentage || 0) >= 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                }
+              />
+            </>
+          )}
         </div>
       )}
 
@@ -179,7 +186,7 @@ export default function FarmerDashboard() {
                 <XAxis
                   dataKey="date"
                   tick={{ fontSize: 11 }}
-                  tickFormatter={(d) => d.slice(5)}
+                  tickFormatter={(d) => d?.slice(5) || ""}
                 />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
@@ -210,7 +217,11 @@ export default function FarmerDashboard() {
               Worker Payments
             </h3>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={charts.worker_payments.map((w) => ({ name: w.worker.name, total_kgs: w.total_kgs, total_jobs: w.total_jobs }))}>
+              <BarChart data={charts.worker_payments.map((w) => ({ 
+                name: w.worker?.name || "Unknown", 
+                total_kgs: w.total_kgs || 0, 
+                total_jobs: w.total_jobs || 0 
+              }))}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -253,15 +264,15 @@ export default function FarmerDashboard() {
                 {farms.map((f) => (
                   <tr key={f.id}>
                     <td className="px-4 py-2 font-medium text-gray-900">
-                      {f.name}
+                      {f.name || "—"}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{f.zone}</td>
-                    <td className="px-4 py-2 text-gray-500">{f.factory}</td>
+                    <td className="px-4 py-2 text-gray-500">{f.zone || "—"}</td>
+                    <td className="px-4 py-2 text-gray-500">{f.factory || "—"}</td>
                     <td className="px-4 py-2 text-right text-gray-900">
-                      {f.size}
+                      {f.size || "—"}
                     </td>
                     <td className="px-4 py-2 text-gray-500">
-                      {f.supervisor.name}
+                      {f.supervisor?.name || "—"}
                     </td>
                   </tr>
                 ))}
@@ -302,14 +313,14 @@ export default function FarmerDashboard() {
                 {workGroups.map((g) => (
                   <tr key={g.id}>
                     <td className="px-4 py-2 font-medium text-gray-900">
-                      {g.name}
+                      {g.name || "—"}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{g.code}</td>
+                    <td className="px-4 py-2 text-gray-500">{g.code || "—"}</td>
                     <td className="px-4 py-2 text-right text-gray-900">
-                      {g.members_count}
+                      {g.members_count || 0}
                     </td>
                     <td className="px-4 py-2 text-right text-emerald-600 font-medium">
-                      {g.total_kgs.toLocaleString()}
+                      {g.total_kgs?.toLocaleString() || 0}
                     </td>
                     <td className="px-4 py-2 text-center">
                       <span
@@ -352,19 +363,19 @@ export default function FarmerDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {charts.farm_performance.map((f) => (
-                    <tr key={f.farm.id}>
+                  {charts.farm_performance.map((f, idx) => (
+                    <tr key={idx}>
                       <td className="px-3 py-1.5 text-gray-900">
-                        {f.farm.name}
+                        {f.farm?.name || "—"}
                       </td>
                       <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">
-                        {f.total_kgs.toLocaleString()}
+                        {f.total_kgs?.toLocaleString() || 0}
                       </td>
                       <td className="px-3 py-1.5 text-right text-gray-900">
-                        {f.total_bookings}
+                        {f.total_bookings || 0}
                       </td>
                       <td className="px-3 py-1.5 text-right text-gray-900">
-                        {f.completed}
+                        {f.completed || 0}
                       </td>
                     </tr>
                   ))}
@@ -374,6 +385,7 @@ export default function FarmerDashboard() {
           </div>
         )}
 
+        {/* Activity Breakdown */}
         {charts?.activity_breakdown && charts.activity_breakdown.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">
@@ -401,16 +413,16 @@ export default function FarmerDashboard() {
                   {charts.activity_breakdown.map((a, i) => (
                     <tr key={i}>
                       <td className="px-3 py-1.5 text-gray-900">
-                        {a.farm}
+                        {a.farm || "—"}
                       </td>
                       <td className="px-3 py-1.5 text-gray-900">
-                        {a.activity}
+                        {a.activity || "—"}
                       </td>
                       <td className="px-3 py-1.5 text-right text-gray-900">
-                        {a.total_jobs}
+                        {a.total_jobs || 0}
                       </td>
                       <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">
-                        {a.total_kgs.toLocaleString()}
+                        {a.total_kgs?.toLocaleString() || 0}
                       </td>
                     </tr>
                   ))}
