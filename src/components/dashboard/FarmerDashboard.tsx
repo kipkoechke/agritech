@@ -374,7 +374,6 @@ export default function FarmerDashboard() {
           </div>
         )}
 
-        {/* Activity Breakdown */}
         {charts?.activity_breakdown && charts.activity_breakdown.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">
