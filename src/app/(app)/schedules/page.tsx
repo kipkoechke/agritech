@@ -160,7 +160,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
             <h2 className="text-lg font-semibold text-gray-900">Activity Calendar</h2>
             <p className="text-sm text-gray-500 mt-0.5">View and manage farm schedules</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-primary">{totalSchedules}</p>
               <p className="text-xs text-gray-500">Total Schedules</p>
@@ -178,7 +178,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3">
-        {/* Calendar Grid */}
+        {/* Calendar Grid - Larger cells */}
         <div className="lg:col-span-2 p-6 border-r border-gray-200">
           {/* Calendar Navigation */}
           <div className="flex items-center justify-between mb-6">
@@ -189,7 +189,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
               >
                 <MdChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <h2 className="text-xl font-semibold text-gray-900 min-w-[180px] text-center">
+              <h2 className="text-xl font-semibold text-gray-900 min-w-[200px] text-center">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h2>
               <button
@@ -209,7 +209,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           </div>
 
           {/* Week Days Header */}
-          <div className="grid grid-cols-7 gap-2 mb-3">
+          <div className="grid grid-cols-7 gap-3 mb-3">
             {weekDays.map((day, index) => (
               <div
                 key={day}
@@ -224,14 +224,14 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
             ))}
           </div>
 
-          {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-2">
+          {/* Calendar Days - Larger cells */}
+          <div className="grid grid-cols-7 gap-3">
             {days.map((day, index) => {
               if (!day) {
                 return (
                   <div
                     key={`empty-${index}`}
-                    className="min-h-[120px] bg-gray-50 rounded-xl border border-gray-100"
+                    className="min-h-[160px] bg-gray-50 rounded-xl border border-gray-100"
                   />
                 );
               }
@@ -246,7 +246,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
                   className={`
-                    min-h-[120px] p-2 rounded-xl border-2 transition-all text-left
+                    min-h-[160px] p-3 rounded-xl border-2 transition-all text-left
                     ${isSelected
                       ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
                       : isToday
@@ -279,7 +279,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    {daySchedules.slice(0, 2).map((schedule) => {
+                    {daySchedules.slice(0, 3).map((schedule) => {
                       const colors = getActivityColor(schedule.activity.name);
                       return (
                         <div
@@ -287,16 +287,16 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                           className={`text-xs truncate px-1.5 py-1 rounded-lg ${colors.light} ${colors.text} border ${colors.border}`}
                           title={`${schedule.reference_code} - ${schedule.activity.name}`}
                         >
-                          <span className="font-medium">{schedule.activity.name.substring(0, 8)}</span>
+                          <span className="font-medium">{schedule.activity.name.substring(0, 10)}</span>
                           {schedule.status === "cancelled" && (
                             <MdCancelIcon className="w-3 h-3 inline ml-1 text-red-500" />
                           )}
                         </div>
                       );
                     })}
-                    {daySchedules.length > 2 && (
+                    {daySchedules.length > 3 && (
                       <div className="text-xs text-gray-400 text-center pt-1">
-                        +{daySchedules.length - 2} more
+                        +{daySchedules.length - 3} more
                       </div>
                     )}
                   </div>
@@ -306,14 +306,14 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           </div>
         </div>
 
-        {/* Selected Date Details Panel */}
-        <div className="p-6 bg-gradient-to-br from-gray-50 to-white">
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
+        {/* Selected Date Details Panel - Smaller, with scrollable list */}
+        <div className="p-4 bg-gradient-to-br from-gray-50 to-white flex flex-col h-full">
+          <div className="mb-4">
+            <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <MdEvent className="w-4 h-4 text-primary" />
               </div>
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-gray-900 text-sm">
                 {selectedDate ? (
                   selectedDate.toLocaleDateString("en-KE", {
                     weekday: "long",
@@ -329,30 +329,30 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           </div>
 
           {selectedDate && selectedDateSchedules.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MdSchedule className="w-8 h-8 text-gray-300" />
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <MdSchedule className="w-6 h-6 text-gray-300" />
               </div>
-              <p className="text-gray-500 font-medium">No schedules for this date</p>
+              <p className="text-gray-500 text-sm font-medium">No schedules for this date</p>
               <p className="text-xs text-gray-400 mt-1">Click the + button to create one</p>
             </div>
           )}
 
           {selectedDate && selectedDateSchedules.length > 0 && (
-            <div className="space-y-3">
+            <div className="flex-1 overflow-y-auto max-h-[400px] space-y-2 pr-1 custom-scrollbar">
               {selectedDateSchedules.map((schedule) => {
                 const colors = getActivityColor(schedule.activity.name);
                 return (
                   <div
                     key={schedule.id}
-                    className={`p-4 rounded-xl border-2 ${colors.border} ${colors.light} hover:shadow-md transition-all cursor-pointer`}
+                    className={`p-3 rounded-lg border ${colors.border} ${colors.light} hover:shadow-md transition-all cursor-pointer`}
                     onClick={() => window.location.href = `/schedules/${schedule.id}`}
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className={`w-2 h-2 rounded-full ${colors.bg}`} />
-                          <p className="font-semibold text-gray-900 text-sm">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div className={`w-1.5 h-1.5 rounded-full ${colors.bg}`} />
+                          <p className="font-semibold text-gray-900 text-xs">
                             {schedule.reference_code}
                           </p>
                         </div>
@@ -361,7 +361,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                         </p>
                       </div>
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                        className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
                           schedule.status
                         )}`}
                       >
@@ -369,25 +369,25 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                       </span>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-xs">
-                        <MdAgriculture className="w-3.5 h-3.5 text-gray-400" />
-                        <span className="text-gray-600">{schedule.farm.name}</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <MdAgriculture className="w-3 h-3 text-gray-400" />
+                        <span className="text-gray-600 text-xs truncate">{schedule.farm.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <MdLocationOn className="w-3.5 h-3.5 text-gray-400" />
-                        <span className="text-gray-600">{schedule.farm.zone.name}</span>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <MdLocationOn className="w-3 h-3 text-gray-400" />
+                        <span className="text-gray-600 text-xs truncate">{schedule.farm.zone.name}</span>
                       </div>
                       {schedule.created_by && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <MdPerson className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="text-gray-600">{schedule.created_by.name}</span>
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <MdPerson className="w-3 h-3 text-gray-400" />
+                          <span className="text-gray-600 text-xs truncate">{schedule.created_by.name}</span>
                         </div>
                       )}
                     </div>
 
                     {schedule.notes && (
-                      <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 mt-2 pt-1 border-t border-gray-200 line-clamp-2">
                         {schedule.notes}
                       </p>
                     )}
@@ -397,18 +397,18 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
             </div>
           )}
 
-          {/* Activity Legend */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Activity Legend
+          {/* Activity Legend - Compact */}
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              Activities
             </p>
-            <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
               {["Plucking", "Pruning", "Spraying", "Fertilizing", "Harvesting", "Weeding"].map((activity) => {
                 const colors = getActivityColor(activity);
                 return (
-                  <div key={activity} className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${colors.bg}`} />
-                    <span className={`text-xs ${colors.text}`}>{activity}</span>
+                  <div key={activity} className="flex items-center gap-1">
+                    <div className={`w-2 h-2 rounded-full ${colors.bg}`} />
+                    <span className={`text-xs ${colors.text}`}>{activity.substring(0, 6)}</span>
                   </div>
                 );
               })}
@@ -416,6 +416,23 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #a1a1a1;
+        }
+      `}</style>
     </div>
   );
 };
@@ -678,7 +695,7 @@ export default function SchedulesPage() {
                                   </ActionMenu.Content>
                                 </ActionMenu>
                                </td>
-                             </tr>
+                            </tr>
                           );
                         })}
                       </tbody>
