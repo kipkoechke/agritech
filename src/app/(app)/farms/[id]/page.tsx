@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import {
   MdArrowBack,
   MdLocationOn,
@@ -17,13 +18,16 @@ import {
   MdEdit,
   MdPinDrop,
   MdScale,
-  MdVerified,
+  MdExpandMore,
+  MdExpandLess,
   MdInfo,
+  MdPhone,
+  MdEmail,
 } from "react-icons/md";
 import Button from "@/components/common/Button";
 import { useFarm } from "@/hooks/useFarm";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 // Dynamically import Leaflet components with no SSR
 const MapContainer = dynamic(
@@ -49,12 +53,10 @@ const getCoordinates = (farm: any): { lat: number; lng: number } | null => {
   
   const coords = farm.coordinates;
   
-  // Handle { lat, lng } format
   if (typeof coords.lat === "number" && typeof coords.lng === "number") {
     return { lat: coords.lat, lng: coords.lng };
   }
   
-  // Handle { latitude, longitude } format
   if (typeof coords.latitude === "number" && typeof coords.longitude === "number") {
     return { lat: coords.latitude, lng: coords.longitude };
   }
@@ -62,38 +64,57 @@ const getCoordinates = (farm: any): { lat: number; lng: number } | null => {
   return null;
 };
 
-// Info Card Component
-const InfoCard = ({ icon: Icon, label, value, highlight = false }: any) => (
-  <div className={`bg-white rounded-xl border p-4 transition-all hover:shadow-md ${
-    highlight ? "border-primary/30 bg-primary/5" : "border-gray-200"
-  }`}>
-    <div className="flex items-start gap-3">
-      <div className={`p-2 rounded-lg ${
-        highlight ? "bg-primary/20 text-primary" : "bg-gray-100 text-gray-500"
-      }`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div className="flex-1">
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{label}</p>
-        <p className={`text-base font-semibold ${
-          highlight ? "text-primary" : "text-gray-900"
-        }`}>
-          {value || "—"}
-        </p>
-      </div>
-    </div>
-  </div>
-);
+// Collapsible Section Component
+const CollapsibleSection = ({ 
+  title, 
+  icon: Icon, 
+  children, 
+  defaultOpen = false 
+}: { 
+  title: string; 
+  icon: any; 
+  children: React.ReactNode; 
+  defaultOpen?: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
-// Section Component
-const Section = ({ title, icon: Icon, children }: any) => (
-  <div className="mb-6">
-    <div className="flex items-center gap-2 mb-3">
-      <Icon className="w-5 h-5 text-primary" />
-      <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+  return (
+    <div className="border-b border-gray-200 last:border-b-0">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between py-4 px-6 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+            <Icon className="w-4 h-4" />
+          </div>
+          <span className="font-semibold text-gray-900">{title}</span>
+        </div>
+        {isOpen ? (
+          <MdExpandLess className="w-5 h-5 text-gray-400" />
+        ) : (
+          <MdExpandMore className="w-5 h-5 text-gray-400" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="px-6 pb-4">
+          {children}
+        </div>
+      )}
     </div>
-    <div className="pl-7">
-      {children}
+  );
+};
+
+// Detail Row Component
+const DetailRow = ({ label, value, highlight = false }: { label: string; value: string | number; highlight?: boolean }) => (
+  <div className="flex items-start py-3 border-b border-gray-100 last:border-b-0">
+    <div className="w-32 flex-shrink-0">
+      <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
+    </div>
+    <div className="flex-1">
+      <span className={`text-sm ${highlight ? "text-primary font-semibold" : "text-gray-800"}`}>
+        {value || "—"}
+      </span>
     </div>
   </div>
 );
@@ -108,7 +129,6 @@ export default function FarmDetailsPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Fix Leaflet marker icons
     if (typeof window !== "undefined") {
       import("leaflet").then((L) => {
         // @ts-ignore
@@ -139,7 +159,7 @@ export default function FarmDetailsPage() {
   if (!farm) {
     return (
       <div className="min-h-screen p-6 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
             <MdInfo className="w-12 h-12 text-red-400 mx-auto mb-3" />
             <h2 className="text-lg font-semibold text-red-800 mb-2">Farm Not Found</h2>
@@ -167,7 +187,7 @@ export default function FarmDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -179,218 +199,134 @@ export default function FarmDetailsPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <MdStore className="w-6 h-6 text-primary" />
-                  <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-                    {farm.name}
-                  </h1>
-                  {farm.product?.name && (
-                    <span className="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                      {farm.product.name}
-                    </span>
-                  )}
+                  <h1 className="text-xl font-bold text-gray-900">{farm.name}</h1>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-0.5">
                   <MdCode className="w-3 h-3 text-gray-400" />
-                  <p className="text-sm text-gray-500">
-                    Farm Code: {farm.farm_code || "—"}
-                  </p>
+                  <p className="text-xs text-gray-500">Code: {farm.farm_code || "—"}</p>
                 </div>
               </div>
             </div>
             <Button type="small" to={`/farms/${id}/edit`} className="flex items-center gap-2">
               <MdEdit className="w-4 h-4" />
-              Edit Farm
+              Edit
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Farm Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-transparent">
-                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <MdInfo className="w-5 h-5 text-primary" />
-                  Farm Information
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoCard
-                    icon={MdAgriculture}
-                    label="Farm Size"
-                    value={`${size.toLocaleString()} Hectares`}
-                    highlight
-                  />
-                  <InfoCard
-                    icon={MdLocationOn}
-                    label="Zone"
-                    value={farm.zone?.name || "Not Assigned"}
-                  />
-                  <InfoCard
-                    icon={MdPerson}
-                    label="Farmer"
-                    value={farm.farmer?.name || "Not Assigned"}
-                  />
-                  <InfoCard
-                    icon={MdPerson}
-                    label="Supervisor"
-                    value={farm.supervisor?.name || "Not Assigned"}
-                  />
-                  {farm.factory && (
-                    <InfoCard
-                      icon={MdFactory}
-                      label="Factory"
-                      value={farm.factory.name}
-                    />
-                  )}
-                  {farm.cluster && (
-                    <InfoCard
-                      icon={MdFactory}
-                      label="Cluster"
-                      value={farm.cluster.name}
-                    />
-                  )}
-                  <InfoCard
-                    icon={MdCalendarToday}
-                    label="Created"
-                    value={createdDate.toLocaleDateString("en-KE", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  />
-                  {isUpdated && (
-                    <InfoCard
-                      icon={MdCalendarToday}
-                      label="Last Updated"
-                      value={updatedDate.toLocaleDateString("en-KE", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    />
-                  )}
-                </div>
-              </div>
+      {/* Main Content - Single Form Layout */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+          {/* Farm Details Section */}
+          <CollapsibleSection title="Farm Details" icon={MdAgriculture} defaultOpen={true}>
+            <div className="space-y-1">
+              <DetailRow label="Farm Name" value={farm.name} />
+              <DetailRow label="Farm Code" value={farm.farm_code} />
+              <DetailRow label="Size" value={`${size.toLocaleString()} Hectares`} highlight />
+              <DetailRow label="Product Type" value={farm.product?.name || "Not specified"} />
             </div>
+          </CollapsibleSection>
 
-            {/* Additional Details */}
-            {(farm.product || farm.zone?.code) && (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-transparent">
-                  <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <MdCategory className="w-5 h-5 text-primary" />
-                    Product & Classification
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {farm.product && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <MdAgriculture className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Product Type</p>
-                          <p className="text-sm font-semibold text-gray-900">{farm.product.name}</p>
-                        </div>
+          {/* Location & Zone Section */}
+          <CollapsibleSection title="Location & Zone" icon={MdLocationOn} defaultOpen={true}>
+            <div className="space-y-1">
+              <DetailRow label="Zone" value={farm.zone?.name || "Not assigned"} />
+              {farm.zone?.code && <DetailRow label="Zone Code" value={farm.zone.code} />}
+              
+              {/* Map Section */}
+              {coordinates && (
+                <div className="mt-4">
+                  <div className="mb-3">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MdPinDrop className="w-4 h-4 text-primary" />
+                        <span className="text-xs text-gray-500 uppercase tracking-wider">Coordinates</span>
                       </div>
-                    )}
-                    {farm.zone?.code && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <MdVerified className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Zone Code</p>
-                          <p className="text-sm font-semibold text-gray-900">{farm.zone.code}</p>
-                        </div>
-                      </div>
-                    )}
+                      <code className="text-xs text-gray-700">
+                        {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
+                      </code>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Location Map */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-24">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-transparent">
-                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <MdPinDrop className="w-5 h-5 text-primary" />
-                  Farm Location
-                </h2>
-              </div>
-              <div className="p-6">
-                {coordinates ? (
-                  <>
-                    <div className="mb-4">
-                      <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                        <p className="text-xs text-gray-500 mb-1">Coordinates</p>
-                        <div className="flex items-center gap-2">
-                          <MdLocationOn className="w-4 h-4 text-primary" />
-                          <code className="text-sm text-gray-700">
-                            {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
-                          </code>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="h-[300px] rounded-lg overflow-hidden border border-gray-200">
-                      {isMounted && (
-                        <MapContainer
-                          center={[coordinates.lat, coordinates.lng]}
-                          zoom={15}
-                          style={{ height: "100%", width: "100%" }}
-                          scrollWheelZoom={true}
-                          zoomControl={true}
-                        >
-                          <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                          />
-                          <Marker position={[coordinates.lat, coordinates.lng]}>
-                            <Popup>
-                              <div className="text-center">
-                                <p className="font-bold text-gray-900">{farm.name}</p>
-                                <p className="text-xs text-gray-500">{farm.farm_code}</p>
-                                <p className="text-xs text-primary mt-1">{size.toFixed(2)} Ha</p>
-                              </div>
-                            </Popup>
-                          </Marker>
-                        </MapContainer>
-                      )}
-                    </div>
-                    
-                    <div className="mt-4 text-center">
-                      <a
-                        href={`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium"
+                  
+                  <div className="h-[280px] rounded-lg overflow-hidden border border-gray-200">
+                    {isMounted && (
+                      <MapContainer
+                        center={[coordinates.lat, coordinates.lng]}
+                        zoom={14}
+                        style={{ height: "100%", width: "100%" }}
+                        scrollWheelZoom={true}
                       >
-                        <MdLocationOn className="w-4 h-4" />
-                        Open in Google Maps
-                      </a>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MdLocationOn className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-500">No location coordinates available</p>
-                    <p className="text-xs text-gray-400 mt-2">This farm doesn't have coordinates set</p>
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        <Marker position={[coordinates.lat, coordinates.lng]}>
+                          <Popup>
+                            <div className="text-center">
+                              <p className="font-bold text-gray-900">{farm.name}</p>
+                              <p className="text-xs text-gray-500">{farm.farm_code}</p>
+                              <p className="text-xs text-primary mt-1">{size.toFixed(2)} Ha</p>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      </MapContainer>
+                    )}
                   </div>
-                )}
-              </div>
+                  
+                  <div className="mt-3 text-center">
+                    <a
+                      href={`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium"
+                    >
+                      <MdLocationOn className="w-3 h-3" />
+                      Open in Google Maps
+                    </a>
+                  </div>
+                </div>
+              )}
+              
+              {!coordinates && (
+                <div className="mt-4 text-center py-6 bg-gray-50 rounded-lg">
+                  <MdLocationOn className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No location coordinates available</p>
+                </div>
+              )}
             </div>
-          </div>
+          </CollapsibleSection>
+
+          {/* Farm Management Section */}
+          <CollapsibleSection title="Farm Management" icon={MdPerson}>
+            <div className="space-y-1">
+              <DetailRow label="Farmer" value={farm.farmer?.name || "Not assigned"} />
+              <DetailRow label="Supervisor" value={farm.supervisor?.name || "Not assigned"} />
+              {farm.factory && <DetailRow label="Factory" value={farm.factory.name} />}
+              {farm.cluster && <DetailRow label="Cluster" value={farm.cluster.name} />}
+            </div>
+          </CollapsibleSection>
+
+          {/* Dates Section */}
+          <CollapsibleSection title="Timeline" icon={MdCalendarToday}>
+            <div className="space-y-1">
+              <DetailRow 
+                label="Created" 
+                value={createdDate.toLocaleDateString("en-KE", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })} 
+              />
+              {isUpdated && (
+                <DetailRow 
+                  label="Last Updated" 
+                  value={updatedDate.toLocaleDateString("en-KE", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })} 
+                />
+              )}
+            </div>
+          </CollapsibleSection>
         </div>
       </div>
     </div>
