@@ -20,9 +20,6 @@ import {
   MdClear,
   MdStore,
   MdPinDrop,
-  MdCategory,
-  MdCode,
-  MdFactory,
 } from "react-icons/md";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
@@ -71,7 +68,7 @@ const getSizeColor = (size: number) => {
   return "#ef4444";
 };
 
-// Farm Detail Card Component
+// Farm Detail Card Component (Left Panel)
 const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDetails: (id: string) => void }) => {
   if (!farm) return null;
 
@@ -114,96 +111,54 @@ const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDeta
           <p className="text-xs text-gray-500 uppercase tracking-wider">Farmer</p>
           <p className="text-sm font-medium text-gray-700">{farm.farmer?.name || "N/A"}</p>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Product</p>
-          <p className="text-sm font-medium text-gray-700">{farm.product?.name || "N/A"}</p>
-        </div>
       </div>
     </div>
   );
 };
 
-// Custom Popup Component for Map
-const CustomPopup = ({ farm, onViewDetails }: { farm: Farm; onViewDetails: (id: string) => void }) => {
+// Simple Map Popup Component
+const MapPopup = ({ farm, onViewDetails }: { farm: Farm; onViewDetails: (id: string) => void }) => {
   const size = parseFloat(farm.size as any) || 0;
   
   return (
-    <div className="custom-farm-popup">
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 px-4 py-3 rounded-t-lg -mt-1 -mx-1">
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden min-w-[220px]">
+      {/* Farm Name Header */}
+      <div className="px-3 py-2 bg-primary text-white">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-            <MdStore className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h3 className="font-bold text-white text-sm">{farm.name}</h3>
-            <p className="text-white/80 text-xs">{farm.farm_code}</p>
-          </div>
+          <MdStore className="w-4 h-4" />
+          <span className="font-semibold text-sm truncate">{farm.name}</span>
         </div>
       </div>
-
+      
       {/* Content */}
-      <div className="px-4 py-3 space-y-2">
-        {/* Location */}
-        <div className="flex items-start gap-2">
-          <MdPinDrop className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="text-xs text-gray-500">Zone</p>
-            <p className="text-sm font-medium text-gray-800">{farm.zone?.name || "N/A"}</p>
-          </div>
+      <div className="px-3 py-2 space-y-1.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">Farm Code:</span>
+          <span className="font-medium text-gray-800">{farm.farm_code}</span>
         </div>
-
-        {/* Farmer Info */}
-        <div className="flex items-start gap-2">
-          <MdPerson className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="text-xs text-gray-500">Farmer</p>
-            <p className="text-sm font-medium text-gray-800">{farm.farmer?.name || "N/A"}</p>
-          </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">Zone:</span>
+          <span className="font-medium text-gray-800">{farm.zone?.name || "N/A"}</span>
         </div>
-
-        {/* Product & Size Row */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="flex items-start gap-2">
-            <MdCategory className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-gray-500">Product</p>
-              <p className="text-sm font-medium text-gray-800">{farm.product?.name || "N/A"}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <MdScale className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-gray-500">Size</p>
-              <p className="text-sm font-bold text-primary">{size.toFixed(2)} Ha</p>
-            </div>
-          </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">Farmer:</span>
+          <span className="font-medium text-gray-800 truncate max-w-[120px]">{farm.farmer?.name || "N/A"}</span>
         </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-100 my-2"></div>
-
-        {/* View Details Button */}
-        <button
-          onClick={() => onViewDetails(farm.id)}
-          className="w-full bg-primary/10 hover:bg-primary/20 text-primary font-medium py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
-        >
-          <MdInfo className="w-4 h-4" />
-          View Full Farm Details
-          <MdArrowForward className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">Size:</span>
+          <span className="font-bold text-primary">{size.toFixed(2)} Ha</span>
+        </div>
       </div>
-
-      <style jsx>{`
-        .custom-farm-popup {
-          min-width: 260px;
-          max-width: 280px;
-          background: white;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-      `}</style>
+      
+      {/* View Button */}
+      <button
+        onClick={() => onViewDetails(farm.id)}
+        className="w-full px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-primary text-xs font-medium flex items-center justify-center gap-1 transition-colors border-t"
+      >
+        <MdInfo className="w-3 h-3" />
+        View Details
+        <MdArrowForward className="w-3 h-3" />
+      </button>
     </div>
   );
 };
@@ -603,7 +558,7 @@ export default function FarmLocationPage() {
                           }}
                         >
                           <Popup>
-                            <CustomPopup farm={farm} onViewDetails={handleViewFarmDetails} />
+                            <MapPopup farm={farm} onViewDetails={handleViewFarmDetails} />
                           </Popup>
                         </CircleMarker>
                       );
