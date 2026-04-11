@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import {
   MdClose,
   MdMap,
@@ -13,26 +14,15 @@ import {
   MdLocationOn,
   MdAgriculture,
   MdScale,
-  MdTrendingUp,
   MdViewList,
   MdPublic,
   MdPerson,
   MdFactory,
   MdCategory,
   MdCode,
+  MdInfo,
+  MdArrowForward,
 } from "react-icons/md";
-import {
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
 import type { Farm } from "@/types/farm";
@@ -72,149 +62,45 @@ const getCoordinates = (farm: Farm): { lat: number; lng: number } | null => {
 // Helper to format number
 const formatNumber = (num: number) => num.toLocaleString("en-KE");
 
-// Colors for pie chart
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec489a"];
+// Get marker color based on product type
+const getProductColor = (productName: string | undefined) => {
+  const colors: Record<string, string> = {
+    Tea: "#10b981", // green
+    Coffee: "#8b5cf6", // purple
+    Maize: "#f59e0b", // amber
+    Wheat: "#3b82f6", // blue
+    Default: "#ef4444", // red
+  };
+  return colors[productName || ""] || colors.Default;
+};
 
-// Ranking Chart Component
-const RankingChart = ({
-  data,
-  title,
-  icon: Icon,
-  valueLabel = "KG",
-}: {
-  data: Array<{ name: string; value: number }>;
-  title: string;
-  icon: any;
-  valueLabel?: string;
-}) => (
-  <div className="bg-white rounded-lg border border-slate-200">
-    <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-      <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-        <Icon className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-        {title}
-      </h2>
-    </div>
-    <div className="p-3 md:p-4">
-      {data.length > 0 ? (
-        <div className="space-y-3">
-          {data.map((item, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-8 text-center">
-                <span
-                  className={`text-sm font-bold ${
-                    i === 0
-                      ? "text-yellow-500"
-                      : i === 1
-                        ? "text-gray-400"
-                        : i === 2
-                          ? "text-amber-600"
-                          : "text-gray-500"
-                  }`}
-                >
-                  #{i + 1}
-                </span>
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium text-gray-700">
-                    {item.name}
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {item.value.toLocaleString()} {valueLabel}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(item.value / data[0].value) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500 text-center py-8">No data available</p>
-      )}
-    </div>
-  </div>
-);
+// Get marker color based on farm size
+const getSizeColor = (size: number) => {
+  if (size >= 10) return "#10b981";
+  if (size >= 5) return "#3b82f6";
+  if (size >= 2) return "#f59e0b";
+  return "#ef4444";
+};
 
-// Top Farmers Chart Component
-const TopFarmersChart = ({
-  data,
-  title,
-  icon: Icon,
-}: {
-  data: Array<{ name: string; farmCount: number; totalSize: number }>;
-  title: string;
-  icon: any;
-}) => (
-  <div className="bg-white rounded-lg border border-slate-200">
-    <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-200">
-      <h2 className="font-semibold text-gray-900 flex items-center gap-2 text-sm md:text-base">
-        <Icon className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-        {title}
-      </h2>
-    </div>
-    <div className="p-3 md:p-4">
-      {data.length > 0 ? (
-        <div className="space-y-4">
-          {data.map((farmer, i) => (
-            <div key={i} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-sm font-bold w-6 ${
-                      i === 0
-                        ? "text-yellow-500"
-                        : i === 1
-                          ? "text-gray-400"
-                          : i === 2
-                            ? "text-amber-600"
-                            : "text-gray-500"
-                    }`}
-                  >
-                    #{i + 1}
-                  </span>
-                  <span className="font-medium text-gray-800">{farmer.name}</span>
-                </div>
-                <span className="text-xs text-gray-500">{farmer.farmCount} farms</span>
-              </div>
-              <div className="ml-8">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>Total Size: {farmer.totalSize.toFixed(1)} Ha</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    className="bg-primary h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${(farmer.totalSize / data[0].totalSize) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500 text-center py-8">No data available</p>
-      )}
-    </div>
-  </div>
-);
-
-// Farm Detail Card Component
-const FarmDetailCard = ({ farm }: { farm: Farm | null }) => {
+// Farm Detail Card Component (Compact for sidebar)
+const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDetails: (id: string) => void }) => {
   if (!farm) return null;
 
   const size = parseFloat(farm.size as any) || 0;
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-      <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-transparent">
+      <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-transparent flex justify-between items-center">
         <h3 className="font-semibold text-gray-900 flex items-center gap-2">
           <MdLocationOn className="w-4 h-4 text-primary" />
-          Farm Details
+          Selected Farm
         </h3>
+        <button
+          onClick={() => onViewDetails(farm.id)}
+          className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+        >
+          View Details <MdArrowForward className="w-3 h-3" />
+        </button>
       </div>
       <div className="p-4 space-y-3">
         <div>
@@ -224,64 +110,32 @@ const FarmDetailCard = ({ farm }: { farm: Farm | null }) => {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Farm Code</p>
-            <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
-              <MdCode className="w-3 h-3 text-gray-400" />
-              {farm.farm_code}
-            </p>
+            <p className="text-sm font-medium text-gray-700">{farm.farm_code}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Size</p>
             <p className="text-sm font-medium text-gray-700">{size.toFixed(2)} Ha</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Zone</p>
-            <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
-              <MdLocationOn className="w-3 h-3 text-gray-400" />
-              {farm.zone?.name || "N/A"}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Product</p>
-            <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
-              <MdCategory className="w-3 h-3 text-gray-400" />
-              {farm.product?.name || "N/A"}
-            </p>
-          </div>
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Zone</p>
+          <p className="text-sm font-medium text-gray-700">{farm.zone?.name || "N/A"}</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 uppercase tracking-wider">Farmer</p>
-          <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
-            <MdPerson className="w-3 h-3 text-gray-400" />
-            {farm.farmer?.name || "N/A"}
-          </p>
+          <p className="text-sm font-medium text-gray-700">{farm.farmer?.name || "N/A"}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Supervisor</p>
-          <p className="text-sm font-medium text-gray-700">
-            {farm.supervisor?.name || "Not Assigned"}
-          </p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Product</p>
+          <p className="text-sm font-medium text-gray-700">{farm.product?.name || "N/A"}</p>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Factory</p>
-          <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
-            <MdFactory className="w-3 h-3 text-gray-400" />
-            {farm.factory?.name || "N/A"}
-          </p>
-        </div>
-        {farm.cluster && (
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Cluster</p>
-            <p className="text-sm font-medium text-gray-700">{farm.cluster.name}</p>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
 export default function FarmLocationPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const isAdmin = useIsAdmin();
   const isFarmer = useIsFarmer();
@@ -292,23 +146,14 @@ export default function FarmLocationPage() {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
+  const [selectedFarmerId, setSelectedFarmerId] = useState<string>("");
+  const [selectedClusterId, setSelectedClusterId] = useState<string>("");
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [isLargeScreen, setIsLargeScreen] = useState(true);
 
   // Fetch farms using the hook
   const { data: farmsResponse, isLoading, isError, refetch } = useFarms({});
   const allFarms = farmsResponse?.data || [];
-
-  // Handle responsive
-  useEffect(() => {
-    const checkScreen = () => {
-      setIsLargeScreen(window.innerWidth >= 1024);
-    };
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
 
   // Setup Leaflet icons on mount
   useEffect(() => {
@@ -337,9 +182,15 @@ export default function FarmLocationPage() {
 
   const handleClearFilters = () => {
     setSelectedZoneId("");
+    setSelectedFarmerId("");
+    setSelectedClusterId("");
   };
 
-  // Filter farms based on role and selected zone
+  const handleViewFarmDetails = (farmId: string) => {
+    router.push(`/farms/${farmId}`);
+  };
+
+  // Filter farms based on role and selected filters
   const filteredFarms = useMemo(() => {
     let data = allFarms;
 
@@ -362,10 +213,20 @@ export default function FarmLocationPage() {
       data = data.filter((farm) => farm.zone?.id === selectedZoneId);
     }
 
-    return data;
-  }, [selectedZoneId, allFarms, user, isFarmer, isSupervisor]);
+    // Farmer filter
+    if (selectedFarmerId) {
+      data = data.filter((farm) => farm.farmer?.id === selectedFarmerId);
+    }
 
-  // Get unique zones for filter dropdown
+    // Cluster filter
+    if (selectedClusterId) {
+      data = data.filter((farm) => farm.cluster?.id === selectedClusterId);
+    }
+
+    return data;
+  }, [selectedZoneId, selectedFarmerId, selectedClusterId, allFarms, user, isFarmer, isSupervisor]);
+
+  // Get unique values for filters
   const uniqueZones = useMemo(() => {
     const zonesMap = new Map<string, string>();
     allFarms.forEach((farm) => {
@@ -376,13 +237,25 @@ export default function FarmLocationPage() {
     return Array.from(zonesMap.entries()).map(([id, name]) => ({ id, name }));
   }, [allFarms]);
 
-  // Get marker color based on farm size
-  const getMarkerColor = (size: number) => {
-    if (size >= 10) return "#10b981";
-    if (size >= 5) return "#3b82f6";
-    if (size >= 2) return "#f59e0b";
-    return "#ef4444";
-  };
+  const uniqueFarmers = useMemo(() => {
+    const farmersMap = new Map<string, string>();
+    allFarms.forEach((farm) => {
+      if (farm.farmer?.id && farm.farmer?.name) {
+        farmersMap.set(farm.farmer.id, farm.farmer.name);
+      }
+    });
+    return Array.from(farmersMap.entries()).map(([id, name]) => ({ id, name }));
+  }, [allFarms]);
+
+  const uniqueClusters = useMemo(() => {
+    const clustersMap = new Map<string, string>();
+    allFarms.forEach((farm) => {
+      if (farm.cluster?.id && farm.cluster?.name) {
+        clustersMap.set(farm.cluster.id, farm.cluster.name);
+      }
+    });
+    return Array.from(clustersMap.entries()).map(([id, name]) => ({ id, name }));
+  }, [allFarms]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -391,41 +264,8 @@ export default function FarmLocationPage() {
       (sum, farm) => sum + (parseFloat(farm.size as any) || 0),
       0,
     );
-    return { totalFarms, totalSize: totalSize.toFixed(1) };
-  }, [filteredFarms]);
-
-  // Top farms by size
-  const topFarms = useMemo(() => {
-    return [...filteredFarms]
-      .sort((a, b) => (parseFloat(b.size as any) || 0) - (parseFloat(a.size as any) || 0))
-      .slice(0, 5)
-      .map((farm) => ({ name: farm.name, value: parseFloat(farm.size as any) || 0 }));
-  }, [filteredFarms]);
-
-  // Top Farmers by total farm size
-  const topFarmers = useMemo(() => {
-    const farmerMap = new Map<string, { name: string; farmCount: number; totalSize: number }>();
-    
-    filteredFarms.forEach((farm) => {
-      if (farm.farmer?.name) {
-        const existing = farmerMap.get(farm.farmer.id);
-        const size = parseFloat(farm.size as any) || 0;
-        if (existing) {
-          existing.farmCount++;
-          existing.totalSize += size;
-        } else {
-          farmerMap.set(farm.farmer.id, {
-            name: farm.farmer.name,
-            farmCount: 1,
-            totalSize: size,
-          });
-        }
-      }
-    });
-    
-    return Array.from(farmerMap.values())
-      .sort((a, b) => b.totalSize - a.totalSize)
-      .slice(0, 5);
+    const uniqueFarmersCount = new Set(filteredFarms.map((f) => f.farmer?.id).filter(Boolean)).size;
+    return { totalFarms, totalSize: totalSize.toFixed(1), uniqueFarmersCount };
   }, [filteredFarms]);
 
   const getDashboardTitle = () => {
@@ -513,7 +353,7 @@ export default function FarmLocationPage() {
 
         {isFilterExpanded && (
           <div className="border-t border-gray-100 px-3 md:px-4 py-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
               <div>
                 <label className="text-gray-700 mb-1 flex text-xs font-medium">Zone</label>
                 <select
@@ -529,13 +369,43 @@ export default function FarmLocationPage() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="text-gray-700 mb-1 flex text-xs font-medium">Farmer</label>
+                <select
+                  value={selectedFarmerId}
+                  onChange={(e) => setSelectedFarmerId(e.target.value)}
+                  className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
+                >
+                  <option value="">All Farmers</option>
+                  {uniqueFarmers.map((farmer) => (
+                    <option key={farmer.id} value={farmer.id}>
+                      {farmer.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-gray-700 mb-1 flex text-xs font-medium">Cluster</label>
+                <select
+                  value={selectedClusterId}
+                  onChange={(e) => setSelectedClusterId(e.target.value)}
+                  className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
+                >
+                  <option value="">All Clusters</option>
+                  {uniqueClusters.map((cluster) => (
+                    <option key={cluster.id} value={cluster.id}>
+                      {cluster.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex justify-end mt-3">
               <button
                 onClick={handleClearFilters}
-                disabled={!selectedZoneId}
+                disabled={!selectedZoneId && !selectedFarmerId && !selectedClusterId}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
-                  selectedZoneId
+                  selectedZoneId || selectedFarmerId || selectedClusterId
                     ? "text-gray-700 bg-gray-100 hover:bg-gray-200"
                     : "text-gray-400 bg-gray-50 cursor-not-allowed"
                 }`}
@@ -549,7 +419,7 @@ export default function FarmLocationPage() {
 
       {/* Stats Cards Row */}
       <div className="px-3 md:px-4 py-2 bg-gray-100 shrink-0">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
             <div className="flex items-center gap-2 md:gap-3">
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
@@ -577,30 +447,41 @@ export default function FarmLocationPage() {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-lg border border-slate-200 p-2.5 md:p-3">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+                <MdPerson className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-[10px] md:text-xs text-slate-500">Total Farmers</p>
+                <p className="text-lg md:text-2xl font-bold text-purple-600">
+                  {formatNumber(stats.uniqueFarmersCount)}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Main Content: Left Panel + Right Panel */}
       <div className="flex-1 flex overflow-hidden px-3 md:px-4 pb-4 gap-4">
-        {/* LEFT PANEL - Analytics */}
+        {/* LEFT PANEL - Selected Farm Details */}
         <div className="w-full lg:w-2/5 xl:w-1/3 bg-transparent overflow-y-auto space-y-4">
-          {/* Top Farms Ranking */}
-          <RankingChart
-            data={topFarms}
-            title="Top Farms by Size"
-            icon={MdTrendingUp}
-            valueLabel="Ha"
-          />
-
-          {/* Top Farmers */}
-          <TopFarmersChart
-            data={topFarmers}
-            title="Top Farmers by Land Size"
-            icon={MdPerson}
-          />
+          {/* Instructions Card when no farm selected */}
+          {!selectedFarm && (
+            <div className="bg-white rounded-lg border border-slate-200 p-6 text-center">
+              <MdInfo className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm">
+                Click on any farm marker on the map or select a farm from the table to view details here.
+              </p>
+            </div>
+          )}
 
           {/* Selected Farm Detail Card */}
-          {selectedFarm && <FarmDetailCard farm={selectedFarm} />}
+          {selectedFarm && (
+            <FarmDetailCard farm={selectedFarm} onViewDetails={handleViewFarmDetails} />
+          )}
         </div>
 
         {/* RIGHT PANEL - Tabs Container with Map/Table */}
@@ -641,7 +522,7 @@ export default function FarmLocationPage() {
                 <div className="h-full rounded-lg overflow-hidden border border-gray-200">
                   {farmsWithCoords.length > 0 ? (
                     <MapContainer
-                      key={`map-${selectedZoneId}-${selectedFarm?.id}`}
+                      key={`map-${selectedZoneId}-${selectedFarmerId}-${selectedClusterId}`}
                       center={mapCenter}
                       zoom={12}
                       style={{ height: "100%", width: "100%" }}
@@ -654,13 +535,14 @@ export default function FarmLocationPage() {
                         const size = parseFloat(farm.size as any) || 0;
                         const radius = Math.max(8, Math.min(25, Math.sqrt(size) * 3));
                         const isSelected = selectedFarm?.id === farm.id;
+                        const markerColor = getSizeColor(size);
                         return (
                           <CircleMarker
                             key={farm.id}
                             center={[coords.lat, coords.lng]}
                             radius={isSelected ? radius + 5 : radius}
-                            fillColor={getMarkerColor(size)}
-                            color={isSelected ? "#3b82f6" : getMarkerColor(size)}
+                            fillColor={markerColor}
+                            color={isSelected ? "#3b82f6" : markerColor}
                             weight={isSelected ? 3 : 2}
                             opacity={1}
                             fillOpacity={0.7}
@@ -669,17 +551,29 @@ export default function FarmLocationPage() {
                             }}
                           >
                             <Popup>
-                              <div className="text-sm">
+                              <div className="text-sm min-w-[200px]">
                                 <p className="font-bold text-gray-900">{farm.name}</p>
-                                <p className="text-gray-600">Farm Code: {farm.farm_code}</p>
-                                <p className="text-gray-600">Zone: {farm.zone?.name || "N/A"}</p>
-                                <p className="text-gray-600">Farmer: {farm.farmer?.name || "N/A"}</p>
-                                <p className="text-gray-600">
-                                  Supervisor: {farm.supervisor?.name || "Not Assigned"}
-                                </p>
-                                <p className="text-primary font-bold mt-1">
-                                  Size: {size.toFixed(2)} Ha
-                                </p>
+                                <p className="text-gray-600 text-xs">Farm Code: {farm.farm_code}</p>
+                                <div className="mt-2 pt-2 border-t border-gray-100">
+                                  <p className="text-gray-600">
+                                    <span className="font-medium">Zone:</span> {farm.zone?.name || "N/A"}
+                                  </p>
+                                  <p className="text-gray-600">
+                                    <span className="font-medium">Farmer:</span> {farm.farmer?.name || "N/A"}
+                                  </p>
+                                  <p className="text-gray-600">
+                                    <span className="font-medium">Product:</span> {farm.product?.name || "N/A"}
+                                  </p>
+                                  <p className="text-primary font-bold mt-1">
+                                    Size: {size.toFixed(2)} Ha
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => handleViewFarmDetails(farm.id)}
+                                  className="mt-2 w-full text-center text-primary text-xs font-medium hover:underline"
+                                >
+                                  View Full Details →
+                                </button>
                               </div>
                             </Popup>
                           </CircleMarker>
@@ -730,16 +624,16 @@ export default function FarmLocationPage() {
                         Farmer
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Supervisor
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Factory
+                        Cluster
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Product
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Size (Ha)
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -765,10 +659,7 @@ export default function FarmLocationPage() {
                           {farm.farmer?.name || "N/A"}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.supervisor?.name || "Not Assigned"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.factory?.name || "N/A"}
+                          {farm.cluster?.name || "N/A"}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                           {farm.product?.name || "N/A"}
@@ -777,6 +668,17 @@ export default function FarmLocationPage() {
                           <span className="text-sm font-semibold text-gray-900">
                             {parseFloat(farm.size as any)?.toFixed(2) || "0"} Ha
                           </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewFarmDetails(farm.id);
+                            }}
+                            className="text-primary hover:text-primary/80 text-sm flex items-center gap-1"
+                          >
+                            View <MdArrowForward className="w-3 h-3" />
+                          </button>
                         </td>
                       </tr>
                     ))}
