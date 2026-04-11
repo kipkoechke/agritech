@@ -12,6 +12,7 @@ import {
   MdLocationOn,
   MdCalendarToday,
   MdCheckCircle,
+  MdCancel as MdCancelIcon,
   MdPhone,
   MdExpandMore,
   MdExpandLess,
@@ -225,8 +226,8 @@ export default function ScheduleDetailsPage() {
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-          {/* Schedule Details Section */}
-          <CollapsibleSection title="Schedule Details" icon={MdSchedule} defaultOpen={true}>
+          {/* Schedule Details Section - Closed by default */}
+          <CollapsibleSection title="Schedule Details" icon={MdSchedule} defaultOpen={false}>
             <div className="space-y-1">
               <DetailRow label="Reference Code" value={schedule.reference_code} />
               <DetailRow label="Activity" value={schedule.activity.name} icon={MdAgriculture} />
@@ -253,16 +254,16 @@ export default function ScheduleDetailsPage() {
             </div>
           </CollapsibleSection>
 
-          {/* Farm Details Section */}
-          <CollapsibleSection title="Farm Details" icon={MdAgriculture} defaultOpen={true}>
+          {/* Farm Details Section - Closed by default */}
+          <CollapsibleSection title="Farm Details" icon={MdAgriculture} defaultOpen={false}>
             <div className="space-y-1">
               <DetailRow label="Farm Name" value={schedule.farm.name} icon={MdAgriculture} />
               <DetailRow label="Zone" value={schedule.farm.zone.name} icon={MdLocationOn} />
             </div>
           </CollapsibleSection>
 
-          {/* Created By Section */}
-          <CollapsibleSection title="Creator Information" icon={MdPerson} defaultOpen={true}>
+          {/* Creator Information Section - Closed by default */}
+          <CollapsibleSection title="Creator Information" icon={MdPerson} defaultOpen={false}>
             <div className="space-y-1">
               <DetailRow label="Created By" value={schedule.created_by.name} icon={MdPerson} />
               <DetailRow 
@@ -288,11 +289,11 @@ export default function ScheduleDetailsPage() {
             </div>
           </CollapsibleSection>
 
-          {/* Bookings Section */}
+          {/* Bookings Section - Closed by default */}
           <CollapsibleSection 
             title="Bookings" 
             icon={MdPeople} 
-            defaultOpen={bookings.length > 0}
+            defaultOpen={false}
             badgeCount={bookingsCount}
           >
             {bookings.length === 0 ? (
@@ -314,7 +315,7 @@ export default function ScheduleDetailsPage() {
             )}
           </CollapsibleSection>
 
-          {/* Summary Stats */}
+          {/* Summary Stats - Only visible if there are bookings */}
           {bookings.length > 0 && (
             <div className="bg-gradient-to-r from-gray-50 to-white p-4 border-t border-gray-200">
               <h4 className="text-xs font-semibold text-gray-700 mb-3 flex items-center gap-2">

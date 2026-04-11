@@ -19,6 +19,7 @@ import {
   MdPerson,
   MdCheckCircle,
   MdCancel as MdCancelIcon,
+  MdPeople,
 } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
@@ -271,11 +272,13 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                     >
                       {day.getDate()}
                     </span>
-                    {daySchedules.length > 0 && (
-                      <span className="text-xs font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
-                        {daySchedules.length}
-                      </span>
-                    )}
+                    <div className="flex gap-1">
+                      {daySchedules.length > 0 && (
+                        <span className="text-xs font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                          {daySchedules.length}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
@@ -360,13 +363,21 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                           {schedule.activity.name}
                         </p>
                       </div>
-                      <span
-                        className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
-                          schedule.status
-                        )}`}
-                      >
-                        {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
+                            schedule.status
+                          )}`}
+                        >
+                          {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
+                        </span>
+                        {schedule.bookings_count !== undefined && schedule.bookings_count > 0 && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-primary/10 text-primary">
+                            <MdPeople className="w-2.5 h-2.5" />
+                            {schedule.bookings_count} bookings
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-1">
@@ -605,6 +616,9 @@ export default function SchedulesPage() {
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             Status
                           </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Bookings
+                          </th>
                           <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             Actions
                           </th>
@@ -619,12 +633,12 @@ export default function SchedulesPage() {
                                 <div className="text-sm font-semibold text-gray-900">
                                   {schedule.reference_code}
                                 </div>
-                               </td>
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colors.light} ${colors.text}`}>
                                   {schedule.activity.name}
                                 </span>
-                               </td>
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
                                   {schedule.farm.name}
@@ -632,14 +646,14 @@ export default function SchedulesPage() {
                                 <div className="text-xs text-gray-400">
                                   {schedule.farm.zone.name}
                                 </div>
-                               </td>
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-500">
                                   {new Date(
                                     schedule.scheduled_date,
                                   ).toLocaleDateString()}
                                 </div>
-                               </td>
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span
                                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -651,7 +665,17 @@ export default function SchedulesPage() {
                                   {schedule.status.charAt(0).toUpperCase() +
                                     schedule.status.slice(1)}
                                 </span>
-                               </td>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {schedule.bookings_count !== undefined && schedule.bookings_count > 0 ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                                    <MdPeople className="w-3 h-3" />
+                                    {schedule.bookings_count}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-gray-400">—</span>
+                                )}
+                              </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right">
                                 <ActionMenu menuId={`schedule-${schedule.id}`}>
                                   <ActionMenu.Trigger />
@@ -694,7 +718,7 @@ export default function SchedulesPage() {
                                     </Modal.Open>
                                   </ActionMenu.Content>
                                 </ActionMenu>
-                               </td>
+                              </td>
                             </tr>
                           );
                         })}
