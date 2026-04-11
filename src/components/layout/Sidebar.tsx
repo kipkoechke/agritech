@@ -7,9 +7,11 @@ import {
   MdPeople,
   MdAgriculture,
   MdFactory,
+  MdScale,
   MdMap,
   MdSupervisorAccount,
   MdPerson,
+  MdDesignServices,
   MdGroup,
   MdSchedule,
   MdBookOnline,
@@ -19,7 +21,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import {
   useLogout,
   useAuth,
@@ -42,6 +44,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   const isFarmer = useIsFarmer();
   const isSupervisor = useIsSupervisor();
   const isPlucker = useIsPlucker();
+  
+  // Add client-side only state to prevent hydration mismatch
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const menuItems = useMemo(() => {
     // All menu items definition
@@ -102,13 +111,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname.startsWith("/bookings"),
         visibleTo: ["admin", "farmer", "supervisor"],
       },
-      // {
-      //   name: "Weighing Points",
-      //   icon: MdScale,
-      //   href: "/weighing-points",
-      //   active: pathname.startsWith("/weighing-points"),
-      //   visibleTo: ["admin", "farmer", "supervisor"],
-      // },
       {
         name: "Farm Map",
         icon: MdMap,
@@ -116,13 +118,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname === "/farm-map",
         visibleTo: ["admin", "supervisor"],
       },
-      // {
-      //   name: "My Services",
-      //   icon: MdDesignServices,
-      //   href: "/my-services",
-      //   active: pathname.startsWith("/my-services"),
-      //   visibleTo: ["admin", "farmer", "supervisor", "plucker"],
-      // },
       {
         name: "Work Groups",
         icon: MdGroupWork,
@@ -166,7 +161,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
     }
   };
 
-  if (isLoading) {
+  // Show loading state only on client, or a consistent placeholder on server
+  if (!isClient || isLoading) {
     return (
       <div className="bg-primary-hover border-r border-primary-hover/20 h-full flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
