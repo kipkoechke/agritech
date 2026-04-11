@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdPeople,
         href: "/farm-workers",
         active: pathname.startsWith("/farm-workers"),
-        visibleTo: ["admin", "supervisor"],
+        visibleTo: ["admin"],
       },
       {
         name: "Farm Supervisors",
