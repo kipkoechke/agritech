@@ -84,6 +84,7 @@ const getActivityColor = (activityName: string) => {
 
 // Calendar View Component
 const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
+  const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -287,8 +288,12 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                       return (
                         <div
                           key={schedule.id}
-                          className={`text-xs truncate px-1.5 py-1 rounded-lg ${colors.light} ${colors.text} border ${colors.border}`}
+                          className={`text-xs truncate px-1.5 py-1 rounded-lg ${colors.light} ${colors.text} border ${colors.border} cursor-pointer hover:opacity-80`}
                           title={`${schedule.reference_code} - ${schedule.activity.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/schedules/${schedule.id}`);
+                          }}
                         >
                           <span className="font-medium">{schedule.activity.name.substring(0, 10)}</span>
                           {schedule.status === "cancelled" && (
@@ -349,7 +354,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                   <div
                     key={schedule.id}
                     className={`p-3 rounded-lg border ${colors.border} ${colors.light} hover:shadow-md transition-all cursor-pointer`}
-                    onClick={() => window.location.href = `/schedules/${schedule.id}`}
+                    onClick={() => router.push(`/schedules/${schedule.id}`)}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -628,9 +633,13 @@ export default function SchedulesPage() {
                         {schedules.map((schedule) => {
                           const colors = getActivityColor(schedule.activity.name);
                           return (
-                            <tr key={schedule.id} className="hover:bg-gray-50 transition-colors">
+                            <tr 
+                              key={schedule.id} 
+                              className="hover:bg-gray-50 transition-colors cursor-pointer"
+                              onClick={() => router.push(`/schedules/${schedule.id}`)}
+                            >
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-semibold text-gray-900">
+                                <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                                   {schedule.reference_code}
                                 </div>
                               </td>
@@ -677,47 +686,49 @@ export default function SchedulesPage() {
                                 )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <ActionMenu menuId={`schedule-${schedule.id}`}>
-                                  <ActionMenu.Trigger />
-                                  <ActionMenu.Content>
-                                    <ActionMenu.Item
-                                      onClick={() =>
-                                        router.push(`/schedules/${schedule.id}`)
-                                      }
-                                    >
-                                      <FiEye className="h-4 w-4" />
-                                      View
-                                    </ActionMenu.Item>
-                                    <ActionMenu.Item
-                                      onClick={() =>
-                                        router.push(`/schedules/${schedule.id}/edit`)
-                                      }
-                                    >
-                                      <FiEdit className="h-4 w-4" />
-                                      Edit
-                                    </ActionMenu.Item>
-                                    {schedule.status !== "cancelled" && (
+                                <div onClick={(e) => e.stopPropagation()}>
+                                  <ActionMenu menuId={`schedule-${schedule.id}`}>
+                                    <ActionMenu.Trigger />
+                                    <ActionMenu.Content>
                                       <ActionMenu.Item
                                         onClick={() =>
-                                          cancelSchedule.mutate(schedule.id)
+                                          router.push(`/schedules/${schedule.id}`)
                                         }
-                                        className="text-orange-600"
                                       >
-                                        <MdCancel className="h-4 w-4" />
-                                        Cancel
+                                        <FiEye className="h-4 w-4" />
+                                        View
                                       </ActionMenu.Item>
-                                    )}
-                                    <Modal.Open opens="delete-schedule">
                                       <ActionMenu.Item
-                                        onClick={() => setSelectedSchedule(schedule)}
-                                        className="text-red-600"
+                                        onClick={() =>
+                                          router.push(`/schedules/${schedule.id}/edit`)
+                                        }
                                       >
-                                        <FiTrash className="h-4 w-4" />
-                                        Delete
+                                        <FiEdit className="h-4 w-4" />
+                                        Edit
                                       </ActionMenu.Item>
-                                    </Modal.Open>
-                                  </ActionMenu.Content>
-                                </ActionMenu>
+                                      {schedule.status !== "cancelled" && (
+                                        <ActionMenu.Item
+                                          onClick={() =>
+                                            cancelSchedule.mutate(schedule.id)
+                                          }
+                                          className="text-orange-600"
+                                        >
+                                          <MdCancel className="h-4 w-4" />
+                                          Cancel
+                                        </ActionMenu.Item>
+                                      )}
+                                      <Modal.Open opens="delete-schedule">
+                                        <ActionMenu.Item
+                                          onClick={() => setSelectedSchedule(schedule)}
+                                          className="text-red-600"
+                                        >
+                                          <FiTrash className="h-4 w-4" />
+                                          Delete
+                                        </ActionMenu.Item>
+                                      </Modal.Open>
+                                    </ActionMenu.Content>
+                                  </ActionMenu>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -743,7 +754,7 @@ export default function SchedulesPage() {
                         <button
                           onClick={() => setPage((p) => p + 1)}
                           disabled={!pagination.next_page}
-                          className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-white bg-primary rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/80 transition-colors"
                         >
                           Next
                         </button>
