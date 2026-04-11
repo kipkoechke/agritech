@@ -9,19 +9,20 @@ import {
   MdMap,
   MdRefresh,
   MdFilterList,
-  MdExpandMore,
-  MdExpandLess,
   MdLocationOn,
   MdAgriculture,
   MdScale,
   MdViewList,
   MdPublic,
   MdPerson,
-  MdFactory,
-  MdCategory,
-  MdCode,
   MdInfo,
   MdArrowForward,
+  MdClear,
+  MdStore,
+  MdPinDrop,
+  MdCategory,
+  MdCode,
+  MdFactory,
 } from "react-icons/md";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
@@ -62,18 +63,6 @@ const getCoordinates = (farm: Farm): { lat: number; lng: number } | null => {
 // Helper to format number
 const formatNumber = (num: number) => num.toLocaleString("en-KE");
 
-// Get marker color based on product type
-const getProductColor = (productName: string | undefined) => {
-  const colors: Record<string, string> = {
-    Tea: "#10b981", // green
-    Coffee: "#8b5cf6", // purple
-    Maize: "#f59e0b", // amber
-    Wheat: "#3b82f6", // blue
-    Default: "#ef4444", // red
-  };
-  return colors[productName || ""] || colors.Default;
-};
-
 // Get marker color based on farm size
 const getSizeColor = (size: number) => {
   if (size >= 10) return "#10b981";
@@ -82,7 +71,7 @@ const getSizeColor = (size: number) => {
   return "#ef4444";
 };
 
-// Farm Detail Card Component (Compact for sidebar)
+// Farm Detail Card Component
 const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDetails: (id: string) => void }) => {
   if (!farm) return null;
 
@@ -134,6 +123,91 @@ const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDeta
   );
 };
 
+// Custom Popup Component for Map
+const CustomPopup = ({ farm, onViewDetails }: { farm: Farm; onViewDetails: (id: string) => void }) => {
+  const size = parseFloat(farm.size as any) || 0;
+  
+  return (
+    <div className="custom-farm-popup">
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-r from-primary to-primary/80 px-4 py-3 rounded-t-lg -mt-1 -mx-1">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <MdStore className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-sm">{farm.name}</h3>
+            <p className="text-white/80 text-xs">{farm.farm_code}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 py-3 space-y-2">
+        {/* Location */}
+        <div className="flex items-start gap-2">
+          <MdPinDrop className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-xs text-gray-500">Zone</p>
+            <p className="text-sm font-medium text-gray-800">{farm.zone?.name || "N/A"}</p>
+          </div>
+        </div>
+
+        {/* Farmer Info */}
+        <div className="flex items-start gap-2">
+          <MdPerson className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-xs text-gray-500">Farmer</p>
+            <p className="text-sm font-medium text-gray-800">{farm.farmer?.name || "N/A"}</p>
+          </div>
+        </div>
+
+        {/* Product & Size Row */}
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <div className="flex items-start gap-2">
+            <MdCategory className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-gray-500">Product</p>
+              <p className="text-sm font-medium text-gray-800">{farm.product?.name || "N/A"}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <MdScale className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-gray-500">Size</p>
+              <p className="text-sm font-bold text-primary">{size.toFixed(2)} Ha</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-100 my-2"></div>
+
+        {/* View Details Button */}
+        <button
+          onClick={() => onViewDetails(farm.id)}
+          className="w-full bg-primary/10 hover:bg-primary/20 text-primary font-medium py-2 px-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+        >
+          <MdInfo className="w-4 h-4" />
+          View Full Farm Details
+          <MdArrowForward className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <style jsx>{`
+        .custom-farm-popup {
+          min-width: 260px;
+          max-width: 280px;
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export default function FarmLocationPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -143,7 +217,6 @@ export default function FarmLocationPage() {
 
   // State
   const [activeTab, setActiveTab] = useState<"map" | "table">("map");
-  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   const [selectedFarmerId, setSelectedFarmerId] = useState<string>("");
@@ -189,6 +262,8 @@ export default function FarmLocationPage() {
   const handleViewFarmDetails = (farmId: string) => {
     router.push(`/farms/${farmId}`);
   };
+
+  const hasActiveFilters = selectedZoneId || selectedFarmerId || selectedClusterId;
 
   // Filter farms based on role and selected filters
   const filteredFarms = useMemo(() => {
@@ -318,103 +393,26 @@ export default function FarmLocationPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      {/* Header Bar with Filter */}
+      {/* Header */}
       <div className="bg-white border-b border-slate-200 shrink-0">
-        <div
-          className="flex items-center justify-between px-3 md:px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
-          onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-        >
-          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-            <div className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/10 text-primary shrink-0">
-              <MdMap className="w-4 h-4 md:w-5 md:h-5" />
+        <div className="px-3 md:px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/10 text-primary shrink-0">
+                <MdAgriculture className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <h1 className="text-base md:text-lg font-bold text-gray-900">
+                {getDashboardTitle()}
+              </h1>
             </div>
-            <h1 className="text-base md:text-lg font-bold text-gray-900">
-              {getDashboardTitle()}
-            </h1>
-            <MdFilterList className="w-4 h-4 text-gray-400 shrink-0" />
-          </div>
-          <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRefresh();
-              }}
+              onClick={handleRefresh}
               className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <MdRefresh className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </button>
-            {isFilterExpanded ? (
-              <MdExpandLess className="w-5 h-5 text-gray-500" />
-            ) : (
-              <MdExpandMore className="w-5 h-5 text-gray-500" />
-            )}
           </div>
         </div>
-
-        {isFilterExpanded && (
-          <div className="border-t border-gray-100 px-3 md:px-4 py-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-              <div>
-                <label className="text-gray-700 mb-1 flex text-xs font-medium">Zone</label>
-                <select
-                  value={selectedZoneId}
-                  onChange={(e) => setSelectedZoneId(e.target.value)}
-                  className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
-                >
-                  <option value="">All Zones</option>
-                  {uniqueZones.map((zone) => (
-                    <option key={zone.id} value={zone.id}>
-                      {zone.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-gray-700 mb-1 flex text-xs font-medium">Farmer</label>
-                <select
-                  value={selectedFarmerId}
-                  onChange={(e) => setSelectedFarmerId(e.target.value)}
-                  className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
-                >
-                  <option value="">All Farmers</option>
-                  {uniqueFarmers.map((farmer) => (
-                    <option key={farmer.id} value={farmer.id}>
-                      {farmer.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-gray-700 mb-1 flex text-xs font-medium">Cluster</label>
-                <select
-                  value={selectedClusterId}
-                  onChange={(e) => setSelectedClusterId(e.target.value)}
-                  className="border-gray-300 focus:border-indigo-500 text-gray-900 focus:ring-indigo-500 hover:border-gray-400 w-full rounded-lg border px-2 md:px-3 py-2 text-sm"
-                >
-                  <option value="">All Clusters</option>
-                  {uniqueClusters.map((cluster) => (
-                    <option key={cluster.id} value={cluster.id}>
-                      {cluster.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end mt-3">
-              <button
-                onClick={handleClearFilters}
-                disabled={!selectedZoneId && !selectedFarmerId && !selectedClusterId}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
-                  selectedZoneId || selectedFarmerId || selectedClusterId
-                    ? "text-gray-700 bg-gray-100 hover:bg-gray-200"
-                    : "text-gray-400 bg-gray-50 cursor-not-allowed"
-                }`}
-              >
-                <MdClose className="w-4 h-4" /> Clear Filters
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Stats Cards Row */}
@@ -464,10 +462,94 @@ export default function FarmLocationPage() {
         </div>
       </div>
 
+      {/* Filters Row - Single Line */}
+      <div className="px-3 md:px-4 py-2 bg-white border-b border-slate-200 shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <MdFilterList className="w-4 h-4 text-gray-400" />
+          
+          <select
+            value={selectedZoneId}
+            onChange={(e) => setSelectedZoneId(e.target.value)}
+            className="border-gray-300 focus:border-primary text-gray-900 focus:ring-primary rounded-lg border px-2 py-1.5 text-sm min-w-[120px]"
+          >
+            <option value="">All Zones</option>
+            {uniqueZones.map((zone) => (
+              <option key={zone.id} value={zone.id}>
+                {zone.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedFarmerId}
+            onChange={(e) => setSelectedFarmerId(e.target.value)}
+            className="border-gray-300 focus:border-primary text-gray-900 focus:ring-primary rounded-lg border px-2 py-1.5 text-sm min-w-[140px]"
+          >
+            <option value="">All Farmers</option>
+            {uniqueFarmers.map((farmer) => (
+              <option key={farmer.id} value={farmer.id}>
+                {farmer.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedClusterId}
+            onChange={(e) => setSelectedClusterId(e.target.value)}
+            className="border-gray-300 focus:border-primary text-gray-900 focus:ring-primary rounded-lg border px-2 py-1.5 text-sm min-w-[140px]"
+          >
+            <option value="">All Clusters</option>
+            {uniqueClusters.map((cluster) => (
+              <option key={cluster.id} value={cluster.id}>
+                {cluster.name}
+              </option>
+            ))}
+          </select>
+
+          {hasActiveFilters && (
+            <button
+              onClick={handleClearFilters}
+              className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MdClear className="w-4 h-4" />
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tab Bar */}
+      <div className="px-3 md:px-4 pt-2 bg-gray-100 shrink-0">
+        <div className="flex gap-1">
+          <button
+            onClick={() => setActiveTab("map")}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+              activeTab === "map"
+                ? "bg-white text-primary border-t border-l border-r border-slate-200"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            <MdMap className="w-4 h-4" />
+            Map View
+          </button>
+          <button
+            onClick={() => setActiveTab("table")}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+              activeTab === "table"
+                ? "bg-white text-primary border-t border-l border-r border-slate-200"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            <MdViewList className="w-4 h-4" />
+            Table View
+          </button>
+        </div>
+      </div>
+
       {/* Main Content: Left Panel + Right Panel */}
-      <div className="flex-1 flex overflow-hidden px-3 md:px-4 pb-4 gap-4">
+      <div className="flex-1 flex overflow-hidden px-3 md:px-4 pb-4 gap-4 bg-gray-100">
         {/* LEFT PANEL - Selected Farm Details */}
-        <div className="w-full lg:w-2/5 xl:w-1/3 bg-transparent overflow-y-auto space-y-4">
+        <div className="w-full lg:w-2/5 xl:w-1/3 bg-transparent overflow-y-auto space-y-4 pt-2">
           {/* Instructions Card when no farm selected */}
           {!selectedFarm && (
             <div className="bg-white rounded-lg border border-slate-200 p-6 text-center">
@@ -484,212 +566,158 @@ export default function FarmLocationPage() {
           )}
         </div>
 
-        {/* RIGHT PANEL - Tabs Container with Map/Table */}
-        <div className="flex-1 relative min-w-0 bg-white rounded-lg border border-slate-200 flex flex-col">
-          {/* Tab Bar */}
-          <div className="border-b border-gray-200 shrink-0">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab("map")}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "map"
-                    ? "text-primary border-b-2 border-primary bg-primary/5"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <MdMap className="w-4 h-4" />
-                Map View
-              </button>
-              <button
-                onClick={() => setActiveTab("table")}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "table"
-                    ? "text-primary border-b-2 border-primary bg-primary/5"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <MdViewList className="w-4 h-4" />
-                Table View
-              </button>
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="flex-1 overflow-hidden">
-            {activeTab === "map" ? (
-              // Map View
-              <div className="h-full p-3 md:p-4">
-                <div className="h-full rounded-lg overflow-hidden border border-gray-200">
-                  {farmsWithCoords.length > 0 ? (
-                    <MapContainer
-                      key={`map-${selectedZoneId}-${selectedFarmerId}-${selectedClusterId}`}
-                      center={mapCenter}
-                      zoom={12}
-                      style={{ height: "100%", width: "100%" }}
-                      scrollWheelZoom={true}
-                    >
-                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                      {farmsWithCoords.map((farm) => {
-                        const coords = getCoordinates(farm);
-                        if (!coords) return null;
-                        const size = parseFloat(farm.size as any) || 0;
-                        const radius = Math.max(8, Math.min(25, Math.sqrt(size) * 3));
-                        const isSelected = selectedFarm?.id === farm.id;
-                        const markerColor = getSizeColor(size);
-                        return (
-                          <CircleMarker
-                            key={farm.id}
-                            center={[coords.lat, coords.lng]}
-                            radius={isSelected ? radius + 5 : radius}
-                            fillColor={markerColor}
-                            color={isSelected ? "#3b82f6" : markerColor}
-                            weight={isSelected ? 3 : 2}
-                            opacity={1}
-                            fillOpacity={0.7}
-                            eventHandlers={{
-                              click: () => setSelectedFarm(farm),
-                            }}
-                          >
-                            <Popup>
-                              <div className="text-sm min-w-[200px]">
-                                <p className="font-bold text-gray-900">{farm.name}</p>
-                                <p className="text-gray-600 text-xs">Farm Code: {farm.farm_code}</p>
-                                <div className="mt-2 pt-2 border-t border-gray-100">
-                                  <p className="text-gray-600">
-                                    <span className="font-medium">Zone:</span> {farm.zone?.name || "N/A"}
-                                  </p>
-                                  <p className="text-gray-600">
-                                    <span className="font-medium">Farmer:</span> {farm.farmer?.name || "N/A"}
-                                  </p>
-                                  <p className="text-gray-600">
-                                    <span className="font-medium">Product:</span> {farm.product?.name || "N/A"}
-                                  </p>
-                                  <p className="text-primary font-bold mt-1">
-                                    Size: {size.toFixed(2)} Ha
-                                  </p>
-                                </div>
-                                <button
-                                  onClick={() => handleViewFarmDetails(farm.id)}
-                                  className="mt-2 w-full text-center text-primary text-xs font-medium hover:underline"
-                                >
-                                  View Full Details →
-                                </button>
-                              </div>
-                            </Popup>
-                          </CircleMarker>
-                        );
-                      })}
-                    </MapContainer>
-                  ) : (
-                    <div className="h-full flex items-center justify-center bg-gray-50">
-                      <p className="text-gray-500">No farms with coordinates available</p>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-4 justify-center">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                    <span className="text-xs text-gray-600">Large (10+ Ha)</span>
+        {/* RIGHT PANEL - Map or Table based on active tab */}
+        <div className="flex-1 relative min-w-0 bg-white rounded-lg border border-slate-200 overflow-hidden pt-2">
+          {activeTab === "map" ? (
+            // Map View
+            <div className="h-full p-3 md:p-4">
+              <div className="h-[calc(100%-50px)] rounded-lg overflow-hidden border border-gray-200">
+                {farmsWithCoords.length > 0 ? (
+                  <MapContainer
+                    key={`map-${selectedZoneId}-${selectedFarmerId}-${selectedClusterId}`}
+                    center={mapCenter}
+                    zoom={12}
+                    style={{ height: "100%", width: "100%" }}
+                    scrollWheelZoom={true}
+                  >
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    {farmsWithCoords.map((farm) => {
+                      const coords = getCoordinates(farm);
+                      if (!coords) return null;
+                      const size = parseFloat(farm.size as any) || 0;
+                      const radius = Math.max(8, Math.min(25, Math.sqrt(size) * 3));
+                      const isSelected = selectedFarm?.id === farm.id;
+                      const markerColor = getSizeColor(size);
+                      return (
+                        <CircleMarker
+                          key={farm.id}
+                          center={[coords.lat, coords.lng]}
+                          radius={isSelected ? radius + 5 : radius}
+                          fillColor={markerColor}
+                          color={isSelected ? "#3b82f6" : markerColor}
+                          weight={isSelected ? 3 : 2}
+                          opacity={1}
+                          fillOpacity={0.7}
+                          eventHandlers={{
+                            click: () => setSelectedFarm(farm),
+                          }}
+                        >
+                          <Popup>
+                            <CustomPopup farm={farm} onViewDetails={handleViewFarmDetails} />
+                          </Popup>
+                        </CircleMarker>
+                      );
+                    })}
+                  </MapContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center bg-gray-50">
+                    <p className="text-gray-500">No farms with coordinates available</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span className="text-xs text-gray-600">Medium (5-10 Ha)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                    <span className="text-xs text-gray-600">Small (2-5 Ha)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="text-xs text-gray-600">Very Small (&lt;2 Ha)</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              // Table View
-              <div className="h-full overflow-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Farm Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Farm Code
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zone
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Farmer
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Cluster
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Product
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Size (Ha)
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredFarms.map((farm) => (
-                      <tr
-                        key={farm.id}
-                        onClick={() => setSelectedFarm(farm)}
-                        className={`hover:bg-gray-50 cursor-pointer transition-colors ${
-                          selectedFarm?.id === farm.id ? "bg-primary/5" : ""
-                        }`}
-                      >
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {farm.name}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.farm_code}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.zone?.name || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.farmer?.name || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.cluster?.name || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {farm.product?.name || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm font-semibold text-gray-900">
-                            {parseFloat(farm.size as any)?.toFixed(2) || "0"} Ha
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewFarmDetails(farm.id);
-                            }}
-                            className="text-primary hover:text-primary/80 text-sm flex items-center gap-1"
-                          >
-                            View <MdArrowForward className="w-3 h-3" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {filteredFarms.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">No farms found</div>
                 )}
               </div>
-            )}
-          </div>
+              <div className="mt-3 flex flex-wrap gap-4 justify-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                  <span className="text-xs text-gray-600">Large (10+ Ha)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-xs text-gray-600">Medium (5-10 Ha)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                  <span className="text-xs text-gray-600">Small (2-5 Ha)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span className="text-xs text-gray-600">Very Small (&lt;2 Ha)</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Table View
+            <div className="h-full overflow-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Farm Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Farm Code
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Zone
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Farmer
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Cluster
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Product
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Size (Ha)
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredFarms.map((farm) => (
+                    <tr
+                      key={farm.id}
+                      onClick={() => setSelectedFarm(farm)}
+                      className={`hover:bg-gray-50 cursor-pointer transition-colors ${
+                        selectedFarm?.id === farm.id ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {farm.name}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {farm.farm_code}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {farm.zone?.name || "N/A"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {farm.farmer?.name || "N/A"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {farm.cluster?.name || "N/A"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {farm.product?.name || "N/A"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {parseFloat(farm.size as any)?.toFixed(2) || "0"} Ha
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewFarmDetails(farm.id);
+                          }}
+                          className="text-primary hover:text-primary/80 text-sm flex items-center gap-1"
+                        >
+                          View <MdArrowForward className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredFarms.length === 0 && (
+                <div className="text-center py-8 text-gray-500">No farms found</div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
