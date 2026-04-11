@@ -23,6 +23,8 @@ import {
   MdVisibility,
   MdChevronLeft,
   MdChevronRight,
+  MdFactory,
+  MdCategory,
 } from "react-icons/md";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
