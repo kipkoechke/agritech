@@ -1,3 +1,4 @@
+// types/schedule.ts
 export interface ScheduleRef {
   id: string;
   name: string;
@@ -14,6 +15,34 @@ export interface ScheduleFarm {
   zone: ScheduleZone;
 }
 
+export interface ScheduleWorker {
+  id: string;
+  name: string;
+  phone: string;
+}
+
+export interface ScheduleBooking {
+  id: string;
+  schedule: {
+    id: string;
+    reference_code: string;
+    scheduled_date: string;
+    status: string;
+    activity: ScheduleRef;
+    farm: ScheduleFarm;
+  };
+  worker: ScheduleWorker;
+  is_confirmed: boolean;
+  worker_signed: boolean;
+  farm_qty: number | null;
+  factory_qty: number | null;
+  metadata: any | null;
+}
+
+export interface BookingsData {
+  data: ScheduleBooking[];
+}
+
 export interface Schedule {
   id: string;
   reference_code: string;
@@ -25,6 +54,8 @@ export interface Schedule {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  bookings_count?: number;
+  bookings?: BookingsData;
 }
 
 export interface CreateScheduleData {

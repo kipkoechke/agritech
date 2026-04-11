@@ -72,53 +72,53 @@ const getSizeColor = (size: number) => {
   return "#ef4444";
 };
 
-// Farm Detail Card Component
+// Farm Detail Card Component - Increased width and improved layout
 const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDetails: (id: string) => void }) => {
   if (!farm) return null;
 
   const size = parseFloat(farm.size as any) || 0;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-3 py-2 bg-gradient-to-r from-primary/10 to-transparent border-b border-slate-100">
+    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-200 shadow-md overflow-hidden">
+      <div className="px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-              <MdStore className="w-3 h-3 text-primary" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <MdStore className="w-4 h-4 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-900 text-xs">Selected Farm</h3>
+            <h3 className="font-semibold text-white text-sm">Selected Farm</h3>
           </div>
           <button
             onClick={() => onViewDetails(farm.id)}
-            className="text-[10px] text-primary hover:text-primary/80 font-medium flex items-center gap-0.5"
+            className="text-xs text-white/90 hover:text-white font-medium flex items-center gap-1 bg-white/10 px-2 py-1 rounded-lg transition-colors"
           >
-            View <MdArrowForward className="w-2.5 h-2.5" />
+            View Details <MdArrowForward className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
-      <div className="p-2">
-        <div className="mb-2">
-          <p className="text-[9px] text-gray-500 uppercase mb-0.5">Farm Name</p>
-          <p className="text-xs font-bold text-gray-900 truncate">{farm.name}</p>
+      <div className="p-4">
+        <div className="mb-3">
+          <p className="text-xs text-emerald-700/70 uppercase mb-1 font-medium">Farm Name</p>
+          <p className="text-base font-bold text-gray-900">{farm.name}</p>
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <p className="text-[9px] text-gray-500 uppercase mb-0.5">Code</p>
-            <p className="text-[10px] font-medium text-gray-700 bg-gray-50 px-1.5 py-0.5 rounded">{farm.farm_code}</p>
+            <p className="text-xs text-emerald-700/70 uppercase mb-1 font-medium">Code</p>
+            <p className="text-sm font-semibold text-gray-700 bg-white/60 px-2 py-1 rounded-lg">{farm.farm_code}</p>
           </div>
           <div>
-            <p className="text-[9px] text-gray-500 uppercase mb-0.5">Size</p>
-            <p className="text-[10px] font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded inline-block">{size.toFixed(2)} Ha</p>
+            <p className="text-xs text-emerald-700/70 uppercase mb-1 font-medium">Size</p>
+            <p className="text-sm font-bold text-emerald-700 bg-emerald-200/50 px-2 py-1 rounded-lg inline-block">{size.toFixed(2)} Ha</p>
           </div>
         </div>
-        <div className="space-y-1">
-          <div className="flex items-center justify-between py-0.5">
-            <span className="text-[9px] text-gray-500">Zone</span>
-            <span className="text-[10px] font-medium text-gray-800">{farm.zone?.name || "N/A"}</span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between py-1 border-b border-emerald-200/50">
+            <span className="text-xs text-emerald-700/70 font-medium">Zone</span>
+            <span className="text-sm font-semibold text-gray-800">{farm.zone?.name || "N/A"}</span>
           </div>
-          <div className="flex items-center justify-between py-0.5">
-            <span className="text-[9px] text-gray-500">Farmer</span>
-            <span className="text-[10px] font-medium text-gray-800">{farm.farmer?.name || "N/A"}</span>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-xs text-emerald-700/70 font-medium">Farmer</span>
+            <span className="text-sm font-semibold text-gray-800">{farm.farmer?.name || "N/A"}</span>
           </div>
         </div>
       </div>
@@ -484,8 +484,8 @@ export default function FarmLocationPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* LEFT PANEL - Compact */}
-        <div className="w-72 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
+        {/* LEFT PANEL - With filters in one line */}
+        <div className="w-80 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
           {/* Tab Toggle */}
           <div className="p-2 border-b border-slate-200">
             <div className="flex gap-1 bg-gray-100 p-0.5 rounded-lg">
@@ -547,27 +547,23 @@ export default function FarmLocationPage() {
             </div>
           </div>
 
-          {/* Filter Toggle Button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center justify-between w-full px-3 py-2 border-b border-slate-200 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-1.5">
+          {/* Filters in one horizontal line */}
+          <div className="p-2 border-b border-slate-200">
+            <div className="flex items-center gap-1 mb-2">
               <MdFilterList className="w-3.5 h-3.5 text-primary" />
               <span className="text-[11px] font-medium text-gray-700">Filters</span>
               {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+              {hasActiveFilters && (
+                <button
+                  onClick={handleClearFilters}
+                  className="ml-auto text-[10px] text-gray-500 hover:text-gray-700 flex items-center gap-0.5"
+                >
+                  <MdClear className="w-3 h-3" />
+                  Clear
+                </button>
+              )}
             </div>
-            {showFilters ? (
-              <MdChevronLeft className="w-3.5 h-3.5 text-gray-400" />
-            ) : (
-              <MdChevronRight className="w-3.5 h-3.5 text-gray-400" />
-            )}
-          </button>
-
-          {/* Filters - Horizontal inline when visible */}
-          {showFilters && (
-            <div className="p-2 border-b border-slate-200 space-y-1.5">
-              {/* Zone Filter */}
+            <div className="flex flex-wrap gap-1.5">
               <select
                 value={selectedZoneId}
                 onChange={(e) => {
@@ -576,9 +572,9 @@ export default function FarmLocationPage() {
                   setSelectedClusterId("");
                   setSelectedFarmId("");
                 }}
-                className="w-full border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px]"
+                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
               >
-                <option value="">All Zones</option>
+                <option value="">Zone</option>
                 {uniqueZones.map((zone) => (
                   <option key={zone.id} value={zone.id}>
                     {zone.name}
@@ -586,7 +582,6 @@ export default function FarmLocationPage() {
                 ))}
               </select>
 
-              {/* Factory Filter - depends on Zone */}
               <select
                 value={selectedFactoryId}
                 onChange={(e) => {
@@ -594,10 +589,10 @@ export default function FarmLocationPage() {
                   setSelectedClusterId("");
                   setSelectedFarmId("");
                 }}
-                className="w-full border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px]"
+                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
                 disabled={!selectedZoneId && uniqueFactories.length === 0}
               >
-                <option value="">All Factories</option>
+                <option value="">Factory</option>
                 {uniqueFactories.map((factory) => (
                   <option key={factory.id} value={factory.id}>
                     {factory.name}
@@ -605,17 +600,16 @@ export default function FarmLocationPage() {
                 ))}
               </select>
 
-              {/* Cluster Filter - depends on Zone & Factory */}
               <select
                 value={selectedClusterId}
                 onChange={(e) => {
                   setSelectedClusterId(e.target.value);
                   setSelectedFarmId("");
                 }}
-                className="w-full border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px]"
+                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
                 disabled={(!selectedZoneId && !selectedFactoryId) || uniqueClusters.length === 0}
               >
-                <option value="">All Clusters</option>
+                <option value="">Cluster</option>
                 {uniqueClusters.map((cluster) => (
                   <option key={cluster.id} value={cluster.id}>
                     {cluster.name}
@@ -623,41 +617,31 @@ export default function FarmLocationPage() {
                 ))}
               </select>
 
-              {/* Farm Filter - depends on Zone, Factory & Cluster */}
               <select
                 value={selectedFarmId}
                 onChange={(e) => setSelectedFarmId(e.target.value)}
-                className="w-full border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px]"
+                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
                 disabled={uniqueFarms.length === 0}
               >
-                <option value="">All Farms</option>
+                <option value="">Farm</option>
                 {uniqueFarms.map((farm) => (
                   <option key={farm.id} value={farm.id}>
                     {farm.name}
                   </option>
                 ))}
               </select>
-
-              {hasActiveFilters && (
-                <button
-                  onClick={handleClearFilters}
-                  className="w-full flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <MdClear className="w-3 h-3" />
-                  Clear All
-                </button>
-              )}
             </div>
-          )}
+          </div>
 
-          {/* Selected Farm Details */}
-          <div className="flex-1 p-2">
+          {/* Selected Farm Details - Now in green theme */}
+          <div className="flex-1 p-3">
             {!selectedFarm && (
-              <div className="text-center py-4">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-1.5">
-                  <MdInfo className="w-4 h-4 text-gray-400" />
+              <div className="text-center py-8">
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <MdInfo className="w-6 h-6 text-emerald-500" />
                 </div>
-                <p className="text-[10px] text-gray-500">Click marker or select from table</p>
+                <p className="text-xs text-gray-500">Click on a farm marker</p>
+                <p className="text-[10px] text-gray-400 mt-1">to view details here</p>
               </div>
             )}
             {selectedFarm && (

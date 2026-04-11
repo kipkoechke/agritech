@@ -1,3 +1,4 @@
+// hooks/useSchedule.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getSchedules,
@@ -81,8 +82,11 @@ export const useCancelSchedule = () => {
 
   return useMutation({
     mutationFn: (id: string) => cancelSchedule(id),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({
+        queryKey: ["schedules", variables],
+      });
       toast.success("Schedule cancelled successfully");
     },
     onError: (error: unknown) => {
