@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { MdFactory, MdAdd, MdSearch } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
-import { ActionMenu } from "@/components/common/ActionMenu";
+import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
+import PageHeader from "@/components/common/PageHeader";
 import { useFactories, useDeleteFactory } from "@/hooks/useFactory";
 import { useZones } from "@/hooks/useZone";
 import type { Factory } from "@/types/factory";
@@ -41,18 +42,10 @@ export default function FactoriesPage() {
 
   return (
     <Modal>
-      <div className="min-h-screen p-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <MdFactory className="w-6 h-6 text-emerald-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Factories</h1>
-              <p className="text-sm text-gray-500">
-                Manage processing factories
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
+      <div className="min-h-screen p-4 space-y-4">
+        <PageHeader
+          title="Factories"
+          search={
             <div className="relative">
               <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -63,21 +56,11 @@ export default function FactoriesPage() {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
               />
             </div>
-            <Button
-              type="small"
-              to="/factories/new"
-              className="flex items-center gap-1"
-            >
-              <MdAdd className="w-4 h-4" />
-              Add Factory
-            </Button>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div className="flex gap-2 items-center">
+          }
+          filters={
             <div className="w-44">
               <SearchableSelect
                 label=""
@@ -90,8 +73,19 @@ export default function FactoriesPage() {
                 placeholder="Filter by zone"
               />
             </div>
-          </div>
-
+          }
+          action={
+            <Button
+              type="small"
+              to="/factories/new"
+              className="flex items-center gap-1"
+            >
+              <MdAdd className="w-4 h-4" />
+              Add Factory
+            </Button>
+          }
+        />
+        <div className="space-y-4">
           {isLoading && (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
@@ -144,9 +138,13 @@ export default function FactoriesPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {factories.map((factory) => (
-                      <tr key={factory.id} className="hover:bg-gray-50">
+                      <tr
+                        key={factory.id}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/factories/${factory.id}`)}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                             {factory.name}
                           </div>
                         </td>
@@ -173,36 +171,41 @@ export default function FactoriesPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <ActionMenu menuId={`factory-${factory.id}`}>
-                            <ActionMenu.Trigger />
-                            <ActionMenu.Content>
-                              <ActionMenu.Item
+                          <div
+                            className="flex items-center justify-end gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Tooltip content="View factory details">
+                              <button
                                 onClick={() =>
                                   router.push(`/factories/${factory.id}`)
                                 }
+                                className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                               >
                                 <FiEye className="h-4 w-4" />
-                                View
-                              </ActionMenu.Item>
-                              <ActionMenu.Item
+                              </button>
+                            </Tooltip>
+                            <Tooltip content="Edit factory">
+                              <button
                                 onClick={() =>
                                   router.push(`/factories/${factory.id}/edit`)
                                 }
+                                className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                               >
                                 <FiEdit className="h-4 w-4" />
-                                Edit
-                              </ActionMenu.Item>
-                              <Modal.Open opens="delete-factory">
-                                <ActionMenu.Item
+                              </button>
+                            </Tooltip>
+                            <Modal.Open opens="delete-factory">
+                              <Tooltip content="Delete factory">
+                                <button
                                   onClick={() => setSelectedFactory(factory)}
-                                  className="text-red-600"
+                                  className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
                                 >
                                   <FiTrash className="h-4 w-4" />
-                                  Delete
-                                </ActionMenu.Item>
-                              </Modal.Open>
-                            </ActionMenu.Content>
-                          </ActionMenu>
+                                </button>
+                              </Tooltip>
+                            </Modal.Open>
+                          </div>
                         </td>
                       </tr>
                     ))}

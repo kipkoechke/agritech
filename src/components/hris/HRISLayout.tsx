@@ -9,17 +9,18 @@ import PageHeader from "@/components/common/PageHeader";
 interface HRISLayoutProps {
   children: ReactNode;
   title: string | ReactNode;
-  description: string;
+  description?: string;
   action?: ReactNode;
   search?: ReactNode;
+  filters?: ReactNode;
 }
 
 const HRISLayout: React.FC<HRISLayoutProps> = ({
   children,
   title,
-  description,
   action,
   search,
+  filters,
 }) => {
   const pathname = usePathname();
 
@@ -99,9 +100,9 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
         <div className="mx-3 md:mx-6 mb-4">
           <PageHeader
             title={title}
-            description={description}
             search={search}
             action={action}
+            filters={filters}
           />
         </div>
 

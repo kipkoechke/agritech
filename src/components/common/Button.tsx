@@ -28,23 +28,23 @@ const baseStyles =
 const types: Record<ButtonType, string> = {
   primary: clsx(
     baseStyles,
-    "bg-primary text-white hover:bg-primary/90 focus:bg-primary focus:ring-primary px-6 py-3 sm:px-8 sm:py-4 md:px-6 md:py-3"
+    "bg-primary text-white hover:bg-primary/90 focus:bg-primary focus:ring-primary px-6 py-3 sm:px-8 sm:py-4 md:px-6 md:py-3",
   ),
   secondary: clsx(
     baseStyles,
-    "border-2 border-accent text-black hover:bg-stone-300 hover:text-primary focus:bg-stone-300 focus:text-primary focus:ring-stone-200 px-6 py-3"
+    "border-2 border-accent text-black hover:bg-stone-300 hover:text-primary focus:bg-stone-300 focus:text-primary focus:ring-stone-200 px-6 py-3",
   ),
   small: clsx(
     baseStyles,
-    "bg-primary text-white hover:bg-primary/90 focus:bg-primary focus:ring-primary px-4 py-2 md:px-3 md:py-1.5 text-xs"
+    "bg-primary text-white hover:bg-primary/90 focus:bg-primary focus:ring-primary px-4 py-2 text-sm",
   ),
   "small-secondary": clsx(
     baseStyles,
-    "border-2 border-secondary text-secondary hover:bg-stone-300 hover:text-primary focus:bg-stone-300 focus:text-primary focus:ring-stone-200 px-4 py-2 md:px-3 md:py-1 text-xs"
+    "border-2 border-secondary text-secondary hover:bg-stone-300 hover:text-primary focus:bg-stone-300 focus:text-primary focus:ring-stone-200 px-4 py-2 md:px-3 md:py-1 text-xs",
   ),
   round: clsx(
     baseStyles,
-    "bg-primary text-white hover:bg-primary/90 focus:bg-primary focus:ring-primary px-2.5 py-1 md:px-3.5 md:py-2 text-sm rounded-full"
+    "bg-primary text-white hover:bg-primary/90 focus:bg-primary focus:ring-primary px-2.5 py-1 md:px-3.5 md:py-2 text-sm rounded-full",
   ),
 };
 

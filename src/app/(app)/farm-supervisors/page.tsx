@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdSupervisorAccount, MdSearch, MdAdd } from "react-icons/md";
 import { FiEye } from "react-icons/fi";
-import { ActionMenu } from "@/components/common/ActionMenu";
+import Tooltip from "@/components/common/Tooltip";
 import Button from "@/components/common/Button";
+import PageHeader from "@/components/common/PageHeader";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 
 export default function FarmsSupervisorsPage() {
@@ -25,13 +26,10 @@ export default function FarmsSupervisorsPage() {
   const pagination = data?.pagination;
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <MdSupervisorAccount className="w-6 h-6 text-primary" />
-          Farm Supervisors
-        </h1>
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen p-4 space-y-4">
+      <PageHeader
+        title="Farm Supervisors"
+        search={
           <div className="relative w-full sm:w-64">
             <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -42,9 +40,11 @@ export default function FarmsSupervisorsPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
             />
           </div>
+        }
+        action={
           <Button
             type="small"
             to="/farm-supervisors/new"
@@ -53,8 +53,8 @@ export default function FarmsSupervisorsPage() {
             <MdAdd className="w-4 h-4" />
             Add Supervisor
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {isLoading && (
         <div className="flex justify-center items-center py-12">
@@ -105,9 +105,13 @@ export default function FarmsSupervisorsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {supervisors.map((sup) => (
-                  <tr key={sup.id} className="hover:bg-gray-50">
+                  <tr
+                    key={sup.id}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/hris/users/${sup.id}`)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                         {sup.name}
                       </div>
                     </td>
@@ -123,17 +127,19 @@ export default function FarmsSupervisorsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <ActionMenu menuId={`supervisor-${sup.id}`}>
-                        <ActionMenu.Trigger />
-                        <ActionMenu.Content>
-                          <ActionMenu.Item
+                      <div
+                        className="flex items-center justify-end gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Tooltip content="View supervisor profile">
+                          <button
                             onClick={() => router.push(`/hris/users/${sup.id}`)}
+                            className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                           >
                             <FiEye className="h-4 w-4" />
-                            View
-                          </ActionMenu.Item>
-                        </ActionMenu.Content>
-                      </ActionMenu>
+                          </button>
+                        </Tooltip>
+                      </div>
                     </td>
                   </tr>
                 ))}

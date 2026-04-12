@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   const isAdmin = useIsAdmin();
   const isFarmer = useIsFarmer();
   const isSupervisor = useIsSupervisor();
-  
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -47,54 +47,127 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   }, []);
 
   const menuItems = useMemo(() => {
+    // Define items with proper role-based visibility
+    const allMenuItems = [
+      // Common items for all roles
+      {
+        name: "Dashboard",
+        icon: MdDashboard,
+        href: "/dashboard",
+        active: pathname === "/dashboard",
+        roles: ["admin", "farmer", "supervisor"],
+      },
+      // Admin only items
+      {
+        name: "Farm Workers",
+        icon: MdPeople,
+        href: "/farm-workers",
+        active: pathname.startsWith("/farm-workers"),
+        roles: ["admin"],
+      },
+      {
+        name: "Farmers",
+        icon: MdPerson,
+        href: "/farmers",
+        active: pathname.startsWith("/farmers"),
+        roles: ["admin"],
+      },
+      {
+        name: "HRIS",
+        icon: MdGroup,
+        href: "/hris/users",
+        active: pathname.startsWith("/hris"),
+        roles: ["admin"],
+      },
+      // Admin & Farmer items (management views)
+      {
+        name: "Farm Supervisors",
+        icon: MdSupervisorAccount,
+        href: "/farm-supervisors",
+        active: pathname.startsWith("/farm-supervisors"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Factory",
+        icon: MdFactory,
+        href: "/factories",
+        active: pathname.startsWith("/factories"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Schedules",
+        icon: MdSchedule,
+        href: "/schedules",
+        active: pathname.startsWith("/schedules"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Bookings",
+        icon: MdBookOnline,
+        href: "/bookings",
+        active: pathname.startsWith("/bookings"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Farms",
+        icon: MdMap,
+        href: "/farm-map",
+        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
+        roles: ["admin"],
+      },
+      {
+        name: "Work Groups",
+        icon: MdGroupWork,
+        href: "/work-groups",
+        active: pathname.startsWith("/work-groups"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Worker Payments",
+        icon: MdPayments,
+        href: "/worker-payments",
+        active: pathname.startsWith("/worker-payments"),
+        roles: ["admin", "farmer"],
+      },
+      // Supervisor only items (personal views)
+      {
+        name: "My Schedules",
+        icon: MdSchedule,
+        href: "/schedules",
+        active: pathname.startsWith("/schedules"),
+        roles: ["supervisor"],
+      },
+      {
+        name: "My Bookings",
+        icon: MdBookOnline,
+        href: "/bookings",
+        active: pathname.startsWith("/bookings"),
+        roles: ["supervisor"],
+      },
+      {
+        name: "My Farms",
+        icon: MdMap,
+        href: "/farm-map",
+        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
+        roles: ["supervisor"],
+      },
+      {
+        name: "My Work Groups",
+        icon: MdGroupWork,
+        href: "/work-groups",
+        active: pathname.startsWith("/work-groups"),
+        roles: ["supervisor"],
+      },
+    ];
+
     // Get user role
     const role = user?.role;
-    
-    // Admin menu items
-    if (isAdmin) {
-      return [
-        { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
-        { name: "Farm Workers", icon: MdPeople, href: "/farm-workers", active: pathname.startsWith("/farm-workers") },
-        { name: "Farm Supervisors", icon: MdSupervisorAccount, href: "/farm-supervisors", active: pathname.startsWith("/farm-supervisors") },
-        { name: "Farmers", icon: MdPerson, href: "/farmers", active: pathname.startsWith("/farmers") },
-        { name: "Factory", icon: MdFactory, href: "/factories", active: pathname.startsWith("/factories") },
-        { name: "Schedules", icon: MdSchedule, href: "/schedules", active: pathname.startsWith("/schedules") },
-        { name: "Farms", icon: MdMap, href: "/farm-map", active: pathname === "/farm-map" || pathname.startsWith("/farms") },
-        { name: "Work Groups", icon: MdGroupWork, href: "/work-groups", active: pathname.startsWith("/work-groups") },
-        { name: "Worker Payments", icon: MdPayments, href: "/worker-payments", active: pathname.startsWith("/worker-payments") },
-        { name: "HRIS", icon: MdGroup, href: "/hris/users", active: pathname.startsWith("/hris") },
-      ];
-    }
-    
-    // Farmer menu items - only "My" items
-    if (isFarmer) {
-      return [
-        { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
-        { name: "My Farms", icon: MdMap, href: "/farm-map", active: pathname === "/farm-map" || pathname.startsWith("/farms") },
-        { name: "My Schedules", icon: MdSchedule, href: "/schedules", active: pathname.startsWith("/schedules") },
-        { name: "My Work Groups", icon: MdGroupWork, href: "/work-groups", active: pathname.startsWith("/work-groups") },
-        { name: "My Payments", icon: MdPayments, href: "/worker-payments", active: pathname.startsWith("/worker-payments") },
-        { name: "My Supervisors", icon: MdSupervisorAccount, href: "/farm-supervisors", active: pathname.startsWith("/farm-supervisors") },
-        { name: "My Factory", icon: MdFactory, href: "/factories", active: pathname.startsWith("/factories") },
-      ];
-    }
-    
-    // Supervisor menu items - only "My" items
-    if (isSupervisor) {
-      return [
-        { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
-        { name: "My Farms", icon: MdMap, href: "/farm-map", active: pathname === "/farm-map" || pathname.startsWith("/farms") },
-        { name: "My Schedules", icon: MdSchedule, href: "/schedules", active: pathname.startsWith("/schedules") },
-        { name: "My Work Groups", icon: MdGroupWork, href: "/work-groups", active: pathname.startsWith("/work-groups") },
-        { name: "Farm Workers", icon: MdPeople, href: "/farm-workers", active: pathname.startsWith("/farm-workers") },
-      ];
-    }
-    
-    // Default fallback
-    return [
-      { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
-    ];
-  }, [pathname, user, isAdmin, isFarmer, isSupervisor]);
+
+    // Filter based on role - NO special admin override
+    return allMenuItems.filter((item) => {
+      return role && item.roles.includes(role);
+    });
+  }, [pathname, user]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -105,6 +178,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       onClose();
     }
   };
+
+  // Collapse sidebar to icon-only when HRIS sub-sidebar is visible
+  const isCollapsed = pathname.startsWith("/hris");
 
   if (!isClient || isLoading) {
     return (
@@ -125,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
             ? "translate-x-0"
             : "-translate-x-full md:translate-x-0"
         }
-        w-64 md:w-auto
+        w-64 ${isCollapsed ? "md:w-14" : "md:w-auto"}
       `}
       style={
         {
@@ -161,22 +237,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
               <Link
                 href={item.href}
                 onClick={handleLinkClick}
-                className={`group flex items-center rounded-lg transition-all duration-200 gap-2 px-2 py-1.5 ${
+                title={isCollapsed ? item.name : undefined}
+                className={`group flex items-center rounded-lg transition-all duration-200 ${isCollapsed ? "justify-center px-0 py-1.5" : "gap-2 px-2 py-1.5"} ${
                   item.active
                     ? "bg-emerald-600 text-white border border-emerald-400/50 shadow-md"
                     : "text-white/80 hover:bg-emerald-700/50 hover:text-white hover:shadow-sm"
                 }`}
               >
                 <div
-                  className={`flex items-center justify-center w-5 h-5 rounded-md transition-all duration-200 shrink-0 ${
+                  className={`flex items-center justify-center ${isCollapsed ? "w-7 h-7" : "w-5 h-5"} rounded-md transition-all duration-200 shrink-0 ${
                     item.active
                       ? "bg-white text-emerald-700 shadow-lg"
                       : "bg-emerald-600/40 text-white group-hover:bg-emerald-500 group-hover:text-white group-hover:shadow-lg"
                   }`}
                 >
-                  <item.icon className="w-3.5 h-3.5" />
+                  <item.icon
+                    className={isCollapsed ? "w-4 h-4" : "w-3.5 h-3.5"}
+                  />
                 </div>
-                <span className="font-medium text-[13px]">{item.name}</span>
+                {!isCollapsed && (
+                  <span className="font-medium text-[13px]">{item.name}</span>
+                )}
               </Link>
             </li>
           ))}
@@ -187,14 +268,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         <button
           onClick={handleLogout}
           disabled={logoutMutation.isPending}
-          className="group flex items-center rounded-lg transition-all duration-200 text-white/80 hover:bg-red-500/20 hover:text-red-400 hover:shadow-sm w-full disabled:opacity-50 gap-2 px-2 py-1.5"
+          title={isCollapsed ? "Logout" : undefined}
+          className={`group flex items-center rounded-lg transition-all duration-200 text-white/80 hover:bg-red-500/20 hover:text-red-400 hover:shadow-sm w-full disabled:opacity-50 ${isCollapsed ? "justify-center px-0 py-1.5" : "gap-2 px-2 py-1.5"}`}
         >
-          <div className="flex items-center justify-center w-5 h-5 rounded-md bg-emerald-600/40 text-white group-hover:bg-red-500 group-hover:text-white group-hover:shadow-lg transition-all duration-200 shrink-0">
-            <MdLogout className="w-3.5 h-3.5" />
+          <div
+            className={`flex items-center justify-center ${isCollapsed ? "w-7 h-7" : "w-5 h-5"} rounded-md bg-emerald-600/40 text-white group-hover:bg-red-500 group-hover:text-white group-hover:shadow-lg transition-all duration-200 shrink-0`}
+          >
+            <MdLogout className={isCollapsed ? "w-4 h-4" : "w-3.5 h-3.5"} />
           </div>
-          <span className="font-medium text-[13px]">
-            {logoutMutation.isPending ? "Logging out..." : "Logout"}
-          </span>
+          {!isCollapsed && (
+            <span className="font-medium text-[13px]">
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
+            </span>
+          )}
         </button>
       </div>
     </div>
