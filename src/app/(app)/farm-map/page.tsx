@@ -290,7 +290,7 @@ export default function FarmLocationPage() {
     window.open(url, '_blank');
   };
 
-  // Get unique zones from farms
+  // Get zones from farms
   const uniqueZones = useMemo(() => {
     const zonesMap = new Map<string, string>();
     allFarms.forEach((farm) => {
