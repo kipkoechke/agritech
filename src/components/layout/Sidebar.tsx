@@ -47,127 +47,54 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   }, []);
 
   const menuItems = useMemo(() => {
-    // Define items with proper role-based visibility
-    const allMenuItems = [
-      // Common items for all roles
-      {
-        name: "Dashboard",
-        icon: MdDashboard,
-        href: "/dashboard",
-        active: pathname === "/dashboard",
-        roles: ["admin", "farmer", "supervisor"],
-      },
-      // Admin only items
-      {
-        name: "Farm Workers",
-        icon: MdPeople,
-        href: "/farm-workers",
-        active: pathname.startsWith("/farm-workers"),
-        roles: ["admin"],
-      },
-      {
-        name: "Farmers",
-        icon: MdPerson,
-        href: "/farmers",
-        active: pathname.startsWith("/farmers"),
-        roles: ["admin"],
-      },
-      {
-        name: "HRIS",
-        icon: MdGroup,
-        href: "/hris/users",
-        active: pathname.startsWith("/hris"),
-        roles: ["admin"],
-      },
-      // Admin & Farmer items (management views)
-      {
-        name: "Farm Supervisors",
-        icon: MdSupervisorAccount,
-        href: "/farm-supervisors",
-        active: pathname.startsWith("/farm-supervisors"),
-        roles: ["admin", "farmer"],
-      },
-      {
-        name: "Factory",
-        icon: MdFactory,
-        href: "/factories",
-        active: pathname.startsWith("/factories"),
-        roles: ["admin", "farmer"],
-      },
-      {
-        name: "Schedules",
-        icon: MdSchedule,
-        href: "/schedules",
-        active: pathname.startsWith("/schedules"),
-        roles: ["admin", "farmer"],
-      },
-      // {
-      //   name: "Bookings",
-      //   icon: MdBookOnline,
-      //   href: "/bookings",
-      //   active: pathname.startsWith("/bookings"),
-      //   roles: ["admin", "farmer"],
-      // },
-      {
-        name: "Farms",
-        icon: MdMap,
-        href: "/farm-map",
-        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
-        roles: ["admin"],
-      },
-      {
-        name: "Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        roles: ["admin", "farmer"],
-      },
-      {
-        name: "Worker Payments",
-        icon: MdPayments,
-        href: "/worker-payments",
-        active: pathname.startsWith("/worker-payments"),
-        roles: ["admin", "farmer"],
-      },
-      // Supervisor only items (personal views)
-      {
-        name: "My Schedules",
-        icon: MdSchedule,
-        href: "/schedules",
-        active: pathname.startsWith("/schedules"),
-        roles: ["supervisor"],
-      },
-      // {
-      //   name: "My Bookings",
-      //   icon: MdBookOnline,
-      //   href: "/bookings",
-      //   active: pathname.startsWith("/bookings"),
-      //   roles: ["supervisor"],
-      // },
-      {
-        name: "My Farms",
-        icon: MdMap,
-        href: "/farm-map",
-        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
-        roles: ["supervisor"],
-      },
-      {
-        name: "My Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        roles: ["supervisor"],
-      },
-    ];
-
     // Get user role
     const role = user?.role;
     
-    // Filter based on role - NO special admin override
-    return allMenuItems.filter((item) => {
-      return role && item.roles.includes(role);
-    });
-  }, [pathname, user]);
+    // Admin menu items
+    if (isAdmin) {
+      return [
+        { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
+        { name: "Farm Workers", icon: MdPeople, href: "/farm-workers", active: pathname.startsWith("/farm-workers") },
+        { name: "Farm Supervisors", icon: MdSupervisorAccount, href: "/farm-supervisors", active: pathname.startsWith("/farm-supervisors") },
+        { name: "Farmers", icon: MdPerson, href: "/farmers", active: pathname.startsWith("/farmers") },
+        { name: "Factory", icon: MdFactory, href: "/factories", active: pathname.startsWith("/factories") },
+        { name: "Schedules", icon: MdSchedule, href: "/schedules", active: pathname.startsWith("/schedules") },
+        { name: "Farms", icon: MdMap, href: "/farm-map", active: pathname === "/farm-map" || pathname.startsWith("/farms") },
+        { name: "Work Groups", icon: MdGroupWork, href: "/work-groups", active: pathname.startsWith("/work-groups") },
+        { name: "Worker Payments", icon: MdPayments, href: "/worker-payments", active: pathname.startsWith("/worker-payments") },
+        { name: "HRIS", icon: MdGroup, href: "/hris/users", active: pathname.startsWith("/hris") },
+      ];
+    }
+    
+    // Farmer menu items - only "My" items
+    if (isFarmer) {
+      return [
+        { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
+        { name: "My Farms", icon: MdMap, href: "/farm-map", active: pathname === "/farm-map" || pathname.startsWith("/farms") },
+        { name: "My Schedules", icon: MdSchedule, href: "/schedules", active: pathname.startsWith("/schedules") },
+        { name: "My Work Groups", icon: MdGroupWork, href: "/work-groups", active: pathname.startsWith("/work-groups") },
+        { name: "My Payments", icon: MdPayments, href: "/worker-payments", active: pathname.startsWith("/worker-payments") },
+        { name: "My Supervisors", icon: MdSupervisorAccount, href: "/farm-supervisors", active: pathname.startsWith("/farm-supervisors") },
+        { name: "My Factory", icon: MdFactory, href: "/factories", active: pathname.startsWith("/factories") },
+      ];
+    }
+    
+    // Supervisor menu items - only "My" items
+    if (isSupervisor) {
+      return [
+        { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
+        { name: "My Farms", icon: MdMap, href: "/farm-map", active: pathname === "/farm-map" || pathname.startsWith("/farms") },
+        { name: "My Schedules", icon: MdSchedule, href: "/schedules", active: pathname.startsWith("/schedules") },
+        { name: "My Work Groups", icon: MdGroupWork, href: "/work-groups", active: pathname.startsWith("/work-groups") },
+        { name: "Farm Workers", icon: MdPeople, href: "/farm-workers", active: pathname.startsWith("/farm-workers") },
+      ];
+    }
+    
+    // Default fallback
+    return [
+      { name: "Dashboard", icon: MdDashboard, href: "/dashboard", active: pathname === "/dashboard" },
+    ];
+  }, [pathname, user, isAdmin, isFarmer, isSupervisor]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
