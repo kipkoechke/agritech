@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   const isAdmin = useIsAdmin();
   const isFarmer = useIsFarmer();
   const isSupervisor = useIsSupervisor();
-  
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -162,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
 
     // Get user role
     const role = user?.role;
-    
+
     // Filter based on role - NO special admin override
     return allMenuItems.filter((item) => {
       return role && item.roles.includes(role);
@@ -178,6 +178,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       onClose();
     }
   };
+
+  // Collapse sidebar to icon-only when HRIS sub-sidebar is visible
+  const isCollapsed = pathname.startsWith("/hris");
 
   if (!isClient || isLoading) {
     return (
@@ -198,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
             ? "translate-x-0"
             : "-translate-x-full md:translate-x-0"
         }
-        w-64 md:w-auto
+        w-64 ${isCollapsed ? "md:w-14" : "md:w-auto"}
       `}
       style={
         {
@@ -234,22 +237,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
               <Link
                 href={item.href}
                 onClick={handleLinkClick}
-                className={`group flex items-center rounded-lg transition-all duration-200 gap-2 px-2 py-1.5 ${
+                title={isCollapsed ? item.name : undefined}
+                className={`group flex items-center rounded-lg transition-all duration-200 ${isCollapsed ? "justify-center px-0 py-1.5" : "gap-2 px-2 py-1.5"} ${
                   item.active
                     ? "bg-emerald-600 text-white border border-emerald-400/50 shadow-md"
                     : "text-white/80 hover:bg-emerald-700/50 hover:text-white hover:shadow-sm"
                 }`}
               >
                 <div
-                  className={`flex items-center justify-center w-5 h-5 rounded-md transition-all duration-200 shrink-0 ${
+                  className={`flex items-center justify-center ${isCollapsed ? "w-7 h-7" : "w-5 h-5"} rounded-md transition-all duration-200 shrink-0 ${
                     item.active
                       ? "bg-white text-emerald-700 shadow-lg"
                       : "bg-emerald-600/40 text-white group-hover:bg-emerald-500 group-hover:text-white group-hover:shadow-lg"
                   }`}
                 >
-                  <item.icon className="w-3.5 h-3.5" />
+                  <item.icon
+                    className={isCollapsed ? "w-4 h-4" : "w-3.5 h-3.5"}
+                  />
                 </div>
-                <span className="font-medium text-[13px]">{item.name}</span>
+                {!isCollapsed && (
+                  <span className="font-medium text-[13px]">{item.name}</span>
+                )}
               </Link>
             </li>
           ))}
@@ -260,14 +268,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         <button
           onClick={handleLogout}
           disabled={logoutMutation.isPending}
-          className="group flex items-center rounded-lg transition-all duration-200 text-white/80 hover:bg-red-500/20 hover:text-red-400 hover:shadow-sm w-full disabled:opacity-50 gap-2 px-2 py-1.5"
+          title={isCollapsed ? "Logout" : undefined}
+          className={`group flex items-center rounded-lg transition-all duration-200 text-white/80 hover:bg-red-500/20 hover:text-red-400 hover:shadow-sm w-full disabled:opacity-50 ${isCollapsed ? "justify-center px-0 py-1.5" : "gap-2 px-2 py-1.5"}`}
         >
-          <div className="flex items-center justify-center w-5 h-5 rounded-md bg-emerald-600/40 text-white group-hover:bg-red-500 group-hover:text-white group-hover:shadow-lg transition-all duration-200 shrink-0">
-            <MdLogout className="w-3.5 h-3.5" />
+          <div
+            className={`flex items-center justify-center ${isCollapsed ? "w-7 h-7" : "w-5 h-5"} rounded-md bg-emerald-600/40 text-white group-hover:bg-red-500 group-hover:text-white group-hover:shadow-lg transition-all duration-200 shrink-0`}
+          >
+            <MdLogout className={isCollapsed ? "w-4 h-4" : "w-3.5 h-3.5"} />
           </div>
-          <span className="font-medium text-[13px]">
-            {logoutMutation.isPending ? "Logging out..." : "Logout"}
-          </span>
+          {!isCollapsed && (
+            <span className="font-medium text-[13px]">
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
+            </span>
+          )}
         </button>
       </div>
     </div>

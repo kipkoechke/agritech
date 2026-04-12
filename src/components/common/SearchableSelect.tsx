@@ -105,11 +105,11 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full px-3 py-2 border rounded-lg shadow-sm text-left
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          w-full px-3 py-2 border rounded-lg text-left
+          focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
           disabled:bg-gray-100 disabled:cursor-not-allowed
           ${error ? "border-red-500" : "border-gray-300"}
-          ${isOpen ? "ring-2 ring-blue-500 border-blue-500" : ""}
+          ${isOpen ? "ring-2 ring-emerald-500 border-emerald-500" : ""}
         `}
       >
         <div className="flex items-center justify-between">
@@ -156,7 +156,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder:text-gray-500"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-900 placeholder:text-gray-500"
               />
             </div>
           </div>

@@ -36,19 +36,7 @@ export default function ProductsPage() {
     <Modal>
       <div className="min-h-screen p-4 space-y-4">
         <PageHeader
-          title={
-            <div className="flex items-center gap-2">
-              <MdInventory className="w-5 h-5 text-emerald-600" />
-              <div>
-                <h1 className="text-base md:text-lg font-semibold text-slate-900">
-                  Products
-                </h1>
-                <p className="text-xs text-slate-500 mt-0.5 hidden md:block">
-                  Manage your product catalog
-                </p>
-              </div>
-            </div>
-          }
+          title="Products"
           search={
             <div className="relative">
               <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -60,36 +48,39 @@ export default function ProductsPage() {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+          }
+          filters={
+            <div className="w-40">
+              <SearchableSelect
+                label=""
+                options={[
+                  { value: "", label: "All Status" },
+                  { value: "true", label: "Active" },
+                  { value: "false", label: "Inactive" },
+                ]}
+                value={statusFilter}
+                onChange={(val) => {
+                  setStatusFilter(val);
+                  setPage(1);
+                }}
+                placeholder="Filter by status"
               />
             </div>
           }
           action={
-            <Button type="small" to="/products/new" className="flex items-center gap-1">
+            <Button
+              type="small"
+              to="/products/new"
+              className="flex items-center gap-1"
+            >
               <MdAdd className="w-4 h-4" />
               Add Product
             </Button>
           }
         />
-
-        <div className="flex gap-2 items-center">
-          <div className="w-40">
-            <SearchableSelect
-              label=""
-              options={[
-                { value: "", label: "All Status" },
-                { value: "true", label: "Active" },
-                { value: "false", label: "Inactive" },
-              ]}
-              value={statusFilter}
-              onChange={(val) => {
-                setStatusFilter(val);
-                setPage(1);
-              }}
-              placeholder="Filter by status"
-            />
-          </div>
-        </div>
 
         {isLoading && (
           <div className="flex justify-center items-center py-12">
@@ -140,7 +131,11 @@ export default function ProductsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/products/${product.id}`)}>
+                    <tr
+                      key={product.id}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => router.push(`/products/${product.id}`)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                           {product.name}
@@ -168,10 +163,15 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex items-center justify-end gap-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Tooltip content="View product details">
                             <button
-                              onClick={() => router.push(`/products/${product.id}`)}
+                              onClick={() =>
+                                router.push(`/products/${product.id}`)
+                              }
                               className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                             >
                               <FiEye className="h-4 w-4" />
@@ -179,7 +179,9 @@ export default function ProductsPage() {
                           </Tooltip>
                           <Tooltip content="Edit product">
                             <button
-                              onClick={() => router.push(`/products/${product.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/products/${product.id}/edit`)
+                              }
                               className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                             >
                               <FiEdit className="h-4 w-4" />

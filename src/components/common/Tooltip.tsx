@@ -30,8 +30,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       if (x + tooltipWidth > window.innerWidth - 8)
         x = window.innerWidth - tooltipWidth - 8;
 
-      const y =
-        position === "top" ? rect.top - 8 : rect.bottom + 8;
+      const y = position === "top" ? rect.top - 8 : rect.bottom + 8;
 
       setCoords({ x, y });
     }

@@ -27,6 +27,7 @@ import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
+import PageHeader from "@/components/common/PageHeader";
 import {
   useSchedules,
   useDeleteSchedule,
@@ -36,7 +37,10 @@ import type { Schedule } from "@/types/schedule";
 
 // Activity color mapping
 const getActivityColor = (activityName: string) => {
-  const colors: Record<string, { bg: string; text: string; border: string; light: string }> = {
+  const colors: Record<
+    string,
+    { bg: string; text: string; border: string; light: string }
+  > = {
     Plucking: {
       bg: "bg-emerald-500",
       text: "text-emerald-700",
@@ -74,12 +78,14 @@ const getActivityColor = (activityName: string) => {
       light: "bg-teal-50",
     },
   };
-  return colors[activityName] || {
-    bg: "bg-gray-500",
-    text: "text-gray-700",
-    border: "border-gray-200",
-    light: "bg-gray-50",
-  };
+  return (
+    colors[activityName] || {
+      bg: "bg-gray-500",
+      text: "text-gray-700",
+      border: "border-gray-200",
+      light: "bg-gray-50",
+    }
+  );
 };
 
 // Calendar View Component
@@ -95,7 +101,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
+
     const days: (Date | null)[] = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
@@ -127,20 +133,34 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const days = getDaysInMonth(currentDate);
 
   const goToPreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+    );
     setSelectedDate(null);
   };
 
   const goToNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+    );
     setSelectedDate(null);
   };
 
@@ -149,9 +169,13 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
     setSelectedDate(null);
   };
 
-  const selectedDateSchedules = selectedDate ? getSchedulesForDate(selectedDate) : [];
+  const selectedDateSchedules = selectedDate
+    ? getSchedulesForDate(selectedDate)
+    : [];
   const totalSchedules = schedules.length;
-  const completedSchedules = schedules.filter(s => s.status !== "cancelled").length;
+  const completedSchedules = schedules.filter(
+    (s) => s.status !== "cancelled",
+  ).length;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
@@ -159,20 +183,30 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
       <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Activity Calendar</h2>
-            <p className="text-sm text-gray-500 mt-0.5">View and manage farm schedules</p>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Activity Calendar
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              View and manage farm schedules
+            </p>
           </div>
           <div className="flex gap-6">
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary">{totalSchedules}</p>
+              <p className="text-2xl font-bold text-primary">
+                {totalSchedules}
+              </p>
               <p className="text-xs text-gray-500">Total Schedules</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{completedSchedules}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {completedSchedules}
+              </p>
               <p className="text-xs text-gray-500">Active</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-red-500">{totalSchedules - completedSchedules}</p>
+              <p className="text-2xl font-bold text-red-500">
+                {totalSchedules - completedSchedules}
+              </p>
               <p className="text-xs text-gray-500">Cancelled</p>
             </div>
           </div>
@@ -240,7 +274,8 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
 
               const daySchedules = getSchedulesForDate(day);
               const isToday = new Date().toDateString() === day.toDateString();
-              const isSelected = selectedDate?.toDateString() === day.toDateString();
+              const isSelected =
+                selectedDate?.toDateString() === day.toDateString();
               const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
               return (
@@ -249,13 +284,14 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                   onClick={() => setSelectedDate(day)}
                   className={`
                     min-h-[160px] p-3 rounded-xl border-2 transition-all text-left
-                    ${isSelected
-                      ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
-                      : isToday
-                      ? "border-primary/40 bg-gradient-to-br from-primary/5 to-transparent"
-                      : isWeekend
-                      ? "border-rose-100 bg-rose-50/30 hover:bg-rose-50"
-                      : "border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50"
+                    ${
+                      isSelected
+                        ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
+                        : isToday
+                          ? "border-primary/40 bg-gradient-to-br from-primary/5 to-transparent"
+                          : isWeekend
+                            ? "border-rose-100 bg-rose-50/30 hover:bg-rose-50"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50"
                     }
                   `}
                 >
@@ -263,11 +299,12 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                     <span
                       className={`
                         text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full
-                        ${isToday
-                          ? "bg-primary text-white"
-                          : isWeekend
-                          ? "text-rose-600"
-                          : "text-gray-700"
+                        ${
+                          isToday
+                            ? "bg-primary text-white"
+                            : isWeekend
+                              ? "text-rose-600"
+                              : "text-gray-700"
                         }
                       `}
                     >
@@ -295,7 +332,9 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                             router.push(`/schedules/${schedule.id}`);
                           }}
                         >
-                          <span className="font-medium">{schedule.activity.name.substring(0, 10)}</span>
+                          <span className="font-medium">
+                            {schedule.activity.name.substring(0, 10)}
+                          </span>
                           {schedule.status === "cancelled" && (
                             <MdCancelIcon className="w-3 h-3 inline ml-1 text-red-500" />
                           )}
@@ -322,16 +361,14 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                 <MdEvent className="w-4 h-4 text-primary" />
               </div>
               <h3 className="font-semibold text-gray-900 text-sm">
-                {selectedDate ? (
-                  selectedDate.toLocaleDateString("en-KE", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                ) : (
-                  "Select a date"
-                )}
+                {selectedDate
+                  ? selectedDate.toLocaleDateString("en-KE", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "Select a date"}
               </h3>
             </div>
           </div>
@@ -341,8 +378,12 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <MdSchedule className="w-6 h-6 text-gray-300" />
               </div>
-              <p className="text-gray-500 text-sm font-medium">No schedules for this date</p>
-              <p className="text-xs text-gray-400 mt-1">Click the + button to create one</p>
+              <p className="text-gray-500 text-sm font-medium">
+                No schedules for this date
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Click the + button to create one
+              </p>
             </div>
           )}
 
@@ -359,7 +400,9 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-1.5 mb-1">
-                          <div className={`w-1.5 h-1.5 rounded-full ${colors.bg}`} />
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${colors.bg}`}
+                          />
                           <p className="font-semibold text-gray-900 text-xs">
                             {schedule.reference_code}
                           </p>
@@ -371,33 +414,41 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                       <div className="flex flex-col items-end gap-1">
                         <span
                           className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
-                            schedule.status
+                            schedule.status,
                           )}`}
                         >
-                          {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
+                          {schedule.status.charAt(0).toUpperCase() +
+                            schedule.status.slice(1)}
                         </span>
-                        {schedule.bookings_count !== undefined && schedule.bookings_count > 0 && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-primary/10 text-primary">
-                            <MdPeople className="w-2.5 h-2.5" />
-                            {schedule.bookings_count} bookings
-                          </span>
-                        )}
+                        {schedule.bookings_count !== undefined &&
+                          schedule.bookings_count > 0 && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-primary/10 text-primary">
+                              <MdPeople className="w-2.5 h-2.5" />
+                              {schedule.bookings_count} bookings
+                            </span>
+                          )}
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 text-xs">
                         <MdAgriculture className="w-3 h-3 text-gray-400" />
-                        <span className="text-gray-600 text-xs truncate">{schedule.farm.name}</span>
+                        <span className="text-gray-600 text-xs truncate">
+                          {schedule.farm.name}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs">
                         <MdLocationOn className="w-3 h-3 text-gray-400" />
-                        <span className="text-gray-600 text-xs truncate">{schedule.farm.zone.name}</span>
+                        <span className="text-gray-600 text-xs truncate">
+                          {schedule.farm.zone.name}
+                        </span>
                       </div>
                       {schedule.created_by && (
                         <div className="flex items-center gap-1.5 text-xs">
                           <MdPerson className="w-3 h-3 text-gray-400" />
-                          <span className="text-gray-600 text-xs truncate">{schedule.created_by.name}</span>
+                          <span className="text-gray-600 text-xs truncate">
+                            {schedule.created_by.name}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -419,12 +470,21 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
               Activities
             </p>
             <div className="flex flex-wrap gap-2">
-              {["Plucking", "Pruning", "Spraying", "Fertilizing", "Harvesting", "Weeding"].map((activity) => {
+              {[
+                "Plucking",
+                "Pruning",
+                "Spraying",
+                "Fertilizing",
+                "Harvesting",
+                "Weeding",
+              ].map((activity) => {
                 const colors = getActivityColor(activity);
                 return (
                   <div key={activity} className="flex items-center gap-1">
                     <div className={`w-2 h-2 rounded-full ${colors.bg}`} />
-                    <span className={`text-xs ${colors.text}`}>{activity.substring(0, 6)}</span>
+                    <span className={`text-xs ${colors.text}`}>
+                      {activity.substring(0, 6)}
+                    </span>
                   </div>
                 );
               })}
@@ -480,19 +540,9 @@ export default function SchedulesPage() {
     <Modal>
       <div className="min-h-screen p-4 bg-gray-50">
         <div className="max-w-[1600px] mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-                <MdSchedule className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Schedules</h1>
-                <p className="text-sm text-gray-500">
-                  Manage farm activity schedules
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
+          <PageHeader
+            title="Schedules"
+            search={
               <div className="relative">
                 <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -503,9 +553,31 @@ export default function SchedulesPage() {
                     setSearch(e.target.value);
                     setPage(1);
                   }}
-                  className="w-64 pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary text-gray-900 placeholder:text-gray-500"
+                  className="w-64 pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-gray-900 placeholder:text-gray-500"
                 />
               </div>
+            }
+            filters={
+              viewMode === "list" ? (
+                <div className="w-48">
+                  <SearchableSelect
+                    label=""
+                    options={[
+                      { value: "", label: "All Statuses" },
+                      { value: "scheduled", label: "Scheduled" },
+                      { value: "cancelled", label: "Cancelled" },
+                    ]}
+                    value={statusFilter}
+                    onChange={(val) => {
+                      setStatusFilter(val);
+                      setPage(1);
+                    }}
+                    placeholder="Filter by status"
+                  />
+                </div>
+              ) : undefined
+            }
+            action={
               <Button
                 type="small"
                 to="/schedules/new"
@@ -514,8 +586,8 @@ export default function SchedulesPage() {
                 <MdAdd className="w-4 h-4" />
                 Add Schedule
               </Button>
-            </div>
-          </div>
+            }
+          />
 
           {/* Tab Bar */}
           <div className="mb-6">
@@ -544,28 +616,6 @@ export default function SchedulesPage() {
               </button>
             </div>
           </div>
-
-          {/* Filters (only show in list view) */}
-          {viewMode === "list" && (
-            <div className="flex gap-2 items-center mb-4">
-              <div className="w-48">
-                <SearchableSelect
-                  label=""
-                  options={[
-                    { value: "", label: "All Statuses" },
-                    { value: "scheduled", label: "Scheduled" },
-                    { value: "cancelled", label: "Cancelled" },
-                  ]}
-                  value={statusFilter}
-                  onChange={(val) => {
-                    setStatusFilter(val);
-                    setPage(1);
-                  }}
-                  placeholder="Filter by status"
-                />
-              </div>
-            </div>
-          )}
 
           {/* List View */}
           {viewMode === "list" && (
@@ -631,12 +681,16 @@ export default function SchedulesPage() {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {schedules.map((schedule) => {
-                          const colors = getActivityColor(schedule.activity.name);
+                          const colors = getActivityColor(
+                            schedule.activity.name,
+                          );
                           return (
-                            <tr 
-                              key={schedule.id} 
+                            <tr
+                              key={schedule.id}
                               className="hover:bg-gray-50 transition-colors cursor-pointer"
-                              onClick={() => router.push(`/schedules/${schedule.id}`)}
+                              onClick={() =>
+                                router.push(`/schedules/${schedule.id}`)
+                              }
                             >
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
@@ -644,7 +698,9 @@ export default function SchedulesPage() {
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colors.light} ${colors.text}`}>
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colors.light} ${colors.text}`}
+                                >
                                   {schedule.activity.name}
                                 </span>
                               </td>
@@ -676,20 +732,28 @@ export default function SchedulesPage() {
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                {schedule.bookings_count !== undefined && schedule.bookings_count > 0 ? (
+                                {schedule.bookings_count !== undefined &&
+                                schedule.bookings_count > 0 ? (
                                   <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
                                     <MdPeople className="w-3 h-3" />
                                     {schedule.bookings_count}
                                   </span>
                                 ) : (
-                                  <span className="text-xs text-gray-400">—</span>
+                                  <span className="text-xs text-gray-400">
+                                    —
+                                  </span>
                                 )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                                <div
+                                  className="flex items-center justify-end gap-1"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <Tooltip content="View schedule details">
                                     <button
-                                      onClick={() => router.push(`/schedules/${schedule.id}`)}
+                                      onClick={() =>
+                                        router.push(`/schedules/${schedule.id}`)
+                                      }
                                       className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                                     >
                                       <FiEye className="h-4 w-4" />
@@ -697,7 +761,11 @@ export default function SchedulesPage() {
                                   </Tooltip>
                                   <Tooltip content="Edit schedule">
                                     <button
-                                      onClick={() => router.push(`/schedules/${schedule.id}/edit`)}
+                                      onClick={() =>
+                                        router.push(
+                                          `/schedules/${schedule.id}/edit`,
+                                        )
+                                      }
                                       className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                                     >
                                       <FiEdit className="h-4 w-4" />
@@ -706,7 +774,9 @@ export default function SchedulesPage() {
                                   {schedule.status !== "cancelled" && (
                                     <Tooltip content="Cancel this schedule">
                                       <button
-                                        onClick={() => cancelSchedule.mutate(schedule.id)}
+                                        onClick={() =>
+                                          cancelSchedule.mutate(schedule.id)
+                                        }
                                         className="p-1.5 text-orange-400/70 bg-orange-50 hover:text-orange-600 hover:bg-orange-100 rounded-lg transition-all"
                                       >
                                         <MdCancel className="h-4 w-4" />
@@ -716,7 +786,9 @@ export default function SchedulesPage() {
                                   <Modal.Open opens="delete-schedule">
                                     <Tooltip content="Delete schedule permanently">
                                       <button
-                                        onClick={() => setSelectedSchedule(schedule)}
+                                        onClick={() =>
+                                          setSelectedSchedule(schedule)
+                                        }
                                         className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
                                       >
                                         <FiTrash className="h-4 w-4" />
@@ -735,8 +807,9 @@ export default function SchedulesPage() {
                   {pagination && pagination.total_pages > 1 && (
                     <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50">
                       <p className="text-sm text-gray-500">
-                        Page {pagination.current_page} of {pagination.total_pages} (
-                        {pagination.total_items} items)
+                        Page {pagination.current_page} of{" "}
+                        {pagination.total_pages} ({pagination.total_items}{" "}
+                        items)
                       </p>
                       <div className="flex gap-2">
                         <button
@@ -762,16 +835,16 @@ export default function SchedulesPage() {
           )}
 
           {/* Calendar View */}
-          {viewMode === "calendar" && (
-            <CalendarView schedules={schedules} />
-          )}
+          {viewMode === "calendar" && <CalendarView schedules={schedules} />}
 
           <Modal.Window name="delete-schedule">
             {selectedSchedule ? (
               <DeleteConfirmationModal
                 itemName={selectedSchedule.reference_code}
                 itemType="Schedule"
-                onConfirm={() => deleteSchedule.mutateAsync(selectedSchedule.id)}
+                onConfirm={() =>
+                  deleteSchedule.mutateAsync(selectedSchedule.id)
+                }
                 isDeleting={deleteSchedule.isPending}
               />
             ) : (

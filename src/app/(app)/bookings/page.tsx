@@ -8,6 +8,7 @@ import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
+import PageHeader from "@/components/common/PageHeader";
 import { useBookings, useDeleteBooking } from "@/hooks/useBooking";
 import type { Booking } from "@/types/booking";
 
@@ -28,18 +29,10 @@ export default function BookingsPage() {
 
   return (
     <Modal>
-      <div className="min-h-screen p-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <MdBookOnline className="w-6 h-6 text-emerald-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bookings</h1>
-              <p className="text-sm text-gray-500">
-                Manage worker bookings for schedules
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
+      <div className="min-h-screen p-4 space-y-4">
+        <PageHeader
+          title="Bookings"
+          search={
             <div className="relative">
               <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -49,6 +42,8 @@ export default function BookingsPage() {
                 className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-500 bg-gray-50"
               />
             </div>
+          }
+          action={
             <Button
               type="small"
               to="/bookings/new"
@@ -57,8 +52,8 @@ export default function BookingsPage() {
               <MdAdd className="w-4 h-4" />
               Add Booking
             </Button>
-          </div>
-        </div>
+          }
+        />
         <div className="space-y-4">
           {isLoading && (
             <div className="flex justify-center items-center py-12">
@@ -115,7 +110,11 @@ export default function BookingsPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {bookings.map((booking) => (
-                      <tr key={booking.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/bookings/${booking.id}`)}>
+                      <tr
+                        key={booking.id}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/bookings/${booking.id}`)}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                             {booking.worker?.name ?? "—"}
@@ -155,10 +154,15 @@ export default function BookingsPage() {
                           {booking.factory_qty ?? "—"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          <div
+                            className="flex items-center justify-end gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Tooltip content="View booking details">
                               <button
-                                onClick={() => router.push(`/bookings/${booking.id}`)}
+                                onClick={() =>
+                                  router.push(`/bookings/${booking.id}`)
+                                }
                                 className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                               >
                                 <FiEye className="h-4 w-4" />
@@ -166,7 +170,9 @@ export default function BookingsPage() {
                             </Tooltip>
                             <Tooltip content="Edit booking">
                               <button
-                                onClick={() => router.push(`/bookings/${booking.id}/edit`)}
+                                onClick={() =>
+                                  router.push(`/bookings/${booking.id}/edit`)
+                                }
                                 className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                               >
                                 <FiEdit className="h-4 w-4" />

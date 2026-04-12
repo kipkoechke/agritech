@@ -53,20 +53,7 @@ export default function ClustersPage() {
   return (
     <Modal>
       <HRISLayout
-        title={
-          <div className="flex items-center gap-2">
-            <MdHub className="w-5 h-5 text-emerald-600" />
-            <div>
-              <h1 className="text-base md:text-lg font-semibold text-slate-900">
-                Clusters
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5 hidden md:block">
-                Manage farm clusters
-              </p>
-            </div>
-          </div>
-        }
-        description=""
+        title="Clusters"
         search={
           <div className="relative">
             <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -78,23 +65,12 @@ export default function ClustersPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
             />
           </div>
         }
-        action={
-          <Button
-            type="small"
-            to="/hris/clusters/new"
-            className="flex items-center gap-1"
-          >
-            <MdAdd className="w-4 h-4" />
-            Add Cluster
-          </Button>
-        }
-      >
-        <div className="space-y-4">
-          <div className="flex gap-2 items-center">
+        filters={
+          <>
             <div className="w-44">
               <SearchableSelect
                 label=""
@@ -119,8 +95,20 @@ export default function ClustersPage() {
                 placeholder="Filter by factory"
               />
             </div>
-          </div>
-
+          </>
+        }
+        action={
+          <Button
+            type="small"
+            to="/hris/clusters/new"
+            className="flex items-center gap-1"
+          >
+            <MdAdd className="w-4 h-4" />
+            Add Cluster
+          </Button>
+        }
+      >
+        <div className="space-y-4">
           {isLoading && (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
@@ -176,7 +164,13 @@ export default function ClustersPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {clusters.map((cluster) => (
-                      <tr key={cluster.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/hris/clusters/${cluster.id}`)}>
+                      <tr
+                        key={cluster.id}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() =>
+                          router.push(`/hris/clusters/${cluster.id}`)
+                        }
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                             {cluster.name}
@@ -208,10 +202,15 @@ export default function ClustersPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          <div
+                            className="flex items-center justify-end gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Tooltip content="View cluster details">
                               <button
-                                onClick={() => router.push(`/hris/clusters/${cluster.id}`)}
+                                onClick={() =>
+                                  router.push(`/hris/clusters/${cluster.id}`)
+                                }
                                 className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                               >
                                 <FiEye className="h-4 w-4" />
@@ -219,7 +218,11 @@ export default function ClustersPage() {
                             </Tooltip>
                             <Tooltip content="Edit cluster">
                               <button
-                                onClick={() => router.push(`/hris/clusters/${cluster.id}/edit`)}
+                                onClick={() =>
+                                  router.push(
+                                    `/hris/clusters/${cluster.id}/edit`,
+                                  )
+                                }
                                 className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                               >
                                 <FiEdit className="h-4 w-4" />
