@@ -21,6 +21,7 @@ import {
   MdDirections,
   MdSchedule,
   MdVisibility,
+  MdAdd,
 } from "react-icons/md";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
@@ -290,6 +291,10 @@ export default function FarmLocationPage() {
     window.open(url, '_blank');
   };
 
+  const handleAddFarm = () => {
+    router.push('/farms/new');
+  };
+
   // Get zones from farms
   const uniqueZones = useMemo(() => {
     const zonesMap = new Map<string, string>();
@@ -428,12 +433,24 @@ export default function FarmLocationPage() {
               </div>
               <h1 className="text-sm font-bold text-gray-900">{getDashboardTitle()}</h1>
             </div>
-            <button
-              onClick={handleRefresh}
-              className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <MdRefresh className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Add Farm Button - conditionally show based on role */}
+              {(isAdmin || isSupervisor) && (
+                <button
+                  onClick={handleAddFarm}
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-primary hover:bg-primary/90 text-white text-[11px] font-medium rounded-lg transition-colors shadow-sm"
+                >
+                  <MdAdd className="w-3.5 h-3.5" />
+                  Add Farm
+                </button>
+              )}
+              <button
+                onClick={handleRefresh}
+                className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <MdRefresh className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
