@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdPerson, MdAdd, MdSearch } from "react-icons/md";
 import { FiEye } from "react-icons/fi";
-import { ActionMenu } from "@/components/common/ActionMenu";
+import Tooltip from "@/components/common/Tooltip";
 import Button from "@/components/common/Button";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 
@@ -105,9 +105,9 @@ export default function FarmersPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {farmers.map((farmer) => (
-                  <tr key={farmer.id} className="hover:bg-gray-50">
+                  <tr key={farmer.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/hris/users/${farmer.id}`)}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                         {farmer.name}
                       </div>
                     </td>
@@ -127,19 +127,16 @@ export default function FarmersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <ActionMenu menuId={`farmer-${farmer.id}`}>
-                        <ActionMenu.Trigger />
-                        <ActionMenu.Content>
-                          <ActionMenu.Item
-                            onClick={() =>
-                              router.push(`/hris/users/${farmer.id}`)
-                            }
+                      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        <Tooltip content="View farmer profile">
+                          <button
+                            onClick={() => router.push(`/hris/users/${farmer.id}`)}
+                            className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                           >
                             <FiEye className="h-4 w-4" />
-                            View
-                          </ActionMenu.Item>
-                        </ActionMenu.Content>
-                      </ActionMenu>
+                          </button>
+                        </Tooltip>
+                      </div>
                     </td>
                   </tr>
                 ))}

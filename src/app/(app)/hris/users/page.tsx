@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { MdGroup, MdAdd, MdSearch } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
-import { ActionMenu } from "@/components/common/ActionMenu";
+import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
@@ -152,9 +152,9 @@ export default function HrisUsersPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50">
+                      <tr key={user.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/hris/users/${user.id}`)}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                             {user.name}
                           </div>
                         </td>
@@ -174,36 +174,34 @@ export default function HrisUsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <ActionMenu menuId={`user-${user.id}`}>
-                            <ActionMenu.Trigger />
-                            <ActionMenu.Content>
-                              <ActionMenu.Item
-                                onClick={() =>
-                                  router.push(`/hris/users/${user.id}`)
-                                }
+                          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                            <Tooltip content="View user profile">
+                              <button
+                                onClick={() => router.push(`/hris/users/${user.id}`)}
+                                className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                               >
                                 <FiEye className="h-4 w-4" />
-                                View
-                              </ActionMenu.Item>
-                              <ActionMenu.Item
-                                onClick={() =>
-                                  router.push(`/hris/users/${user.id}/edit`)
-                                }
+                              </button>
+                            </Tooltip>
+                            <Tooltip content="Edit user">
+                              <button
+                                onClick={() => router.push(`/hris/users/${user.id}/edit`)}
+                                className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                               >
                                 <FiEdit className="h-4 w-4" />
-                                Edit
-                              </ActionMenu.Item>
-                              <Modal.Open opens="delete-user">
-                                <ActionMenu.Item
+                              </button>
+                            </Tooltip>
+                            <Modal.Open opens="delete-user">
+                              <Tooltip content="Delete user">
+                                <button
                                   onClick={() => setSelectedUser(user)}
-                                  className="text-red-600"
+                                  className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
                                 >
                                   <FiTrash className="h-4 w-4" />
-                                  Delete
-                                </ActionMenu.Item>
-                              </Modal.Open>
-                            </ActionMenu.Content>
-                          </ActionMenu>
+                                </button>
+                              </Tooltip>
+                            </Modal.Open>
+                          </div>
                         </td>
                       </tr>
                     ))}

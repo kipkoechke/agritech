@@ -23,7 +23,7 @@ import {
 } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
-import { ActionMenu } from "@/components/common/ActionMenu";
+import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
@@ -686,48 +686,43 @@ export default function SchedulesPage() {
                                 )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <div onClick={(e) => e.stopPropagation()}>
-                                  <ActionMenu menuId={`schedule-${schedule.id}`}>
-                                    <ActionMenu.Trigger />
-                                    <ActionMenu.Content>
-                                      <ActionMenu.Item
-                                        onClick={() =>
-                                          router.push(`/schedules/${schedule.id}`)
-                                        }
+                                <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                                  <Tooltip content="View schedule details">
+                                    <button
+                                      onClick={() => router.push(`/schedules/${schedule.id}`)}
+                                      className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
+                                    >
+                                      <FiEye className="h-4 w-4" />
+                                    </button>
+                                  </Tooltip>
+                                  <Tooltip content="Edit schedule">
+                                    <button
+                                      onClick={() => router.push(`/schedules/${schedule.id}/edit`)}
+                                      className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                                    >
+                                      <FiEdit className="h-4 w-4" />
+                                    </button>
+                                  </Tooltip>
+                                  {schedule.status !== "cancelled" && (
+                                    <Tooltip content="Cancel this schedule">
+                                      <button
+                                        onClick={() => cancelSchedule.mutate(schedule.id)}
+                                        className="p-1.5 text-orange-400/70 bg-orange-50 hover:text-orange-600 hover:bg-orange-100 rounded-lg transition-all"
                                       >
-                                        <FiEye className="h-4 w-4" />
-                                        View
-                                      </ActionMenu.Item>
-                                      <ActionMenu.Item
-                                        onClick={() =>
-                                          router.push(`/schedules/${schedule.id}/edit`)
-                                        }
+                                        <MdCancel className="h-4 w-4" />
+                                      </button>
+                                    </Tooltip>
+                                  )}
+                                  <Modal.Open opens="delete-schedule">
+                                    <Tooltip content="Delete schedule permanently">
+                                      <button
+                                        onClick={() => setSelectedSchedule(schedule)}
+                                        className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
                                       >
-                                        <FiEdit className="h-4 w-4" />
-                                        Edit
-                                      </ActionMenu.Item>
-                                      {schedule.status !== "cancelled" && (
-                                        <ActionMenu.Item
-                                          onClick={() =>
-                                            cancelSchedule.mutate(schedule.id)
-                                          }
-                                          className="text-orange-600"
-                                        >
-                                          <MdCancel className="h-4 w-4" />
-                                          Cancel
-                                        </ActionMenu.Item>
-                                      )}
-                                      <Modal.Open opens="delete-schedule">
-                                        <ActionMenu.Item
-                                          onClick={() => setSelectedSchedule(schedule)}
-                                          className="text-red-600"
-                                        >
-                                          <FiTrash className="h-4 w-4" />
-                                          Delete
-                                        </ActionMenu.Item>
-                                      </Modal.Open>
-                                    </ActionMenu.Content>
-                                  </ActionMenu>
+                                        <FiTrash className="h-4 w-4" />
+                                      </button>
+                                    </Tooltip>
+                                  </Modal.Open>
                                 </div>
                               </td>
                             </tr>

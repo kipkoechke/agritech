@@ -10,7 +10,7 @@ import {
 } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
-import { ActionMenu } from "@/components/common/ActionMenu";
+import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
@@ -193,9 +193,9 @@ export default function FarmsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {farms.map((farm) => (
-                    <tr key={farm.id} className="hover:bg-gray-50">
+                    <tr key={farm.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/farms/${farm.id}`)}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                           {farm.name}
                         </div>
                       </td>
@@ -230,45 +230,47 @@ export default function FarmsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <ActionMenu menuId={`farm-${farm.id}`}>
-                          <ActionMenu.Trigger />
-                          <ActionMenu.Content>
-                            <ActionMenu.Item
+                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          <Tooltip content="View farm details">
+                            <button
                               onClick={() => router.push(`/farms/${farm.id}`)}
+                              className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
                             >
                               <FiEye className="h-4 w-4" />
-                              View
-                            </ActionMenu.Item>
-                            <ActionMenu.Item
-                              onClick={() =>
-                                router.push(`/farms/${farm.id}/edit`)
-                              }
+                            </button>
+                          </Tooltip>
+                          <Tooltip content="Edit farm">
+                            <button
+                              onClick={() => router.push(`/farms/${farm.id}/edit`)}
+                              className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
                             >
                               <FiEdit className="h-4 w-4" />
-                              Edit
-                            </ActionMenu.Item>
-                            <Modal.Open opens="assign-supervisor">
-                              <ActionMenu.Item
+                            </button>
+                          </Tooltip>
+                          <Modal.Open opens="assign-supervisor">
+                            <Tooltip content="Assign a supervisor to this farm">
+                              <button
                                 onClick={() => {
                                   setAssignFarm(farm);
                                   setSupervisorId(farm.supervisor?.id || "");
                                 }}
+                                className="p-1.5 text-emerald-500/70 bg-emerald-50 hover:text-emerald-600 hover:bg-emerald-100 rounded-lg transition-all"
                               >
                                 <MdSupervisorAccount className="h-4 w-4" />
-                                Assign Supervisor
-                              </ActionMenu.Item>
-                            </Modal.Open>
-                            <Modal.Open opens="delete-farm">
-                              <ActionMenu.Item
+                              </button>
+                            </Tooltip>
+                          </Modal.Open>
+                          <Modal.Open opens="delete-farm">
+                            <Tooltip content="Delete farm">
+                              <button
                                 onClick={() => setSelectedFarm(farm)}
-                                className="text-red-600"
+                                className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
                               >
                                 <FiTrash className="h-4 w-4" />
-                                Delete
-                              </ActionMenu.Item>
-                            </Modal.Open>
-                          </ActionMenu.Content>
-                        </ActionMenu>
+                              </button>
+                            </Tooltip>
+                          </Modal.Open>
+                        </div>
                       </td>
                     </tr>
                   ))}
