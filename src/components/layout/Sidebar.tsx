@@ -101,13 +101,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname.startsWith("/schedules"),
         roles: ["admin", "farmer"],
       },
-      {
-        name: "Bookings",
-        icon: MdBookOnline,
-        href: "/bookings",
-        active: pathname.startsWith("/bookings"),
-        roles: ["admin", "farmer"],
-      },
+      // {
+      //   name: "Bookings",
+      //   icon: MdBookOnline,
+      //   href: "/bookings",
+      //   active: pathname.startsWith("/bookings"),
+      //   roles: ["admin", "farmer"],
+      // },
       {
         name: "Farms",
         icon: MdMap,
@@ -137,13 +137,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname.startsWith("/schedules"),
         roles: ["supervisor"],
       },
-      {
-        name: "My Bookings",
-        icon: MdBookOnline,
-        href: "/bookings",
-        active: pathname.startsWith("/bookings"),
-        roles: ["supervisor"],
-      },
+      // {
+      //   name: "My Bookings",
+      //   icon: MdBookOnline,
+      //   href: "/bookings",
+      //   active: pathname.startsWith("/bookings"),
+      //   roles: ["supervisor"],
+      // },
       {
         name: "My Farms",
         icon: MdMap,
