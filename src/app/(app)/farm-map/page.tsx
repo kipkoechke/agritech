@@ -1,7 +1,7 @@
 // app/farms/page.tsx
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -21,16 +21,15 @@ import {
   MdDirections,
   MdSchedule,
   MdVisibility,
-  MdChevronLeft,
-  MdChevronRight,
-  MdFactory,
-  MdCategory,
 } from "react-icons/md";
 import { useAuth, useIsAdmin, useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useFarms } from "@/hooks/useFarm";
+import { useFactories } from "@/hooks/useFactory";
+import { useClusters } from "@/hooks/useCluster";
 import type { Farm } from "@/types/farm";
 import "leaflet/dist/leaflet.css";
 
+// Dynamically import MapContainer with no SSR
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
   { ssr: false }
@@ -72,7 +71,7 @@ const getSizeColor = (size: number) => {
   return "#ef4444";
 };
 
-// Farm Detail Card Component - Increased width and improved layout
+// Farm Detail Card Component
 const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDetails: (id: string) => void }) => {
   if (!farm) return null;
 
@@ -80,45 +79,45 @@ const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDeta
 
   return (
     <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-200 shadow-md overflow-hidden">
-      <div className="px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700">
+      <div className="px-3 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <MdStore className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+              <MdStore className="w-3 h-3 text-white" />
             </div>
-            <h3 className="font-semibold text-white text-sm">Selected Farm</h3>
+            <h3 className="font-semibold text-white text-xs">Selected Farm</h3>
           </div>
           <button
             onClick={() => onViewDetails(farm.id)}
-            className="text-xs text-white/90 hover:text-white font-medium flex items-center gap-1 bg-white/10 px-2 py-1 rounded-lg transition-colors"
+            className="text-[10px] text-white/90 hover:text-white font-medium flex items-center gap-0.5 bg-white/10 px-1.5 py-0.5 rounded-lg transition-colors"
           >
-            View Details <MdArrowForward className="w-3.5 h-3.5" />
+            View <MdArrowForward className="w-2.5 h-2.5" />
           </button>
         </div>
       </div>
-      <div className="p-4">
-        <div className="mb-3">
-          <p className="text-xs text-emerald-700/70 uppercase mb-1 font-medium">Farm Name</p>
-          <p className="text-base font-bold text-gray-900">{farm.name}</p>
+      <div className="p-2">
+        <div className="mb-2">
+          <p className="text-[9px] text-emerald-700/70 uppercase mb-0.5 font-medium">Farm Name</p>
+          <p className="text-xs font-bold text-gray-900 truncate">{farm.name}</p>
         </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-2 gap-2 mb-2">
           <div>
-            <p className="text-xs text-emerald-700/70 uppercase mb-1 font-medium">Code</p>
-            <p className="text-sm font-semibold text-gray-700 bg-white/60 px-2 py-1 rounded-lg">{farm.farm_code}</p>
+            <p className="text-[9px] text-emerald-700/70 uppercase mb-0.5 font-medium">Code</p>
+            <p className="text-[10px] font-semibold text-gray-700 bg-white/60 px-1.5 py-0.5 rounded-lg">{farm.farm_code}</p>
           </div>
           <div>
-            <p className="text-xs text-emerald-700/70 uppercase mb-1 font-medium">Size</p>
-            <p className="text-sm font-bold text-emerald-700 bg-emerald-200/50 px-2 py-1 rounded-lg inline-block">{size.toFixed(2)} Ha</p>
+            <p className="text-[9px] text-emerald-700/70 uppercase mb-0.5 font-medium">Size</p>
+            <p className="text-[10px] font-bold text-emerald-700 bg-emerald-200/50 px-1.5 py-0.5 rounded-lg inline-block">{size.toFixed(2)} Ha</p>
           </div>
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between py-1 border-b border-emerald-200/50">
-            <span className="text-xs text-emerald-700/70 font-medium">Zone</span>
-            <span className="text-sm font-semibold text-gray-800">{farm.zone?.name || "N/A"}</span>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between py-0.5 border-b border-emerald-200/50">
+            <span className="text-[9px] text-emerald-700/70 font-medium">Zone</span>
+            <span className="text-[10px] font-semibold text-gray-800">{farm.zone?.name || "N/A"}</span>
           </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-xs text-emerald-700/70 font-medium">Farmer</span>
-            <span className="text-sm font-semibold text-gray-800">{farm.farmer?.name || "N/A"}</span>
+          <div className="flex items-center justify-between py-0.5">
+            <span className="text-[9px] text-emerald-700/70 font-medium">Farmer</span>
+            <span className="text-[10px] font-semibold text-gray-800">{farm.farmer?.name || "N/A"}</span>
           </div>
         </div>
       </div>
@@ -126,7 +125,7 @@ const FarmDetailCard = ({ farm, onViewDetails }: { farm: Farm | null; onViewDeta
   );
 };
 
-// Map Popup Component
+// Single Card Map Popup Component
 const MapPopup = ({ farm, onViewDetails, onViewSchedules, onGetDirections }: { 
   farm: Farm; 
   onViewDetails: (id: string) => void; 
@@ -137,64 +136,69 @@ const MapPopup = ({ farm, onViewDetails, onViewSchedules, onGetDirections }: {
   const coords = getCoordinates(farm);
   
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden min-w-[260px]">
-      <div className="bg-gradient-to-r from-primary to-primary/80 px-3 py-2">
+    <div className="w-[260px] bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 px-3 py-2">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-            <MdStore className="w-3 h-3 text-white" />
+          <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center">
+            <MdStore className="w-3.5 h-3.5 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-white text-xs">{farm.name}</h3>
-            <p className="text-white/70 text-[10px]">{farm.farm_code}</p>
+            <h3 className="font-bold text-white text-sm">{farm.name}</h3>
+            <p className="text-white/80 text-[10px]">{farm.farm_code}</p>
           </div>
         </div>
       </div>
       
-      <div className="px-3 py-2 space-y-1.5">
-        <div className="flex justify-between items-center">
-          <span className="text-[10px] text-gray-500">Zone</span>
-          <span className="text-[11px] font-medium text-gray-800">{farm.zone?.name || "N/A"}</span>
+      <div className="px-3 py-2">
+        <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <MdLocationOn className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-[11px] text-gray-500">Zone</span>
+          </div>
+          <span className="text-[12px] font-semibold text-gray-800">{farm.zone?.name || "N/A"}</span>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-[10px] text-gray-500">Farmer</span>
-          <span className="text-[11px] font-medium text-gray-800">{farm.farmer?.name || "N/A"}</span>
+        
+        <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <MdPerson className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-[11px] text-gray-500">Farmer</span>
+          </div>
+          <span className="text-[12px] font-semibold text-gray-800">{farm.farmer?.name || "N/A"}</span>
         </div>
-        <div className="flex justify-between items-center pt-1 border-t border-gray-100">
-          <span className="text-[10px] text-gray-500">Size</span>
-          <span className="text-[11px] font-bold text-primary">{size.toFixed(2)} Ha</span>
+        
+        <div className="flex justify-between items-center py-1.5">
+          <div className="flex items-center gap-2">
+            <MdScale className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-[11px] text-gray-500">Size</span>
+          </div>
+          <span className="text-[12px] font-bold text-emerald-600">{size.toFixed(2)} Ha</span>
         </div>
       </div>
       
       <div className="grid grid-cols-3 gap-0.5 p-1.5 bg-gray-50 border-t border-gray-100">
         <button
           onClick={() => onViewDetails(farm.id)}
-          className="flex flex-col items-center gap-0.5 py-1.5 rounded-md hover:bg-white transition-colors group"
+          className="flex flex-col items-center gap-0.5 py-1.5 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm"
         >
-          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20">
-            <MdVisibility className="w-3 h-3 text-primary" />
-          </div>
+          <MdVisibility className="w-3.5 h-3.5 text-emerald-600" />
           <span className="text-[9px] font-medium text-gray-600">View</span>
         </button>
         
         <button
           onClick={() => onViewSchedules(farm.id)}
-          className="flex flex-col items-center gap-0.5 py-1.5 rounded-md hover:bg-white transition-colors group"
+          className="flex flex-col items-center gap-0.5 py-1.5 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm"
         >
-          <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center group-hover:bg-amber-200">
-            <MdSchedule className="w-3 h-3 text-amber-600" />
-          </div>
-          <span className="text-[9px] font-medium text-gray-600">Schedules</span>
+          <MdSchedule className="w-3.5 h-3.5 text-amber-600" />
+          <span className="text-[9px] font-medium text-gray-600">Schedule</span>
         </button>
         
         {coords && (
           <button
             onClick={() => onGetDirections(coords.lat, coords.lng, farm.name)}
-            className="flex flex-col items-center gap-0.5 py-1.5 rounded-md hover:bg-white transition-colors group"
+            className="flex flex-col items-center gap-0.5 py-1.5 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm"
           >
-            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200">
-              <MdDirections className="w-3 h-3 text-emerald-600" />
-            </div>
-            <span className="text-[9px] font-medium text-gray-600">Directions</span>
+            <MdDirections className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-[9px] font-medium text-gray-600">Direction</span>
           </button>
         )}
       </div>
@@ -211,7 +215,6 @@ export default function FarmLocationPage() {
 
   // State
   const [activeTab, setActiveTab] = useState<"map" | "table">("map");
-  const [showFilters, setShowFilters] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   const [selectedFactoryId, setSelectedFactoryId] = useState<string>("");
@@ -219,10 +222,23 @@ export default function FarmLocationPage() {
   const [selectedFarmId, setSelectedFarmId] = useState<string>("");
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [mapKey, setMapKey] = useState(0);
 
   // Fetch farms using the hook
   const { data: farmsResponse, isLoading, isError, refetch } = useFarms({});
   const allFarms = farmsResponse?.data || [];
+
+  // Fetch factories based on selected zone
+  const { data: factoriesResponse } = useFactories(
+    selectedZoneId ? { zone_id: selectedZoneId } : undefined
+  );
+  const factories = factoriesResponse?.data || [];
+
+  // Fetch clusters based on selected factory
+  const { data: clustersResponse } = useClusters(
+    selectedFactoryId ? { factory_id: selectedFactoryId } : undefined
+  );
+  const clusters = clustersResponse?.data || [];
 
   // Setup Leaflet icons on mount
   useEffect(() => {
@@ -242,6 +258,11 @@ export default function FarmLocationPage() {
       });
     }
   }, []);
+
+  // Update map key when filters change to force remount
+  useEffect(() => {
+    setMapKey(prev => prev + 1);
+  }, [selectedZoneId, selectedFactoryId, selectedClusterId, selectedFarmId, activeTab]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -269,7 +290,7 @@ export default function FarmLocationPage() {
     window.open(url, '_blank');
   };
 
-  // Get unique values for filters with cascade
+  // Get unique zones from farms
   const uniqueZones = useMemo(() => {
     const zonesMap = new Map<string, string>();
     allFarms.forEach((farm) => {
@@ -279,66 +300,6 @@ export default function FarmLocationPage() {
     });
     return Array.from(zonesMap.entries()).map(([id, name]) => ({ id, name }));
   }, [allFarms]);
-
-  // Factories filtered by selected zone
-  const uniqueFactories = useMemo(() => {
-    const factoriesMap = new Map<string, string>();
-    let data = allFarms;
-    
-    if (selectedZoneId) {
-      data = data.filter((farm) => farm.zone?.id === selectedZoneId);
-    }
-    
-    data.forEach((farm) => {
-      if (farm.factory?.id && farm.factory?.name) {
-        factoriesMap.set(farm.factory.id, farm.factory.name);
-      }
-    });
-    return Array.from(factoriesMap.entries()).map(([id, name]) => ({ id, name }));
-  }, [allFarms, selectedZoneId]);
-
-  // Clusters filtered by selected zone and factory
-  const uniqueClusters = useMemo(() => {
-    const clustersMap = new Map<string, string>();
-    let data = allFarms;
-    
-    if (selectedZoneId) {
-      data = data.filter((farm) => farm.zone?.id === selectedZoneId);
-    }
-    if (selectedFactoryId) {
-      data = data.filter((farm) => farm.factory?.id === selectedFactoryId);
-    }
-    
-    data.forEach((farm) => {
-      if (farm.cluster?.id && farm.cluster?.name) {
-        clustersMap.set(farm.cluster.id, farm.cluster.name);
-      }
-    });
-    return Array.from(clustersMap.entries()).map(([id, name]) => ({ id, name }));
-  }, [allFarms, selectedZoneId, selectedFactoryId]);
-
-  // Farms filtered by selected zone, factory, and cluster
-  const uniqueFarms = useMemo(() => {
-    const farmsMap = new Map<string, string>();
-    let data = allFarms;
-    
-    if (selectedZoneId) {
-      data = data.filter((farm) => farm.zone?.id === selectedZoneId);
-    }
-    if (selectedFactoryId) {
-      data = data.filter((farm) => farm.factory?.id === selectedFactoryId);
-    }
-    if (selectedClusterId) {
-      data = data.filter((farm) => farm.cluster?.id === selectedClusterId);
-    }
-    
-    data.forEach((farm) => {
-      if (farm.id && farm.name) {
-        farmsMap.set(farm.id, farm.name);
-      }
-    });
-    return Array.from(farmsMap.entries()).map(([id, name]) => ({ id, name }));
-  }, [allFarms, selectedZoneId, selectedFactoryId, selectedClusterId]);
 
   // Filter farms based on role and selected filters
   const filteredFarms = useMemo(() => {
@@ -393,14 +354,9 @@ export default function FarmLocationPage() {
     return "Farm Locations";
   };
 
-  // Kenya/East Africa bounds
-  const kenyaBounds: [[number, number], [number, number]] = [
-    [-5, 34],
-    [5, 42],
-  ];
-  
-  const kenyaCenter: [number, number] = [0.0236, 37.9062];
-  const defaultZoom = 6.5;
+  // East Africa center
+  const eastAfricaCenter: [number, number] = [0, 40];
+  const defaultZoom = 5.5;
 
   const mapCenter = useMemo(() => {
     if (selectedFarm) {
@@ -419,16 +375,16 @@ export default function FarmLocationPage() {
       }, 0) / farmsWithCoords.length;
       return [avgLat, avgLng] as [number, number];
     }
-    return kenyaCenter;
+    return eastAfricaCenter;
   }, [selectedFarm, filteredFarms]);
 
   const mapZoom = useMemo(() => {
     const farmsWithCoords = filteredFarms.filter((farm) => getCoordinates(farm));
-    if (selectedFarm) return 14;
+    if (selectedFarm) return 12;
     if (farmsWithCoords.length === 0) return defaultZoom;
-    if (farmsWithCoords.length === 1) return 12;
-    if (farmsWithCoords.length <= 5) return 10;
-    if (farmsWithCoords.length <= 20) return 8;
+    if (farmsWithCoords.length === 1) return 10;
+    if (farmsWithCoords.length <= 5) return 8;
+    if (farmsWithCoords.length <= 20) return 6.5;
     return defaultZoom;
   }, [selectedFarm, filteredFarms]);
 
@@ -484,8 +440,8 @@ export default function FarmLocationPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* LEFT PANEL - With filters in one line */}
-        <div className="w-80 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
+        {/* LEFT PANEL */}
+        <div className="w-96 bg-white border-r border-slate-200 flex flex-col overflow-y-auto">
           {/* Tab Toggle */}
           <div className="p-2 border-b border-slate-200">
             <div className="flex gap-1 bg-gray-100 p-0.5 rounded-lg">
@@ -498,7 +454,7 @@ export default function FarmLocationPage() {
                 }`}
               >
                 <MdMap className="w-3 h-3" />
-                Map
+                Map View
               </button>
               <button
                 onClick={() => setActiveTab("table")}
@@ -509,12 +465,12 @@ export default function FarmLocationPage() {
                 }`}
               >
                 <MdViewList className="w-3 h-3" />
-                Table
+                Table View
               </button>
             </div>
           </div>
 
-          {/* Stats Cards - Compact Horizontal */}
+          {/* Stats Cards */}
           <div className="p-2 border-b border-slate-200">
             <div className="flex gap-2">
               <div className="flex-1 bg-blue-50 rounded-lg px-2 py-1.5">
@@ -530,9 +486,9 @@ export default function FarmLocationPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     <MdScale className="w-3 h-3 text-amber-500" />
-                    <span className="text-[9px] text-gray-500">Size</span>
+                    <span className="text-[9px] text-gray-500">Size(Ha)</span>
                   </div>
-                  <span className="text-sm font-bold text-amber-600">{stats.totalSize}H</span>
+                  <span className="text-sm font-bold text-amber-600">{stats.totalSize}</span>
                 </div>
               </div>
               <div className="flex-1 bg-purple-50 rounded-lg px-2 py-1.5">
@@ -547,23 +503,26 @@ export default function FarmLocationPage() {
             </div>
           </div>
 
-          {/* Filters in one horizontal line */}
+          {/* Filters */}
           <div className="p-2 border-b border-slate-200">
-            <div className="flex items-center gap-1 mb-2">
-              <MdFilterList className="w-3.5 h-3.5 text-primary" />
-              <span className="text-[11px] font-medium text-gray-700">Filters</span>
-              {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1">
+                <MdFilterList className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[11px] font-medium text-gray-700">Filters</span>
+                {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+              </div>
               {hasActiveFilters && (
                 <button
                   onClick={handleClearFilters}
-                  className="ml-auto text-[10px] text-gray-500 hover:text-gray-700 flex items-center gap-0.5"
+                  className="text-[10px] text-gray-500 hover:text-gray-700 flex items-center gap-0.5"
                 >
                   <MdClear className="w-3 h-3" />
                   Clear
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            
+            <div className="grid grid-cols-2 gap-1.5">
               <select
                 value={selectedZoneId}
                 onChange={(e) => {
@@ -572,9 +531,9 @@ export default function FarmLocationPage() {
                   setSelectedClusterId("");
                   setSelectedFarmId("");
                 }}
-                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
+                className="border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[10px] bg-white truncate"
               >
-                <option value="">Zone</option>
+                <option value="">All Zones</option>
                 {uniqueZones.map((zone) => (
                   <option key={zone.id} value={zone.id}>
                     {zone.name}
@@ -589,11 +548,11 @@ export default function FarmLocationPage() {
                   setSelectedClusterId("");
                   setSelectedFarmId("");
                 }}
-                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
-                disabled={!selectedZoneId && uniqueFactories.length === 0}
+                className="border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[10px] bg-white truncate"
+                disabled={!selectedZoneId || factories.length === 0}
               >
-                <option value="">Factory</option>
-                {uniqueFactories.map((factory) => (
+                <option value="">All Factories</option>
+                {factories.map((factory: any) => (
                   <option key={factory.id} value={factory.id}>
                     {factory.name}
                   </option>
@@ -606,11 +565,11 @@ export default function FarmLocationPage() {
                   setSelectedClusterId(e.target.value);
                   setSelectedFarmId("");
                 }}
-                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
-                disabled={(!selectedZoneId && !selectedFactoryId) || uniqueClusters.length === 0}
+                className="border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[10px] bg-white truncate"
+                disabled={!selectedFactoryId || clusters.length === 0}
               >
-                <option value="">Cluster</option>
-                {uniqueClusters.map((cluster) => (
+                <option value="">All Clusters</option>
+                {clusters.map((cluster: any) => (
                   <option key={cluster.id} value={cluster.id}>
                     {cluster.name}
                   </option>
@@ -620,11 +579,10 @@ export default function FarmLocationPage() {
               <select
                 value={selectedFarmId}
                 onChange={(e) => setSelectedFarmId(e.target.value)}
-                className="flex-1 min-w-[100px] border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[11px] bg-white"
-                disabled={uniqueFarms.length === 0}
+                className="border-gray-200 focus:border-primary text-gray-900 focus:ring-primary rounded-md border px-2 py-1.5 text-[10px] bg-white truncate"
               >
-                <option value="">Farm</option>
-                {uniqueFarms.map((farm) => (
+                <option value="">All Farms</option>
+                {filteredFarms.map((farm) => (
                   <option key={farm.id} value={farm.id}>
                     {farm.name}
                   </option>
@@ -633,15 +591,15 @@ export default function FarmLocationPage() {
             </div>
           </div>
 
-          {/* Selected Farm Details - Now in green theme */}
-          <div className="flex-1 p-3">
+          {/* Selected Farm Details */}
+          <div className="flex-1 p-2">
             {!selectedFarm && (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <MdInfo className="w-6 h-6 text-emerald-500" />
+              <div className="text-center py-6">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <MdInfo className="w-5 h-5 text-emerald-500" />
                 </div>
-                <p className="text-xs text-gray-500">Click on a farm marker</p>
-                <p className="text-[10px] text-gray-400 mt-1">to view details here</p>
+                <p className="text-[10px] text-gray-500">Click on a farm marker</p>
+                <p className="text-[9px] text-gray-400 mt-0.5">to view details here</p>
               </div>
             )}
             {selectedFarm && (
@@ -650,17 +608,15 @@ export default function FarmLocationPage() {
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT PANEL - Map or Table */}
         <div className="flex-1 relative bg-gray-100">
           {activeTab === "map" ? (
-            <div className="h-full relative">
+            <div className="h-full relative" key={`map-wrapper-${mapKey}`}>
               {farmsWithCoords.length > 0 ? (
                 <MapContainer
-                  key={`map-${selectedZoneId}-${selectedFactoryId}-${selectedClusterId}-${selectedFarmId}`}
+                  key={mapKey}
                   center={mapCenter}
                   zoom={mapZoom}
-                  maxBounds={kenyaBounds}
-                  maxBoundsViscosity={1.0}
                   style={{ height: "100%", width: "100%" }}
                   scrollWheelZoom={true}
                   zoomControl={true}
