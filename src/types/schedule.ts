@@ -1,6 +1,7 @@
 // types/schedule.ts
 export interface ScheduleRef {
   id: string;
+  email:string;
   name: string;
 }
 
@@ -12,6 +13,8 @@ export interface ScheduleZone {
 export interface ScheduleFarm {
   id: string;
   name: string;
+  location:string;
+  area:string;
   zone: ScheduleZone;
 }
 
