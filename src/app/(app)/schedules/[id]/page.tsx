@@ -122,7 +122,7 @@ const NavItem = ({
     <button
         onClick={onClick}
         className={`
-      w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+      w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm
       ${
             isActive
                 ? "bg-primary text-white shadow-md shadow-primary/20"
@@ -130,14 +130,14 @@ const NavItem = ({
         }
     `}
     >
-        <div className={`${isActive ? "text-white" : "text-gray-500"}`}>
-            <Icon className="w-5 h-5" />
+        <div className={`${isActive ? "text-white" : "text-gray-500"} flex-shrink-0`}>
+            <Icon className="w-4 h-4" />
         </div>
-        <span className="flex-1 text-left text-sm font-medium">{label}</span>
+        <span className="flex-1 text-left text-xs font-medium">{label}</span>
         {badgeCount !== undefined && badgeCount > 0 && (
             <span
                 className={`
-          px-2 py-0.5 text-xs font-medium rounded-full
+          px-1.5 py-0.5 text-[10px] font-medium rounded-full flex-shrink-0
           ${
                     isActive
                         ? "bg-white/20 text-white"
@@ -193,9 +193,9 @@ export default function ScheduleDetailsPage() {
 
     const sections = [
         { id: "overview", label: "Overview", icon: MdInfo },
-        { id: "schedule", label: "Schedule Details", icon: MdSchedule },
-        { id: "farm", label: "Farm Details", icon: MdAgriculture },
-        { id: "creator", label: "Creator Info", icon: MdPerson },
+        { id: "schedule", label: "Schedule", icon: MdSchedule },
+        { id: "farm", label: "Farm", icon: MdAgriculture },
+        { id: "creator", label: "Creator", icon: MdPerson },
         {
             id: "bookings",
             label: "Bookings",
@@ -210,36 +210,36 @@ export default function ScheduleDetailsPage() {
                 return (
                     <div className="space-y-6">
                         {/* Quick Stats */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
                                 <p className="text-2xl font-bold text-blue-700">
                                     {bookings.length}
                                 </p>
-                                <p className="text-xs text-blue-600 font-medium mt-1">
+                                <p className="text-[10px] text-blue-600 font-medium mt-1">
                                     Total Bookings
                                 </p>
                             </div>
-                            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
                                 <p className="text-2xl font-bold text-green-700">
                                     {confirmedCount}
                                 </p>
-                                <p className="text-xs text-green-600 font-medium mt-1">
+                                <p className="text-[10px] text-green-600 font-medium mt-1">
                                     Confirmed
                                 </p>
                             </div>
-                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200">
                                 <p className="text-2xl font-bold text-purple-700">
                                     {signedCount}
                                 </p>
-                                <p className="text-xs text-purple-600 font-medium mt-1">
+                                <p className="text-[10px] text-purple-600 font-medium mt-1">
                                     Worker Signed
                                 </p>
                             </div>
-                            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
+                            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 border border-amber-200">
                                 <p className="text-2xl font-bold text-amber-700">
                                     {withQuantitiesCount}
                                 </p>
-                                <p className="text-xs text-amber-600 font-medium mt-1">
+                                <p className="text-[10px] text-amber-600 font-medium mt-1">
                                     With Quantities
                                 </p>
                             </div>
@@ -349,7 +349,13 @@ export default function ScheduleDetailsPage() {
                                 value={schedule.farm.zone.name}
                                 icon={MdLocationOn}
                             />
-
+                            {schedule.farm.location && (
+                                <DetailRow
+                                    label="Location"
+                                    value={schedule.farm.location}
+                                    icon={MdLocationOn}
+                                />
+                            )}
                         </div>
                     </div>
                 );
@@ -487,19 +493,18 @@ export default function ScheduleDetailsPage() {
                 </div>
             </div>
 
-            {/* Main Content with Side Navigation */}
-            <div className="max-w-7xl mx-auto px-4 py-6">
-                <div className="flex gap-6 flex-col lg:flex-row">
-                    {/* Side Navigation */}
-                    <div className="lg:w-72 flex-shrink-0">
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm sticky top-20 overflow-hidden">
-                            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            {/* Main Content with Side Navigation - Reduced spacing and width */}
+            <div className="max-w-7xl mx-auto px-4 py-4">
+                <div className="flex gap-3">
+                    {/* Side Navigation - Reduced width */}
+                    <div className="w-48 flex-shrink-0">
+                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm sticky top-20 overflow-hidden">
+                            <div className="px-3 py-2 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                     Navigation
                                 </p>
-                                <p className="text-sm text-gray-700 mt-1">Schedule Sections</p>
                             </div>
-                            <div className="p-3 space-y-1">
+                            <div className="p-2 space-y-0.5">
                                 {sections.map((section) => (
                                     <NavItem
                                         key={section.id}
@@ -515,10 +520,10 @@ export default function ScheduleDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Content Area */}
-                    <div className="flex-1">
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                            <div className="p-6">{renderContent()}</div>
+                    {/* Content Area - Takes remaining space */}
+                    <div className="flex-1 min-w-0">
+                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="p-5">{renderContent()}</div>
                         </div>
                     </div>
                 </div>
