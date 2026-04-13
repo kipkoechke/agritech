@@ -9,7 +9,7 @@ import {
   MdSupervisorAccount,
   MdFactory,
   MdScale,
-  MdMap,
+  MdMap, MdGroup, MdSchedule,
 } from "react-icons/md";
 
 interface NavItem {
@@ -25,24 +25,19 @@ const agritechNavItems: NavItem[] = [
     icon: MdDashboard,
   },
   {
+    name: "Schdeules",
+    href: "/schedules",
+    icon: MdSchedule,
+  },
+  {
     name: "Farms",
-    href: "/farms",
-    icon: MdAgriculture,
-  },
-  {
-    name: "Workers",
-    href: "/farm-workers",
-    icon: MdPeople,
-  },
-  {
-    name: "Supervisors",
-    href: "/farm-supervisors",
-    icon: MdSupervisorAccount,
-  },
-  {
-    name: "Map",
     href: "/farm-map",
     icon: MdMap,
+  },
+  {
+    name: "Work Group",
+    href: "/work-groups",
+    icon: MdGroup,
   },
 ];
 
