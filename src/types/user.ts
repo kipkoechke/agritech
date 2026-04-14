@@ -56,11 +56,11 @@ export interface UsersResponse {
   };
 }
 
-export interface UserResponse {
+interface UserResponse {
   data: User;
 }
 
-export interface UserRole {
+interface UserRole {
   id: string;
   name: string;
 }

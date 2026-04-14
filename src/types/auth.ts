@@ -27,14 +27,14 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface AuthState {
+interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
 
-export interface LoginFormData {
+interface LoginFormData {
   email: string;
   password: string;
   remember?: boolean;

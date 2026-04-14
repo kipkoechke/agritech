@@ -45,7 +45,7 @@ export const login = async (
   return response.data;
 };
 
-export const directLogin = login;
+const directLogin = login;
 
 export const logoutUser = async (): Promise<void> => {
   await axiosInstance.post<LogoutResponse>(AUTH_ENDPOINTS.LOGOUT);
@@ -57,6 +57,6 @@ export const getMe = async (): Promise<User> => {
   return response.data.data;
 };
 
-export const clearAuthSession = (): void => {
+const clearAuthSession = (): void => {
   clearAuthData();
 };

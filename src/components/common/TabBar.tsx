@@ -6,7 +6,7 @@ import {
   useCallback,
 } from "react";
 
-export interface TabsProps {
+interface TabsProps {
   defaultValue?: string;
   value?: string;
   children: React.ReactNode;
@@ -14,27 +14,27 @@ export interface TabsProps {
   onValueChange?: (value: string) => void;
 }
 
-export interface TabsListProps {
+interface TabsListProps {
   children: React.ReactNode;
   className?: string;
   actions?: React.ReactNode;
   onScroll?: () => void;
 }
 
-export interface TabsTriggerProps {
+interface TabsTriggerProps {
   value: string;
   children: React.ReactNode;
   icon?: React.ReactNode;
   className?: string;
 }
 
-export interface TabsContentProps {
+interface TabsContentProps {
   value: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export const TabsContext = createContext<{
+const TabsContext = createContext<{
   value: string;
   setValue: (v: string) => void;
   onValueChange?: (value: string) => void;

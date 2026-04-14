@@ -53,7 +53,7 @@ export const getAuthToken = (): string | null => {
 /**
  * Remove authentication token from cookies
  */
-export const removeAuthToken = (): void => {
+const removeAuthToken = (): void => {
   try {
     document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict`;
   } catch (error) {
@@ -98,7 +98,7 @@ export const getUserData = (): User | null => {
 /**
  * Remove user data from localStorage and cookie
  */
-export const removeUserData = (): void => {
+const removeUserData = (): void => {
   try {
     if (typeof window !== "undefined") {
       localStorage.removeItem(USER_KEY);
@@ -129,7 +129,7 @@ export const isAuthenticated = (): boolean => {
 /**
  * Get Bearer token for API requests
  */
-export const getBearerToken = (): string | null => {
+const getBearerToken = (): string | null => {
   const token = getAuthToken();
   return token ? `Bearer ${token}` : null;
 };

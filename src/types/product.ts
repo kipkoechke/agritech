@@ -39,6 +39,6 @@ export interface ProductResponse {
   data: Product;
 }
 
-export interface PriceHistoryResponse {
+interface PriceHistoryResponse {
   data: any[];
 }

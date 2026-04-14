@@ -13,7 +13,7 @@ export const useZones = () => {
   });
 };
 
-export const useCreateZone = () => {
+const useCreateZone = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -28,7 +28,7 @@ export const useCreateZone = () => {
   });
 };
 
-export const useUpdateZone = () => {
+const useUpdateZone = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -43,7 +43,7 @@ export const useUpdateZone = () => {
   });
 };
 
-export const useDeleteZone = () => {
+const useDeleteZone = () => {
   const queryClient = useQueryClient();
   
   return useMutation({

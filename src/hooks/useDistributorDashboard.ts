@@ -5,7 +5,7 @@ import {
 } from "@/services/distributorDashboardService";
 
 // Query Keys
-export const distributorDashboardQueryKeys = {
+const distributorDashboardQueryKeys = {
   all: ["distributor-dashboard"] as const,
   dashboard: (params: DistributorDashboardParams = {}) =>
     [...distributorDashboardQueryKeys.all, params] as const,

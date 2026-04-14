@@ -6,7 +6,7 @@ export interface Zone {
   updated_at?: string;
 }
 
-export interface ApiResponse<T> {
+interface ApiResponse<T> {
   data: T;
   message?: string;
   pagination?: {

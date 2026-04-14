@@ -99,7 +99,7 @@ export const useWorkGroupMembers = (
   });
 };
 
-export const useWorkGroupMember = (workGroupId: string, memberId: string) => {
+const useWorkGroupMember = (workGroupId: string, memberId: string) => {
   return useQuery({
     queryKey: ["work-group-members", workGroupId, memberId],
     queryFn: () => getWorkGroupMember(workGroupId, memberId),
@@ -130,7 +130,7 @@ export const useAddWorkGroupMembers = () => {
   });
 };
 
-export const useUpdateWorkGroupMember = () => {
+const useUpdateWorkGroupMember = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

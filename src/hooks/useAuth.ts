@@ -15,7 +15,7 @@ import type {
 import toast from "react-hot-toast";
 
 // Query Keys
-export const authQueryKeys = {
+const authQueryKeys = {
   all: ["auth"] as const,
   user: () => [...authQueryKeys.all, "user"] as const,
 } as const;
@@ -53,7 +53,7 @@ export const useAuth = () => {
 /**
  * Hook for login
  */
-export const useLogin = () => {
+const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -107,7 +107,7 @@ export const useLogout = () => {
 /**
  * Hook to get current user without triggering a fetch
  */
-export const useCurrentUser = (): User | null => {
+const useCurrentUser = (): User | null => {
   const queryClient = useQueryClient();
   return queryClient.getQueryData<User>(authQueryKeys.user()) || null;
 };
@@ -115,7 +115,7 @@ export const useCurrentUser = (): User | null => {
 /**
  * Hook to check if user has specific role
  */
-export const useHasRole = (requiredRole: UserRole | UserRole[]): boolean => {
+const useHasRole = (requiredRole: UserRole | UserRole[]): boolean => {
   const { user } = useAuth();
   if (!user) return false;
 
@@ -150,7 +150,7 @@ export const useIsSupervisor = (): boolean => {
 /**
  * Hook to check if user is a plucker
  */
-export const useIsPlucker = (): boolean => {
+const useIsPlucker = (): boolean => {
   const { user } = useAuth();
   return user?.role === "plucker";
 };
@@ -158,7 +158,7 @@ export const useIsPlucker = (): boolean => {
 /**
  * Hook to get authentication status without triggering queries
  */
-export const useAuthStatus = () => {
+const useAuthStatus = () => {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData<User>(authQueryKeys.user());
 
@@ -171,7 +171,7 @@ export const useAuthStatus = () => {
 /**
  * Hook to get role-based dashboard components
  */
-export const useRoleBasedDashboard = () => {
+const useRoleBasedDashboard = () => {
   const { user } = useAuth();
   
   const getDashboardTitle = () => {

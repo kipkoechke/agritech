@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "../common/TabBar";
 import { MdGroup, MdSecurity } from "react-icons/md";
 
-export const UserManagementTabs: React.FC = () => {
+const UserManagementTabs: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
 

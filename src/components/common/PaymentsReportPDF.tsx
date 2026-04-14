@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export interface PaymentReportData {
+interface PaymentReportData {
   id: string;
   transaction_id: string;
   customer_name: string;
@@ -230,7 +230,7 @@ export interface PaymentReportData {
   receipt_number?: string;
 }
 
-export interface PaymentReportSummary {
+interface PaymentReportSummary {
   total_transactions: number;
   total_amount: string;
   order_payments_amount: string;

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Purchase volume interface
-export interface CartPurchaseVolume {
+interface CartPurchaseVolume {
   id: string;
   name: string;
   min_quantity: string;
@@ -10,7 +10,7 @@ export interface CartPurchaseVolume {
 }
 
 // Cart item interface
-export interface CartItem {
+interface CartItem {
   product_id: string;
   product_name: string;
   qty: number;
@@ -20,7 +20,7 @@ export interface CartItem {
 }
 
 // Helper function to calculate effective price based on quantity and purchase volumes
-export const calculateEffectivePrice = (
+const calculateEffectivePrice = (
   qty: number,
   basePrice: number,
   purchaseVolumes?: CartPurchaseVolume[],
@@ -198,21 +198,21 @@ const cartSlice = createSlice({
 });
 
 export const {
-  initializeCart,
-  addToCart,
-  updateItemQty,
-  removeFromCart,
-  setCustomer,
-  setPriority,
-  setNotes,
-  clearCart,
+  
+  
+  
+  
+  
+  
+  
+  
 } = cartSlice.actions;
 
 // Selectors
-export const selectCartItems = (state: { cart: CartState }) => state.cart.items;
-export const selectCartItemCount = (state: { cart: CartState }) =>
+const selectCartItems = (state: { cart: CartState }) => state.cart.items;
+const selectCartItemCount = (state: { cart: CartState }) =>
   state.cart.items.reduce((total, item) => total + item.qty, 0);
-export const selectCartTotal = (state: { cart: CartState }) =>
+const selectCartTotal = (state: { cart: CartState }) =>
   state.cart.items.reduce((total, item) => {
     const { price } = calculateEffectivePrice(
       item.qty,
@@ -221,12 +221,12 @@ export const selectCartTotal = (state: { cart: CartState }) =>
     );
     return total + item.qty * price;
   }, 0);
-export const selectCartCustomer = (state: { cart: CartState }) => ({
+const selectCartCustomer = (state: { cart: CartState }) => ({
   id: state.cart.customer_id,
   name: state.cart.customer_name,
 });
-export const selectCartPriority = (state: { cart: CartState }) =>
+const selectCartPriority = (state: { cart: CartState }) =>
   state.cart.priority;
-export const selectCartNotes = (state: { cart: CartState }) => state.cart.notes;
+const selectCartNotes = (state: { cart: CartState }) => state.cart.notes;
 
 export default cartSlice.reducer;

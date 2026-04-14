@@ -9,7 +9,7 @@ export const usePayments = (params: PaymentsParams = {}) => {
   });
 };
 
-export const usePayment = (id: string) => {
+const usePayment = (id: string) => {
   return useQuery({
     queryKey: ["payment", id],
     queryFn: () => getPayment(id),

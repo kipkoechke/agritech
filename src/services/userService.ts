@@ -23,7 +23,7 @@ export interface HrisUsersParams {
   sort_order?: string;
 }
 
-export const getUsers = async (
+const getUsers = async (
   params?: UserFilters,
 ): Promise<UsersResponse> => {
   const response = await axiosInstance.get<UsersResponse>("/users", { params });
@@ -39,7 +39,7 @@ export const getHrisUsers = async (
   return response.data;
 };
 
-export const getUser = async (id: string): Promise<User> => {
+const getUser = async (id: string): Promise<User> => {
   const response = await axiosInstance.get<{ data: User }>(`/users/${id}`);
   return response.data.data;
 };
@@ -49,7 +49,7 @@ export const getHrisUser = async (id: string): Promise<HrisUserResponse> => {
   return response.data;
 };
 
-export const createUser = async (data: CreateUserData): Promise<User> => {
+const createUser = async (data: CreateUserData): Promise<User> => {
   const response = await axiosInstance.post<{ data: User }>("/users", data);
   return response.data.data;
 };
@@ -61,7 +61,7 @@ export const createHrisUser = async (
   return response.data;
 };
 
-export const updateUser = async (
+const updateUser = async (
   id: string,
   data: UpdateUserData,
 ): Promise<User> => {
@@ -87,7 +87,7 @@ export const deleteUser = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/users/${id}`);
 };
 
-export const getUserRoles = async (): Promise<
+const getUserRoles = async (): Promise<
   { id: string; name: string }[]
 > => {
   const response = await axiosInstance.get<{

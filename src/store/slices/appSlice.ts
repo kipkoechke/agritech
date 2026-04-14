@@ -31,5 +31,5 @@ const appSlice = createSlice({
   },
 });
 
-export const { setLoading, setError, setTheme, clearError } = appSlice.actions;
+export const {     } = appSlice.actions;
 export default appSlice.reducer;
