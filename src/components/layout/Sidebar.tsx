@@ -111,13 +111,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         roles: ["admin", "farmer"],
       },
       {
-        name: "Bookings",
-        icon: MdBookOnline,
-        href: "/bookings",
-        active: pathname.startsWith("/bookings"),
-        roles: ["admin", "supervisor"],
-      },
-      {
         name: "Work Groups",
         icon: MdGroupWork,
         href: "/work-groups",
