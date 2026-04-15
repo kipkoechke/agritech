@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -14,14 +15,22 @@ import {
   MdAccessTime,
   MdPerson,
   MdEmail,
-  MdPhone,
   MdNotes,
   MdPeople,
   MdCheckCircle,
   MdRadioButtonUnchecked,
   MdScale,
+  MdPhone,
+  MdCheck,
+  MdCreate,
 } from "react-icons/md";
 import { useSchedule, useCancelSchedule } from "@/hooks/useSchedule";
+import {
+  useConfirmAttendance,
+  useCaptureFarmQuantity,
+  useCaptureFactoryQuantity,
+  useWorkerSignOff,
+} from "@/hooks/useBooking";
 import type { ScheduleBooking } from "@/types/schedule";
 
 /* ── helpers ── */
@@ -112,89 +121,254 @@ function ProgressRing({
   const offset = circumference - (value / 100) * circumference;
   return (
     <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
+      <circle cx="18" cy="18" r={r} fill="none" strokeWidth="3" stroke={trackColor} />
       <circle
-        cx="18"
-        cy="18"
-        r={r}
-        fill="none"
-        strokeWidth="3"
-        stroke={trackColor}
-      />
-      <circle
-        cx="18"
-        cy="18"
-        r={r}
-        fill="none"
-        strokeWidth="3"
-        stroke={color}
-        strokeLinecap="round"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
+        cx="18" cy="18" r={r} fill="none" strokeWidth="3" stroke={color}
+        strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
         style={{ transition: "stroke-dashoffset 0.5s ease" }}
       />
     </svg>
   );
 }
 
-function WorkerRow({ booking }: { booking: ScheduleBooking }) {
+/* ── WorkerRow with inline actions ── */
+type RowState = {
+  showFarmQty: boolean;
+  showFactoryQty: boolean;
+  farmQtyInput: string;
+  factoryQtyInput: string;
+};
+
+function WorkerRow({
+  booking,
+  confirmMutation,
+  farmQtyMutation,
+  factoryQtyMutation,
+  signOffMutation,
+}: {
+  booking: ScheduleBooking;
+  confirmMutation: ReturnType<typeof useConfirmAttendance>;
+  farmQtyMutation: ReturnType<typeof useCaptureFarmQuantity>;
+  factoryQtyMutation: ReturnType<typeof useCaptureFactoryQuantity>;
+  signOffMutation: ReturnType<typeof useWorkerSignOff>;
+}) {
   const worker = booking.worker;
+  const [state, setState] = useState<RowState>({
+    showFarmQty: false,
+    showFactoryQty: false,
+    farmQtyInput: booking.farm_qty != null ? String(booking.farm_qty) : "",
+    factoryQtyInput:
+      booking.factory_qty != null ? String(booking.factory_qty) : "",
+  });
+
+  const toggleFarmQty = () =>
+    setState((s) => ({ ...s, showFarmQty: !s.showFarmQty }));
+  const toggleFactoryQty = () =>
+    setState((s) => ({ ...s, showFactoryQty: !s.showFactoryQty }));
+
+  const submitFarmQty = () => {
+    const num = parseFloat(state.farmQtyInput);
+    if (!isNaN(num) && num >= 0) {
+      farmQtyMutation.mutate(
+        { id: booking.id, farm_qty: num },
+        { onSuccess: () => setState((s) => ({ ...s, showFarmQty: false })) },
+      );
+    }
+  };
+
+  const submitFactoryQty = () => {
+    const num = parseFloat(state.factoryQtyInput);
+    if (!isNaN(num) && num >= 0) {
+      factoryQtyMutation.mutate(
+        { id: booking.id, factory_qty: num },
+        {
+          onSuccess: () => setState((s) => ({ ...s, showFactoryQty: false })),
+        },
+      );
+    }
+  };
+
   return (
-    <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-50/80 last:border-0 hover:bg-[#F9FAFB] transition-colors">
-      {/* Avatar + identity */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
+    <div className="px-4 py-3 border-b border-gray-50/80 last:border-0 hover:bg-[#F9FAFB] transition-colors">
+      {/* Row 1: avatar + name + status badges */}
+      <div className="flex items-center gap-3">
+        {/* Avatar */}
+        <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
           <span className="text-xs font-bold text-emerald-700 tracking-tight">
             {initials(worker?.name ?? "?")}
           </span>
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate tracking-[-0.01em]">
+
+        {/* Name + phone */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 truncate">
             {worker?.name ?? "—"}
           </p>
           {worker?.phone && (
-            <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5 font-normal tracking-[0.02em]">
+            <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
               <MdPhone className="w-3 h-3" />
               {worker.phone}
             </p>
           )}
         </div>
+
+        {/* Status badges */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <StatusBadge
+            on={booking.is_confirmed}
+            label="Confirmed"
+            onClass="border-emerald-200 bg-emerald-50 text-emerald-700"
+          />
+          <StatusBadge
+            on={booking.worker_signed}
+            label="Signed"
+            onClass="border-blue-200 bg-blue-50 text-blue-600"
+          />
+        </div>
       </div>
 
-      {/* Status badges — fixed width to align under column header */}
-      <div className="flex items-center gap-2 w-44 flex-shrink-0">
-        <StatusBadge
-          on={booking.is_confirmed}
-          label="Confirmed"
-          onClass="border-emerald-200 bg-emerald-50 text-emerald-700"
-        />
-        <StatusBadge
-          on={booking.worker_signed}
-          label="Signed"
-          onClass="border-blue-200 bg-blue-50 text-blue-600"
-        />
-      </div>
-
-      {/* Quantity columns — no per-row labels, numbers only */}
-      <div className="flex items-center gap-4 flex-shrink-0">
-        <div className="w-20 text-right">
+      {/* Row 2: qty display + action buttons */}
+      <div className="mt-2 ml-11 flex items-center gap-3 flex-wrap">
+        {/* Farm qty */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
+            Farm
+          </span>
           {booking.farm_qty != null ? (
-            <span className="text-sm font-semibold text-gray-800 tabular-nums">
+            <span className="text-xs font-semibold text-gray-700 tabular-nums">
               {Number(booking.farm_qty).toFixed(2)} kg
             </span>
           ) : (
-            <span className="text-gray-300 select-none">—</span>
+            <span className="text-gray-300 text-xs">—</span>
           )}
         </div>
-        <div className="w-24 text-right">
+        <span className="text-gray-200 text-xs">·</span>
+        {/* Factory qty */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
+            Factory
+          </span>
           {booking.factory_qty != null ? (
-            <span className="text-sm font-semibold text-gray-800 tabular-nums">
+            <span className="text-xs font-semibold text-gray-700 tabular-nums">
               {Number(booking.factory_qty).toFixed(2)} kg
             </span>
           ) : (
-            <span className="text-gray-300 select-none">—</span>
+            <span className="text-gray-300 text-xs">—</span>
+          )}
+        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Confirm */}
+          {!booking.is_confirmed && (
+            <button
+              onClick={() => confirmMutation.mutate(booking.id)}
+              disabled={confirmMutation.isPending}
+              title="Confirm attendance"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+            >
+              <MdCheck className="w-3 h-3" />
+              Confirm
+            </button>
+          )}
+
+          {/* Farm Qty */}
+          <button
+            onClick={toggleFarmQty}
+            title="Capture farm quantity"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
+          >
+            <MdScale className="w-3 h-3" />
+            Farm Qty
+          </button>
+
+          {/* Factory Qty */}
+          <button
+            onClick={toggleFactoryQty}
+            title="Capture factory quantity"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+          >
+            <MdScale className="w-3 h-3" />
+            Factory Qty
+          </button>
+
+          {/* Sign Off */}
+          {!booking.worker_signed && (
+            <button
+              onClick={() => signOffMutation.mutate(booking.id)}
+              disabled={signOffMutation.isPending}
+              title="Sign off worker"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 disabled:opacity-50 transition-colors"
+            >
+              <MdCreate className="w-3 h-3" />
+              Sign Off
+            </button>
           )}
         </div>
       </div>
+
+      {/* Inline farm qty form */}
+      {state.showFarmQty && (
+        <div className="mt-2 ml-11 flex items-center gap-2">
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={state.farmQtyInput}
+            onChange={(e) =>
+              setState((s) => ({ ...s, farmQtyInput: e.target.value }))
+            }
+            placeholder="Enter kg"
+            className="w-28 px-2.5 py-1.5 text-xs border border-amber-300 rounded-full focus:outline-none focus:ring-1 focus:ring-amber-400"
+          />
+          <button
+            onClick={submitFarmQty}
+            disabled={farmQtyMutation.isPending}
+            className="px-3 py-1.5 text-xs font-semibold bg-amber-500 text-white rounded-full hover:bg-amber-600 disabled:opacity-50 transition-colors"
+          >
+            {farmQtyMutation.isPending ? "Saving…" : "Save"}
+          </button>
+          <button
+            onClick={toggleFarmQty}
+            className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Inline factory qty form */}
+      {state.showFactoryQty && (
+        <div className="mt-2 ml-11 flex items-center gap-2">
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={state.factoryQtyInput}
+            onChange={(e) =>
+              setState((s) => ({ ...s, factoryQtyInput: e.target.value }))
+            }
+            placeholder="Enter kg"
+            className="w-28 px-2.5 py-1.5 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+          <button
+            onClick={submitFactoryQty}
+            disabled={factoryQtyMutation.isPending}
+            className="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 transition-colors"
+          >
+            {factoryQtyMutation.isPending ? "Saving…" : "Save"}
+          </button>
+          <button
+            onClick={toggleFactoryQty}
+            className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -205,6 +379,12 @@ export default function ScheduleDetailsPage() {
   const id = params.id as string;
   const { data: scheduleResponse, isLoading } = useSchedule(id);
   const cancelSchedule = useCancelSchedule();
+
+  /* booking action mutations — single instance per page, passed down to rows */
+  const confirmMutation = useConfirmAttendance();
+  const farmQtyMutation = useCaptureFarmQuantity();
+  const factoryQtyMutation = useCaptureFactoryQuantity();
+  const signOffMutation = useWorkerSignOff();
 
   const schedule = scheduleResponse?.data;
   const bookings = schedule?.bookings?.data ?? [];
@@ -251,7 +431,9 @@ export default function ScheduleDetailsPage() {
 
   const confirmedCount = bookings.filter((b) => b.is_confirmed).length;
   const signedCount = bookings.filter((b) => b.worker_signed).length;
-  const withQuantitiesCount = bookings.filter((b) => b.farm_qty != null).length;
+  const withQuantitiesCount = bookings.filter(
+    (b) => b.farm_qty != null,
+  ).length;
 
   const humanDate = scheduledDate.toLocaleDateString("en-KE", {
     year: "numeric",
@@ -267,7 +449,7 @@ export default function ScheduleDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* ── Sticky Header ── */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           {/* left */}
           <div className="flex items-center gap-3 min-w-0">
             <Link
@@ -328,263 +510,276 @@ export default function ScheduleDetailsPage() {
         </div>
       </div>
 
-      {/* ── Page Body ── */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-        {/* ── Stat Pills ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            {
-              label: "Total Workers",
-              value: bookingsCount,
-              color: "bg-blue-50   border-blue-100   text-blue-700",
-            },
-            {
-              label: "Confirmed",
-              value: confirmedCount,
-              color: "bg-green-50  border-green-100  text-green-700",
-            },
-            {
-              label: "Worker Signed",
-              value: signedCount,
-              color: "bg-purple-50 border-purple-100 text-purple-700",
-            },
-            {
-              label: "With Yield",
-              value: withQuantitiesCount,
-              color: "bg-amber-50  border-amber-100  text-amber-700",
-            },
-          ].map(({ label, value, color }) => (
-            <div key={label} className={`rounded-2xl border p-4 ${color}`}>
-              <p className="text-2xl font-bold">{value}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mt-1 opacity-80">
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
+      {/* ── Page Body: 2-column layout ── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-        {/* ── Details Grid ── */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-            <MdCalendarToday className="w-4 h-4 text-primary" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
-              Schedule Details
-            </h2>
-          </div>
-          <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-            <InfoTile
-              icon={MdAgriculture}
-              label="Activity"
-              value={schedule.activity.name}
-            />
-            <InfoTile
-              icon={MdCalendarToday}
-              label="Scheduled Date"
-              value={humanDate}
-            />
-            <InfoTile
-              icon={MdAccessTime}
-              label="Scheduled Time"
-              value={humanTime}
-            />
-            <InfoTile
-              icon={MdLocationOn}
-              label="Farm"
-              value={schedule.farm.name}
-            />
-            <InfoTile
-              icon={MdLocationOn}
-              label="Zone"
-              value={schedule.farm.zone.name}
-            />
-            {schedule.farm.area && (
-              <InfoTile
-                icon={MdScale}
-                label="Farm Area"
-                value={`${schedule.farm.area} ha`}
-              />
-            )}
-            <InfoTile
-              icon={MdPerson}
-              label="Created By"
-              value={schedule.created_by.name}
-            />
-            {schedule.created_by.email && (
-              <InfoTile
-                icon={MdEmail}
-                label="Creator Email"
-                value={schedule.created_by.email}
-              />
-            )}
-            <InfoTile
-              icon={MdCalendarToday}
-              label="Created At"
-              value={createdDate.toLocaleDateString("en-KE", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            />
-          </div>
-
-          {/* Notes row — full width */}
-          <div className="px-6 pb-5 border-t border-gray-50 pt-4">
-            <div className="flex items-center gap-1.5 mb-2">
-              <MdNotes className="w-3.5 h-3.5 text-primary/70" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                Notes
-              </span>
-            </div>
-            {schedule.notes ? (
-              <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                {schedule.notes}
-              </p>
-            ) : (
-              <p className="text-sm text-gray-300 italic">
-                No notes recorded yet.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* ── Assigned Workers ── */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <MdPeople className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-bold uppercase tracking-[-0.01em] text-gray-500">
-                Assigned Workers
-              </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
-                {bookingsCount}
-              </span>
-            </div>
-            {bookings.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-400 w-16 tracking-[0.02em]">
-                    Confirmed
-                  </span>
-                  <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                    <div
-                      className="h-1.5 rounded-full bg-emerald-500 transition-all duration-500"
-                      style={{
-                        width: `${Math.round((confirmedCount / bookings.length) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-emerald-600 font-semibold tabular-nums">
-                    {confirmedCount}/{bookings.length}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-400 w-16 tracking-[0.02em]">
-                    Signed
-                  </span>
-                  <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                    <div
-                      className="h-1.5 rounded-full bg-blue-400 transition-all duration-500"
-                      style={{
-                        width: `${Math.round((signedCount / bookings.length) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-blue-500 font-semibold tabular-nums">
-                    {signedCount}/{bookings.length}
-                  </span>
-                </div>
+          {/* ── Left: Schedule Details ── */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Details card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+                <MdCalendarToday className="w-4 h-4 text-primary" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Schedule Details
+                </h2>
               </div>
-            )}
-          </div>
-
-          {/* column header strip */}
-          {bookings.length > 0 && (
-            <div className="hidden sm:flex items-center gap-4 px-6 py-2 bg-[#F9FAFB] border-b border-gray-100">
-              <div className="flex-1 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400">
-                Worker
-              </div>
-              <div className="flex-shrink-0 w-44 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400">
-                Status
-              </div>
-              <div className="flex-shrink-0 flex gap-4">
-                <span className="w-20 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400">
-                  Farm Qty
-                </span>
-                <span className="w-24 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400">
-                  Factory Qty
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* rows */}
-          {bookings.length === 0 ? (
-            <div className="py-14 text-center">
-              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                <MdPeople className="w-7 h-7 text-gray-300" />
-              </div>
-              <p className="text-sm text-gray-400">
-                No workers assigned to this schedule yet.
-              </p>
-            </div>
-          ) : (
-            <div>
-              {bookings.map((booking) => (
-                <WorkerRow key={booking.id} booking={booking} />
-              ))}
-            </div>
-          )}
-
-          {/* summary footer — circular progress rings */}
-          {bookings.length > 0 && (
-            <div className="px-6 py-4 bg-[#F9FAFB] border-t border-gray-100 flex flex-wrap items-center gap-6">
-              {(
-                [
-                  {
-                    label: "Confirmation",
-                    value: Math.round((confirmedCount / bookings.length) * 100),
-                    color: "#10b981",
-                    trackColor: "#d1fae5",
-                  },
-                  {
-                    label: "Sign Rate",
-                    value: Math.round((signedCount / bookings.length) * 100),
-                    color: "#60a5fa",
-                    trackColor: "#dbeafe",
-                  },
-                  {
-                    label: "Yield Recorded",
-                    value: Math.round(
-                      (withQuantitiesCount / bookings.length) * 100,
-                    ),
-                    color: "#f59e0b",
-                    trackColor: "#fef3c7",
-                  },
-                ] as {
-                  label: string;
-                  value: number;
-                  color: string;
-                  trackColor: string;
-                }[]
-              ).map(({ label, value, color, trackColor }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <ProgressRing
-                    value={value}
-                    color={color}
-                    trackColor={trackColor}
+              <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+                <InfoTile
+                  icon={MdAgriculture}
+                  label="Activity"
+                  value={schedule.activity.name}
+                />
+                <InfoTile
+                  icon={MdCalendarToday}
+                  label="Date"
+                  value={humanDate}
+                />
+                <InfoTile
+                  icon={MdAccessTime}
+                  label="Time"
+                  value={humanTime}
+                />
+                <InfoTile
+                  icon={MdLocationOn}
+                  label="Farm"
+                  value={schedule.farm.name}
+                />
+                <InfoTile
+                  icon={MdLocationOn}
+                  label="Zone"
+                  value={schedule.farm.zone.name}
+                />
+                {schedule.farm.area && (
+                  <InfoTile
+                    icon={MdScale}
+                    label="Farm Area"
+                    value={`${schedule.farm.area} acres`}
                   />
-                  <div>
-                    <p className="text-xs font-bold text-gray-800 tracking-[-0.01em]">
-                      {value}%
-                    </p>
-                    <p className="text-[10px] text-gray-400 tracking-[0.02em] mt-0.5">
+                )}
+                <InfoTile
+                  icon={MdPerson}
+                  label="Created By"
+                  value={schedule.created_by.name}
+                />
+                {schedule.created_by.email && (
+                  <InfoTile
+                    icon={MdEmail}
+                    label="Creator Email"
+                    value={schedule.created_by.email}
+                    className="sm:col-span-2"
+                  />
+                )}
+                <InfoTile
+                  icon={MdCalendarToday}
+                  label="Created"
+                  value={createdDate.toLocaleDateString("en-KE", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                />
+              </div>
+
+              {/* Notes */}
+              <div className="px-5 pb-4 border-t border-gray-50 pt-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <MdNotes className="w-3.5 h-3.5 text-primary/70" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    Notes
+                  </span>
+                </div>
+                {schedule.notes ? (
+                  <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                    {schedule.notes}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-300 italic">
+                    No notes recorded yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Summary stats card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+                <MdPeople className="w-4 h-4 text-primary" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Summary
+                </h2>
+              </div>
+              <div className="px-5 py-4 grid grid-cols-2 gap-4">
+                {[
+                  {
+                    label: "Total",
+                    value: bookingsCount,
+                    color: "text-blue-600",
+                    bg: "bg-blue-50",
+                  },
+                  {
+                    label: "Confirmed",
+                    value: confirmedCount,
+                    color: "text-emerald-600",
+                    bg: "bg-emerald-50",
+                  },
+                  {
+                    label: "Signed",
+                    value: signedCount,
+                    color: "text-purple-600",
+                    bg: "bg-purple-50",
+                  },
+                  {
+                    label: "With Yield",
+                    value: withQuantitiesCount,
+                    color: "text-amber-600",
+                    bg: "bg-amber-50",
+                  },
+                ].map(({ label, value, color, bg }) => (
+                  <div key={label} className={`${bg} rounded-xl p-3 text-center`}>
+                    <p className={`text-2xl font-bold ${color}`}>{value}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mt-0.5">
                       {label}
                     </p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* ── Right: Assigned Workers ── */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+              {/* Workers header */}
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-4 flex-shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <MdPeople className="w-4 h-4 text-primary" />
+                  <h2 className="text-xs font-bold uppercase tracking-[-0.01em] text-gray-500">
+                    Assigned Workers
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                    {bookingsCount}
+                  </span>
+                </div>
+                {bookings.length > 0 && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-gray-400 w-16 tracking-[0.02em]">
+                        Confirmed
+                      </span>
+                      <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                        <div
+                          className="h-1.5 rounded-full bg-emerald-500 transition-all duration-500"
+                          style={{
+                            width: `${Math.round((confirmedCount / bookings.length) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-emerald-600 font-semibold tabular-nums">
+                        {confirmedCount}/{bookings.length}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-gray-400 w-16 tracking-[0.02em]">
+                        Signed
+                      </span>
+                      <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                        <div
+                          className="h-1.5 rounded-full bg-blue-400 transition-all duration-500"
+                          style={{
+                            width: `${Math.round((signedCount / bookings.length) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-blue-500 font-semibold tabular-nums">
+                        {signedCount}/{bookings.length}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Scrollable rows */}
+              {bookings.length === 0 ? (
+                <div className="py-14 text-center">
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                    <MdPeople className="w-7 h-7 text-gray-300" />
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    No workers assigned to this schedule yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-y-auto max-h-[600px]">
+                  {bookings.map((booking) => (
+                    <WorkerRow
+                      key={booking.id}
+                      booking={booking}
+                      confirmMutation={confirmMutation}
+                      farmQtyMutation={farmQtyMutation}
+                      factoryQtyMutation={factoryQtyMutation}
+                      signOffMutation={signOffMutation}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Summary footer — circular progress rings */}
+              {bookings.length > 0 && (
+                <div className="px-5 py-4 bg-[#F9FAFB] border-t border-gray-100 flex flex-wrap items-center gap-6 flex-shrink-0">
+                  {(
+                    [
+                      {
+                        label: "Confirmation",
+                        value: Math.round(
+                          (confirmedCount / bookings.length) * 100,
+                        ),
+                        color: "#10b981",
+                        trackColor: "#d1fae5",
+                      },
+                      {
+                        label: "Sign Rate",
+                        value: Math.round(
+                          (signedCount / bookings.length) * 100,
+                        ),
+                        color: "#60a5fa",
+                        trackColor: "#dbeafe",
+                      },
+                      {
+                        label: "Yield Recorded",
+                        value: Math.round(
+                          (withQuantitiesCount / bookings.length) * 100,
+                        ),
+                        color: "#f59e0b",
+                        trackColor: "#fef3c7",
+                      },
+                    ] as {
+                      label: string;
+                      value: number;
+                      color: string;
+                      trackColor: string;
+                    }[]
+                  ).map(({ label, value, color, trackColor }) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <ProgressRing
+                        value={value}
+                        color={color}
+                        trackColor={trackColor}
+                      />
+                      <div>
+                        <p className="text-xs font-bold text-gray-800 tracking-[-0.01em]">
+                          {value}%
+                        </p>
+                        <p className="text-[10px] text-gray-400 tracking-[0.02em] mt-0.5">
+                          {label}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

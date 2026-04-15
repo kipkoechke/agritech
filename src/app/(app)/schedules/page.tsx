@@ -269,7 +269,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                 return (
                   <div
                     key={`empty-${index}`}
-                    className="min-h-[160px] bg-gray-50 rounded-xl border border-gray-100"
+                    className="min-h-[80px] bg-gray-50 rounded-xl border border-gray-100"
                   />
                 );
               }
@@ -285,7 +285,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
                   className={`
-                    min-h-[160px] p-3 rounded-xl border-2 transition-all text-left
+                    min-h-[80px] p-2 rounded-xl border-2 transition-all text-left
                     ${
                       isSelected
                         ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
@@ -321,8 +321,8 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    {daySchedules.slice(0, 3).map((schedule) => {
+                  <div className="space-y-1">
+                    {daySchedules.slice(0, 2).map((schedule) => {
                       const colors = getActivityColor(schedule.activity.name);
                       return (
                         <div
@@ -343,9 +343,9 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                         </div>
                       );
                     })}
-                    {daySchedules.length > 3 && (
-                      <div className="text-xs text-gray-400 text-center pt-1">
-                        +{daySchedules.length - 3} more
+                    {daySchedules.length > 2 && (
+                      <div className="text-[10px] text-gray-400 text-center pt-0.5">
+                        +{daySchedules.length - 2} more
                       </div>
                     )}
                   </div>
@@ -466,32 +466,6 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
             </div>
           )}
 
-          {/* Activity Legend - Compact */}
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Activities
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                "Plucking",
-                "Pruning",
-                "Spraying",
-                "Fertilizing",
-                "Harvesting",
-                "Weeding",
-              ].map((activity) => {
-                const colors = getActivityColor(activity);
-                return (
-                  <div key={activity} className="flex items-center gap-1">
-                    <div className={`w-2 h-2 rounded-full ${colors.bg}`} />
-                    <span className={`text-xs ${colors.text}`}>
-                      {activity.substring(0, 6)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </div>
 

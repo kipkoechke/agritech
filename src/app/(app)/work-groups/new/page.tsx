@@ -129,21 +129,19 @@ export default function NewWorkGroupPage() {
               options={farmOptions}
               value={farmId}
               onChange={setFarmId}
-              placeholder="Select farm"
+              placeholder="Select farm (optional)"
               isLoading={farmsLoading}
-              required
             />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date <span className="text-red-500">*</span>
+                Date
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="border-gray-300 focus:border-emerald-500 text-gray-900 focus:ring-emerald-500 hover:border-gray-400 w-full rounded-lg border px-4 py-3 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                required
               />
             </div>
 

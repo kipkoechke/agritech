@@ -21,7 +21,7 @@ import {
   useDeleteFarm,
   useAssignSupervisor,
 } from "@/hooks/useFarm";
-import { useIsFarmer } from "@/hooks/useAuth";
+import { useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useProducts } from "@/hooks/useProduct";
 import { useZones } from "@/hooks/useZone";
@@ -38,6 +38,7 @@ export default function FarmsPage() {
   const [supervisorId, setSupervisorId] = useState("");
 
   const isFarmer = useIsFarmer();
+  const isSupervisor = useIsSupervisor();
   const farmsParams = {
     page,
     zone_id: zoneFilter || undefined,
@@ -133,14 +134,16 @@ export default function FarmsPage() {
             </>
           }
           action={
-            <Button
-              type="small"
-              to="/farms/new"
-              className="flex items-center gap-1"
-            >
-              <MdAdd className="w-4 h-4" />
-              Add Farm
-            </Button>
+            !isSupervisor ? (
+              <Button
+                type="small"
+                to="/farms/new"
+                className="flex items-center gap-1"
+              >
+                <MdAdd className="w-4 h-4" />
+                Add Farm
+              </Button>
+            ) : undefined
           }
         />
 
@@ -189,12 +192,16 @@ export default function FarmsPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Farmer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Supervisor
-                    </th>
+                    {!isFarmer && !isSupervisor && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Farmer
+                      </th>
+                    )}
+                    {!isSupervisor && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Supervisor
+                      </th>
+                    )}
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
@@ -232,16 +239,20 @@ export default function FarmsPage() {
                           {farm.product?.name || "—"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {farm.farmer?.name || "—"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {farm.supervisor?.name || "—"}
-                        </div>
-                      </td>
+                      {!isFarmer && !isSupervisor && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {farm.farmer?.name || "—"}
+                          </div>
+                        </td>
+                      )}
+                      {!isSupervisor && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {farm.supervisor?.name || "—"}
+                          </div>
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div
                           className="flex items-center justify-end gap-1"
@@ -255,39 +266,45 @@ export default function FarmsPage() {
                               <FiEye className="h-3.5 w-3.5" />
                             </button>
                           </Tooltip>
-                          <Tooltip content="Edit farm">
-                            <button
-                              onClick={() =>
-                                router.push(`/farms/${farm.id}/edit`)
-                              }
-                              className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                            >
-                              <FiEdit className="h-3.5 w-3.5" />
-                            </button>
-                          </Tooltip>
-                          <Tooltip content="Assign a supervisor to this farm">
-                            <Modal.Open opens="assign-supervisor">
+                          {!isSupervisor && (
+                            <Tooltip content="Edit farm">
                               <button
-                                onClick={() => {
-                                  setAssignFarm(farm);
-                                  setSupervisorId(farm.supervisor?.id || "");
-                                }}
-                                className="inline-flex items-center justify-center p-1.5 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors"
+                                onClick={() =>
+                                  router.push(`/farms/${farm.id}/edit`)
+                                }
+                                className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
                               >
-                                <MdSupervisorAccount className="h-3.5 w-3.5" />
+                                <FiEdit className="h-3.5 w-3.5" />
                               </button>
-                            </Modal.Open>
-                          </Tooltip>
-                          <Tooltip content="Delete farm">
-                            <Modal.Open opens="delete-farm">
-                              <button
-                                onClick={() => setSelectedFarm(farm)}
-                                className="inline-flex items-center justify-center p-1.5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
-                              >
-                                <FiTrash className="h-3.5 w-3.5" />
-                              </button>
-                            </Modal.Open>
-                          </Tooltip>
+                            </Tooltip>
+                          )}
+                          {!isSupervisor && (
+                            <Tooltip content="Assign a supervisor to this farm">
+                              <Modal.Open opens="assign-supervisor">
+                                <button
+                                  onClick={() => {
+                                    setAssignFarm(farm);
+                                    setSupervisorId(farm.supervisor?.id || "");
+                                  }}
+                                  className="inline-flex items-center justify-center p-1.5 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors"
+                                >
+                                  <MdSupervisorAccount className="h-3.5 w-3.5" />
+                                </button>
+                              </Modal.Open>
+                            </Tooltip>
+                          )}
+                          {!isSupervisor && (
+                            <Tooltip content="Delete farm">
+                              <Modal.Open opens="delete-farm">
+                                <button
+                                  onClick={() => setSelectedFarm(farm)}
+                                  className="inline-flex items-center justify-center p-1.5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
+                                >
+                                  <FiTrash className="h-3.5 w-3.5" />
+                                </button>
+                              </Modal.Open>
+                            </Tooltip>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -22,6 +22,7 @@ import {
   MdCategory,
 } from "react-icons/md";
 import { useFarm } from "@/hooks/useFarm";
+import { useIsSupervisor } from "@/hooks/useAuth";
 import "leaflet/dist/leaflet.css";
 
 // Dynamically import Leaflet components with no SSR
@@ -91,6 +92,7 @@ export default function FarmDetailsPage() {
   const id = params.id as string;
   const { data: farmResponse, isLoading } = useFarm(id);
   const [isMounted, setIsMounted] = useState(false);
+  const isSupervisor = useIsSupervisor();
 
   const farm = farmResponse?.data;
 
@@ -181,13 +183,15 @@ export default function FarmDetailsPage() {
               )}
             </div>
           </div>
-          <Link
-            href={`/farms/${id}/edit`}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors flex-shrink-0"
-          >
-            <MdEdit className="w-3.5 h-3.5" />
-            Edit Farm
-          </Link>
+          {!isSupervisor && (
+            <Link
+              href={`/farms/${id}/edit`}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors flex-shrink-0"
+            >
+              <MdEdit className="w-3.5 h-3.5" />
+              Edit Farm
+            </Link>
+          )}
         </div>
       </div>
 
@@ -209,7 +213,7 @@ export default function FarmDetailsPage() {
             />
             <InfoCard
               label="Size"
-              value={`${size.toLocaleString()} Ha`}
+              value={`${(size * 2.47105).toFixed(2)} Acres`}
               icon={MdScale}
               accent
             />
@@ -250,9 +254,7 @@ export default function FarmDetailsPage() {
                   </span>
                   <div className="flex items-center gap-1.5">
                     <MdPinDrop className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <code className="text-xs text-gray-700">
-                      {coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)}
-                    </code>
+                    <span className="text-xs text-gray-400 italic">See map below</span>
                   </div>
                 </div>
               )}
@@ -278,7 +280,7 @@ export default function FarmDetailsPage() {
                             {farm.farm_code}
                           </p>
                           <p className="text-xs text-primary mt-0.5">
-                            {size.toFixed(2)} Ha
+                            {(size * 2.47105).toFixed(2)} Acres
                           </p>
                         </div>
                       </Popup>

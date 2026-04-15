@@ -86,6 +86,7 @@ export const useConfirmAttendance = () => {
     mutationFn: (id: string) => confirmAttendance(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
       toast.success("Attendance confirmed");
     },
     onError: (error: unknown) => {
@@ -102,6 +103,7 @@ export const useCaptureFarmQuantity = () => {
       captureFarmQuantity(id, farm_qty),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
       toast.success("Farm quantity captured");
     },
     onError: (error: unknown) => {
@@ -118,6 +120,7 @@ export const useCaptureFactoryQuantity = () => {
       captureFactoryQuantity(id, factory_qty),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
       toast.success("Factory quantity captured");
     },
     onError: (error: unknown) => {
@@ -135,6 +138,7 @@ export const useWorkerSignOff = () => {
     mutationFn: (id: string) => workerSignOff(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
       toast.success("Worker signed off successfully");
     },
     onError: (error: unknown) => {

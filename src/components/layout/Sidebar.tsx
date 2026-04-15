@@ -147,20 +147,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       },
       // Supervisor only items (personal views)
       {
-        name: "Farm Workers",
-        icon: MdPeople,
-        href: "/farm-workers",
-        active: pathname.startsWith("/farm-workers"),
-        roles: ["supervisor"],
-      },
-      // {
-      //   name: "My Bookings",
-      //   icon: MdBookOnline,
-      //   href: "/bookings",
-      //   active: pathname.startsWith("/bookings"),
-      //   roles: ["supervisor"],
-      // },
-      {
         name: "My Farms",
         icon: MdMap,
         href: "/farms",
