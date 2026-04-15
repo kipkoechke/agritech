@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { MdArrowBack, MdSupervisorAccount } from "react-icons/md";
 import { InputField } from "@/components/common/InputField";
+import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateHrisUser } from "@/hooks/useHrisUser";
+import { useFarms } from "@/hooks/useFarm";
 import type { CreateHrisUserData } from "@/types/hrisUser";
 
 interface SupervisorFormData {
@@ -19,6 +22,17 @@ interface SupervisorFormData {
 export default function NewSupervisorPage() {
   const router = useRouter();
   const createUser = useCreateHrisUser();
+  const { data: farmsData, isLoading: farmsLoading } = useFarms({
+    per_page: 100,
+  });
+
+  const [farmId, setFarmId] = useState("");
+
+  const farmOptions =
+    farmsData?.data?.map((f) => ({
+      value: f.id,
+      label: f.name,
+    })) || [];
 
   const {
     register,
@@ -29,11 +43,14 @@ export default function NewSupervisorPage() {
   });
 
   const onSubmit = (data: SupervisorFormData) => {
-    const payload: CreateHrisUserData = {
+    const payload: any = {
       ...data,
       role: "supervisor",
     };
-    createUser.mutate(payload, {
+    if (farmId) {
+      payload.farm_id = farmId;
+    }
+    createUser.mutate(payload as CreateHrisUserData, {
       onSuccess: () => router.push("/farm-supervisors"),
     });
   };
@@ -106,6 +123,16 @@ export default function NewSupervisorPage() {
               placeholder="e.g. 0700000000"
               register={register("phone", { required: "Phone is required" })}
               error={errors.phone?.message}
+              required
+            />
+
+            <SearchableSelect
+              label="Assign to Farm"
+              options={farmOptions}
+              value={farmId}
+              onChange={setFarmId}
+              placeholder="Select farm to assign supervisor"
+              isLoading={farmsLoading}
               required
             />
 

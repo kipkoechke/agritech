@@ -83,8 +83,8 @@ export default function FarmsSupervisorsPage() {
       {supervisors.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead className="bg-gray-50/60">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
@@ -108,7 +108,7 @@ export default function FarmsSupervisorsPage() {
                   <tr
                     key={sup.id}
                     className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/hris/users/${sup.id}`)}
+                    onClick={() => router.push(`/farm-supervisors/${sup.id}`)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
@@ -133,10 +133,12 @@ export default function FarmsSupervisorsPage() {
                       >
                         <Tooltip content="View supervisor profile">
                           <button
-                            onClick={() => router.push(`/hris/users/${sup.id}`)}
-                            className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
+                            onClick={() =>
+                              router.push(`/farm-supervisors/${sup.id}`)
+                            }
+                            className="inline-flex items-center justify-center p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                           >
-                            <FiEye className="h-4 w-4" />
+                            <FiEye className="h-3.5 w-3.5" />
                           </button>
                         </Tooltip>
                       </div>
@@ -148,25 +150,25 @@ export default function FarmsSupervisorsPage() {
           </div>
 
           {pagination && pagination.total_pages > 1 && (
-            <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Page {pagination.current_page} of {pagination.total_pages} (
-                {pagination.total_items} items)
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <p className="text-xs text-gray-500">
+                Page {pagination.current_page} of {pagination.total_pages}{" "}
+                &nbsp;·&nbsp; {pagination.total_items} items
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={pagination.current_page <= 1}
-                  className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                 >
-                  Previous
+                  ← Prev
                 </button>
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={!pagination.next_page}
-                  className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                 >
-                  Next
+                  Next →
                 </button>
               </div>
             </div>

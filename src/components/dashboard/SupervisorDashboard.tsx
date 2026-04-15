@@ -8,6 +8,9 @@ import {
   MdAssignment,
   MdWarning,
   MdCheckCircle,
+  MdFactory,
+  MdReceipt,
+  MdAttachFile,
 } from "react-icons/md";
 import {
   BarChart,
@@ -48,6 +51,8 @@ export default function SupervisorDashboard() {
   const assignedFarms = data?.assigned_farms;
   const tasks = data?.tasks;
   const charts = data?.charts;
+  const farmKgs = data?.farm_kgs;
+  const factoryKgs = data?.factory_kgs;
 
   if (isLoading) {
     return (
@@ -190,9 +195,7 @@ export default function SupervisorDashboard() {
                         <td className="px-3 py-1.5 text-gray-900">
                           {t.worker.name}
                         </td>
-                        <td className="px-3 py-1.5 text-gray-500">
-                          {t.farm}
-                        </td>
+                        <td className="px-3 py-1.5 text-gray-500">{t.farm}</td>
                         <td className="px-3 py-1.5 text-gray-500">{t.date}</td>
                         <td className="px-3 py-1.5 text-gray-500">
                           {t.activity}
@@ -238,9 +241,7 @@ export default function SupervisorDashboard() {
                         <td className="px-3 py-1.5 text-gray-900">
                           {t.worker.name}
                         </td>
-                        <td className="px-3 py-1.5 text-gray-500">
-                          {t.farm}
-                        </td>
+                        <td className="px-3 py-1.5 text-gray-500">{t.farm}</td>
                         <td className="px-3 py-1.5 text-gray-500">{t.date}</td>
                         <td className="px-3 py-1.5 text-gray-500">
                           {t.activity}
@@ -254,6 +255,156 @@ export default function SupervisorDashboard() {
           </div>
         </div>
       )}
+
+      {/* Farm KGs Table - Used for Payments */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <MdScale className="text-emerald-500" />
+          Farm KGs (for Payments)
+        </h3>
+        {!farmKgs || farmKgs.length === 0 ? (
+          <p className="text-sm text-gray-500">No farm KG records yet.</p>
+        ) : (
+          <div className="overflow-x-auto max-h-80 overflow-y-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Farmer
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Farm
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Worker
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Activity
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Date
+                  </th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
+                    KGs
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {farmKgs.map((record) => (
+                  <tr key={record.id}>
+                    <td className="px-3 py-1.5 text-gray-900 font-medium">
+                      {record.farmer.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500">
+                      {record.farm.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500">
+                      {record.worker.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500">
+                      {record.activity}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500">{record.date}</td>
+                    <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">
+                      {record.kgs.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Factory / Weighing KGs Table - With Discrepancy Handling */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <MdFactory className="text-blue-500" />
+          Factory / Weighing Point KGs
+        </h3>
+        {!factoryKgs || factoryKgs.length === 0 ? (
+          <p className="text-sm text-gray-500">No factory KG records yet.</p>
+        ) : (
+          <div className="overflow-x-auto max-h-80 overflow-y-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Factory
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Farm
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Date
+                  </th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
+                    Farm KGs
+                  </th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
+                    Factory KGs
+                  </th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
+                    Discrepancy
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                    Reason
+                  </th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">
+                    Receipt
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {factoryKgs.map((record) => (
+                  <tr key={record.id}>
+                    <td className="px-3 py-1.5 text-gray-900 font-medium">
+                      {record.factory.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500">
+                      {record.farm.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500">{record.date}</td>
+                    <td className="px-3 py-1.5 text-right text-gray-900">
+                      {record.farm_kgs.toLocaleString()}
+                    </td>
+                    <td className="px-3 py-1.5 text-right text-gray-900">
+                      {record.factory_kgs.toLocaleString()}
+                    </td>
+                    <td className="px-3 py-1.5 text-right">
+                      <span
+                        className={`font-medium ${record.discrepancy !== 0 ? "text-red-600" : "text-green-600"}`}
+                      >
+                        {record.discrepancy !== 0
+                          ? `${record.discrepancy > 0 ? "+" : ""}${record.discrepancy.toLocaleString()}`
+                          : "0"}
+                      </span>
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-500 text-xs">
+                      {record.discrepancy_reason || "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-center">
+                      {record.receipt_url ? (
+                        <a
+                          href={record.receipt_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          <MdReceipt className="w-3.5 h-3.5" />
+                          View
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Assigned Farms */}
       {assignedFarms && assignedFarms.length > 0 && (
@@ -348,7 +499,13 @@ export default function SupervisorDashboard() {
               Worker Performance
             </h3>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={charts.worker_performance.map((w) => ({ name: w.worker.name, total_kgs: w.total_kgs, total_jobs: w.total_jobs }))}>
+              <BarChart
+                data={charts.worker_performance.map((w) => ({
+                  name: w.worker.name,
+                  total_kgs: w.total_kgs,
+                  total_jobs: w.total_jobs,
+                }))}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 11 }} />

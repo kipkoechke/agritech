@@ -9,9 +9,10 @@ import {
   MdPerson,
   MdAdd,
   MdCalendarToday,
+  MdEdit,
+  MdInfo,
 } from "react-icons/md";
 import { FiTrash } from "react-icons/fi";
-import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
@@ -63,240 +64,290 @@ export default function WorkGroupDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-primary rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-500">Loading work group…</p>
+        </div>
       </div>
     );
   }
 
   if (!group) {
     return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-          Work group not found
+      <div className="min-h-screen p-6 bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <MdInfo className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <h2 className="text-base font-semibold text-gray-800 mb-1">
+            Work group not found
+          </h2>
+          <Link
+            href="/work-groups"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <MdArrowBack className="w-4 h-4" /> Back to Work Groups
+          </Link>
         </div>
       </div>
     );
   }
 
+  const createdDate = new Date(group.created_at).toLocaleDateString("en-KE", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <Modal>
-      <div className="min-h-screen p-4">
-        <div className="mb-4">
-          <Link
-            href="/work-groups"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <MdArrowBack className="w-5 h-5" />
-            Back to Work Groups
-          </Link>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <MdGroup className="w-6 h-6 text-emerald-600" />
+      <div className="min-h-screen bg-gray-50">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link
+                href="/work-groups"
+                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors flex-shrink-0"
+              >
+                <MdArrowBack className="w-5 h-5" />
+              </Link>
+              <div className="min-w-0">
+                <h1 className="text-base font-bold text-gray-900 truncate">
                   {group.name}
                 </h1>
-                <p className="text-gray-500 mt-1">
-                  {group.description || "No description"}
-                </p>
-              </div>
-              <Button type="small" to={`/work-groups/${id}/edit`}>
-                Edit
-              </Button>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="flex items-center gap-2">
-                <MdPerson className="w-4 h-4 text-gray-400 shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">Owner</p>
-                  <p className="text-sm text-gray-900 font-medium">
-                    {group.owner?.name || "—"}
+                {group.description && (
+                  <p className="text-[11px] text-gray-400 leading-none mt-0.5 truncate">
+                    {group.description}
                   </p>
-                </div>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <MdGroup className="w-4 h-4 text-gray-400 shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">Status</p>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      group.active
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {group.active ? "Active" : "Inactive"}
+            </div>
+            <Link
+              href={`/work-groups/${id}/edit`}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors flex-shrink-0"
+            >
+              <MdEdit className="w-3.5 h-3.5" />
+              Edit
+            </Link>
+          </div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+          {/* Details Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+              <MdGroup className="w-4 h-4 text-primary" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                Work Group Details
+              </h2>
+            </div>
+            <div className="px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                  Name
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <MdGroup className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-800">
+                    {group.name}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <MdCalendarToday className="w-4 h-4 text-gray-400 shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">Created</p>
-                  <p className="text-sm text-gray-900 font-medium">
-                    {new Date(group.created_at).toLocaleDateString()}
-                  </p>
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                  Owner
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <MdPerson className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-800">
+                    {group.owner?.name || "—"}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                  Status
+                </span>
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold w-fit ${
+                    group.active
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {group.active ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                  Created
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <MdCalendarToday className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-800">
+                    {createdDate}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Members Section */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <MdPerson className="w-5 h-5 text-gray-500" />
-              Members ({members.length})
-            </h2>
-          </div>
-
-          {/* Add Members */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 bg-gray-50">
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <SearchableSelect
-                  label="Add Members"
-                  options={availableUsers}
-                  value={selectedMemberIds[0] || ""}
-                  onChange={(val) => {
-                    if (val && !selectedMemberIds.includes(val)) {
-                      setSelectedMemberIds((prev) => [...prev, val]);
-                    }
-                  }}
-                  placeholder="Select workers to add"
-                  isLoading={workersLoading}
-                />
-                {selectedMemberIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {selectedMemberIds.map((uid) => {
-                      const worker = workersData?.data?.find(
-                        (w) => w.id === uid,
-                      );
-                      return (
-                        <span
-                          key={uid}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs"
-                        >
-                          {worker?.name || uid}
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedMemberIds((prev) =>
-                                prev.filter((id) => id !== uid),
-                              )
-                            }
-                            className="hover:text-emerald-600"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
+          {/* Members Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MdPerson className="w-4 h-4 text-primary" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Members
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                  {members.length}
+                </span>
               </div>
-              <button
-                onClick={handleAddMembers}
-                disabled={
-                  selectedMemberIds.length === 0 || addMembers.isPending
-                }
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1 shrink-0"
-              >
-                <MdAdd className="w-4 h-4" />
-                {addMembers.isPending ? "Adding..." : "Add"}
-              </button>
             </div>
-          </div>
 
-          {/* Members Table */}
-          {membersLoading && (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600" />
-            </div>
-          )}
-
-          {!membersLoading && members.length === 0 && (
-            <div className="p-8 text-center">
-              <MdPerson className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-500">No members in this work group yet</p>
-            </div>
-          )}
-
-          {members.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Phone
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Added
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {members.map((member) => (
-                    <tr key={member.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {member.farm_worker?.name || "—"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {member.farm_worker?.phone || "—"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            member.active
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {member.active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {new Date(member.created_at).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <Modal.Open opens="delete-member">
-                          <button
-                            onClick={() => setSelectedMember(member)}
-                            className="text-red-500 hover:text-red-700 p-1"
+            {/* Add Members */}
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <SearchableSelect
+                    label="Add Members"
+                    options={availableUsers}
+                    value={selectedMemberIds[0] || ""}
+                    onChange={(val) => {
+                      if (val && !selectedMemberIds.includes(val)) {
+                        setSelectedMemberIds((prev) => [...prev, val]);
+                      }
+                    }}
+                    placeholder="Search and select workers…"
+                    isLoading={workersLoading}
+                  />
+                  {selectedMemberIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {selectedMemberIds.map((uid) => {
+                        const worker = workersData?.data?.find(
+                          (w) => w.id === uid,
+                        );
+                        return (
+                          <span
+                            key={uid}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
                           >
-                            <FiTrash className="h-4 w-4" />
-                          </button>
-                        </Modal.Open>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                            {worker?.name || uid}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectedMemberIds((prev) =>
+                                  prev.filter((i) => i !== uid),
+                                )
+                              }
+                              className="hover:text-primary/70 ml-0.5"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={handleAddMembers}
+                  disabled={
+                    selectedMemberIds.length === 0 || addMembers.isPending
+                  }
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors flex-shrink-0"
+                >
+                  <MdAdd className="w-3.5 h-3.5" />
+                  {addMembers.isPending ? "Adding…" : "Add"}
+                </button>
+              </div>
             </div>
-          )}
+
+            {/* Members List */}
+            {membersLoading && (
+              <div className="flex justify-center items-center py-10">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-primary rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!membersLoading && members.length === 0 && (
+              <div className="py-10 text-center">
+                <MdPerson className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">
+                  No members yet. Add workers above.
+                </p>
+              </div>
+            )}
+
+            {members.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                        Phone
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                        Added
+                      </th>
+                      <th className="px-6 py-3 text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {members.map((member) => (
+                      <tr key={member.id} className="hover:bg-gray-50/50">
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm font-medium text-gray-900">
+                            {member.farm_worker?.name || "—"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm text-gray-500">
+                            {member.farm_worker?.phone || "—"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                              member.active
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {member.active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm text-gray-500">
+                            {new Date(member.created_at).toLocaleDateString()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5 text-right">
+                          <Modal.Open opens="delete-member">
+                            <button
+                              onClick={() => setSelectedMember(member)}
+                              className="inline-flex items-center justify-center p-1.5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
+                            >
+                              <FiTrash className="h-3.5 w-3.5" />
+                            </button>
+                          </Modal.Open>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

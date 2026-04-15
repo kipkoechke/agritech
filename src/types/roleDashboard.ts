@@ -267,11 +267,51 @@ export interface SupervisorDashboardCharts {
   worker_performance: WorkerPerformance[];
 }
 
+export interface FarmKgRecord {
+  id: string;
+  farmer: {
+    id: string;
+    name: string;
+  };
+  farm: {
+    id: string;
+    name: string;
+  };
+  worker: {
+    id: string;
+    name: string;
+  };
+  date: string;
+  kgs: number;
+  activity: string;
+}
+
+export interface FactoryKgRecord {
+  id: string;
+  factory: {
+    id: string;
+    name: string;
+  };
+  weighing_point?: string;
+  farm: {
+    id: string;
+    name: string;
+  };
+  date: string;
+  farm_kgs: number;
+  factory_kgs: number;
+  discrepancy: number;
+  discrepancy_reason?: string;
+  receipt_url?: string;
+}
+
 export interface SupervisorDashboardResponse {
   summary: SupervisorDashboardSummary;
   assigned_farms: AssignedFarm[];
   tasks: SupervisorTasks;
   charts: SupervisorDashboardCharts;
+  farm_kgs?: FarmKgRecord[];
+  factory_kgs?: FactoryKgRecord[];
   date_range: { from: string; to: string };
 }
 

@@ -10,6 +10,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateWorkGroup } from "@/hooks/useWorkGroup";
 import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useFarms } from "@/hooks/useFarm";
 import { useAuth, useIsFarmer } from "@/hooks/useAuth";
 import type { CreateWorkGroupData } from "@/types/workGroup";
 
@@ -26,6 +27,9 @@ export default function NewWorkGroupPage() {
   const { data: usersData, isLoading: usersLoading } = useHrisUsers(
     !isFarmer ? {} : (undefined as any),
   );
+  const { data: farmsData, isLoading: farmsLoading } = useFarms({
+    per_page: 100,
+  });
 
   const {
     register,
@@ -37,6 +41,8 @@ export default function NewWorkGroupPage() {
 
   const [ownerId, setOwnerId] = useState("");
   const [active, setActive] = useState(true);
+  const [farmId, setFarmId] = useState("");
+  const [date, setDate] = useState("");
 
   const ownerOptions =
     usersData?.data?.map((u) => ({
@@ -45,12 +51,20 @@ export default function NewWorkGroupPage() {
       description: u.phone,
     })) || [];
 
+  const farmOptions =
+    farmsData?.data?.map((f) => ({
+      value: f.id,
+      label: f.name,
+    })) || [];
+
   const onSubmit = (data: WorkGroupFormData) => {
     const payload: CreateWorkGroupData = {
       name: data.name,
       description: data.description,
       active,
       owner_id: !isFarmer ? ownerId : user?.id || "",
+      farm_id: farmId || undefined,
+      date: date || undefined,
     };
 
     createWorkGroup.mutate(payload, {
@@ -109,6 +123,29 @@ export default function NewWorkGroupPage() {
                 required
               />
             )}
+
+            <SearchableSelect
+              label="Linked Farm"
+              options={farmOptions}
+              value={farmId}
+              onChange={setFarmId}
+              placeholder="Select farm"
+              isLoading={farmsLoading}
+              required
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="border-gray-300 focus:border-emerald-500 text-gray-900 focus:ring-emerald-500 hover:border-gray-400 w-full rounded-lg border px-4 py-3 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                required
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

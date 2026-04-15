@@ -15,7 +15,8 @@ import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
 import PageHeader from "@/components/common/PageHeader";
-import { useFarms, useDeleteFarm, useAssignSupervisor } from "@/hooks/useFarm";
+import { useFarms, useMineFarms, useDeleteFarm, useAssignSupervisor } from "@/hooks/useFarm";
+import { useIsFarmer } from "@/hooks/useAuth";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useProducts } from "@/hooks/useProduct";
 import { useZones } from "@/hooks/useZone";
@@ -31,11 +32,23 @@ export default function FarmsPage() {
   const [assignFarm, setAssignFarm] = useState<Farm | null>(null);
   const [supervisorId, setSupervisorId] = useState("");
 
-  const { data, isLoading, error } = useFarms({
+  const isFarmer = useIsFarmer();
+  const farmsParams = {
     page,
     zone_id: zoneFilter || undefined,
     product_id: productFilter || undefined,
-  });
+  };
+  const { data: allFarmsData, isLoading: allFarmsLoading, error: allFarmsError } = useFarms(
+    farmsParams,
+    { enabled: !isFarmer },
+  );
+  const { data: mineFarmsData, isLoading: mineFarmsLoading, error: mineFarmsError } = useMineFarms(
+    farmsParams,
+    { enabled: isFarmer },
+  );
+  const data = isFarmer ? mineFarmsData : allFarmsData;
+  const isLoading = isFarmer ? mineFarmsLoading : allFarmsLoading;
+  const error = isFarmer ? mineFarmsError : allFarmsError;
   const { data: productsData } = useProducts();
   const { data: zonesData } = useZones();
   const deleteFarm = useDeleteFarm();
@@ -151,8 +164,8 @@ export default function FarmsPage() {
         {farms.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50/60">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
@@ -161,7 +174,7 @@ export default function FarmsPage() {
                       Code
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Size (Ha)
+                      Size (Acres)
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Zone
@@ -230,44 +243,42 @@ export default function FarmsPage() {
                           <Tooltip content="View farm details">
                             <button
                               onClick={() => router.push(`/farms/${farm.id}`)}
-                              className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
+                              className="inline-flex items-center justify-center p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                             >
-                              <FiEye className="h-4 w-4" />
+                              <FiEye className="h-3.5 w-3.5" />
                             </button>
                           </Tooltip>
                           <Tooltip content="Edit farm">
                             <button
-                              onClick={() =>
-                                router.push(`/farms/${farm.id}/edit`)
-                              }
-                              className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                              onClick={() => router.push(`/farms/${farm.id}/edit`)}
+                              className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
                             >
-                              <FiEdit className="h-4 w-4" />
+                              <FiEdit className="h-3.5 w-3.5" />
                             </button>
                           </Tooltip>
-                          <Modal.Open opens="assign-supervisor">
-                            <Tooltip content="Assign a supervisor to this farm">
+                          <Tooltip content="Assign a supervisor to this farm">
+                            <Modal.Open opens="assign-supervisor">
                               <button
                                 onClick={() => {
                                   setAssignFarm(farm);
                                   setSupervisorId(farm.supervisor?.id || "");
                                 }}
-                                className="p-1.5 text-emerald-500/70 bg-emerald-50 hover:text-emerald-600 hover:bg-emerald-100 rounded-lg transition-all"
+                                className="inline-flex items-center justify-center p-1.5 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors"
                               >
-                                <MdSupervisorAccount className="h-4 w-4" />
+                                <MdSupervisorAccount className="h-3.5 w-3.5" />
                               </button>
-                            </Tooltip>
-                          </Modal.Open>
-                          <Modal.Open opens="delete-farm">
-                            <Tooltip content="Delete farm">
+                            </Modal.Open>
+                          </Tooltip>
+                          <Tooltip content="Delete farm">
+                            <Modal.Open opens="delete-farm">
                               <button
                                 onClick={() => setSelectedFarm(farm)}
-                                className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                                className="inline-flex items-center justify-center p-1.5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
                               >
-                                <FiTrash className="h-4 w-4" />
+                                <FiTrash className="h-3.5 w-3.5" />
                               </button>
-                            </Tooltip>
-                          </Modal.Open>
+                            </Modal.Open>
+                          </Tooltip>
                         </div>
                       </td>
                     </tr>
@@ -277,25 +288,25 @@ export default function FarmsPage() {
             </div>
 
             {pagination && pagination.total_pages > 1 && (
-              <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-                <p className="text-sm text-gray-500">
-                  Page {pagination.current_page} of {pagination.total_pages} (
-                  {pagination.total_items} items)
+              <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <p className="text-xs text-gray-500">
+                  Page {pagination.current_page} of {pagination.total_pages}{" "}
+                  &nbsp;·&nbsp; {pagination.total_items} items
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={pagination.current_page <= 1}
-                    className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                   >
-                    Previous
+                    ← Prev
                   </button>
                   <button
                     onClick={() => setPage((p) => p + 1)}
                     disabled={!pagination.next_page}
-                    className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                   >
-                    Next
+                    Next →
                   </button>
                 </div>
               </div>
@@ -350,6 +361,7 @@ export default function FarmsPage() {
                         onSuccess: () => {
                           setAssignFarm(null);
                           setSupervisorId("");
+                          router.push(`/farms/${assignFarm.id}`);
                         },
                       },
                     );

@@ -32,7 +32,9 @@ import {
   useSchedules,
   useDeleteSchedule,
   useCancelSchedule,
+  useApproveSchedule,
 } from "@/hooks/useSchedule";
+import { useIsFarmer } from "@/hooks/useAuth";
 import type { Schedule } from "@/types/schedule";
 
 // Activity color mapping
@@ -515,6 +517,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
 
 export default function SchedulesPage() {
   const router = useRouter();
+  const isFarmer = useIsFarmer();
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -532,6 +535,7 @@ export default function SchedulesPage() {
   });
   const deleteSchedule = useDeleteSchedule();
   const cancelSchedule = useCancelSchedule();
+  const approveSchedule = useApproveSchedule();
 
   const schedules = data?.data || [];
   const pagination = data?.pagination;
@@ -578,14 +582,16 @@ export default function SchedulesPage() {
               ) : undefined
             }
             action={
-              <Button
-                type="small"
-                to="/schedules/new"
-                className="flex items-center gap-1 bg-primary hover:bg-primary/90"
-              >
-                <MdAdd className="w-4 h-4" />
-                Add Schedule
-              </Button>
+              !isFarmer ? (
+                <Button
+                  type="small"
+                  to="/schedules/new"
+                  className="flex items-center gap-1 bg-primary hover:bg-primary/90"
+                >
+                  <MdAdd className="w-4 h-4" />
+                  Add Schedule
+                </Button>
+              ) : undefined
             }
           />
 
@@ -653,8 +659,8 @@ export default function SchedulesPage() {
               {schedules.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gradient-to-r from-gray-50 to-white">
+                    <table className="min-w-full divide-y divide-gray-100">
+                      <thead className="bg-gradient-to-r from-gray-50/80 to-white">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             Reference
@@ -754,47 +760,66 @@ export default function SchedulesPage() {
                                       onClick={() =>
                                         router.push(`/schedules/${schedule.id}`)
                                       }
-                                      className="p-1.5 text-primary/70 bg-primary/5 hover:text-primary hover:bg-primary/15 rounded-lg transition-all"
+                                      className="inline-flex items-center justify-center p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                                     >
-                                      <FiEye className="h-4 w-4" />
+                                      <FiEye className="h-3.5 w-3.5" />
                                     </button>
                                   </Tooltip>
-                                  <Tooltip content="Edit schedule">
-                                    <button
-                                      onClick={() =>
-                                        router.push(
-                                          `/schedules/${schedule.id}/edit`,
-                                        )
-                                      }
-                                      className="p-1.5 text-blue-500/70 bg-blue-50 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
-                                    >
-                                      <FiEdit className="h-4 w-4" />
-                                    </button>
-                                  </Tooltip>
-                                  {schedule.status !== "cancelled" && (
-                                    <Tooltip content="Cancel this schedule">
+                                  {isFarmer &&
+                                    schedule.status !== "cancelled" &&
+                                    schedule.status !== "approved" && (
+                                      <Tooltip content="Approve schedule">
+                                        <button
+                                          onClick={() =>
+                                            approveSchedule.mutate(schedule.id)
+                                          }
+                                          className="inline-flex items-center justify-center p-1.5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
+                                        >
+                                          <MdCheckCircle className="h-3.5 w-3.5" />
+                                        </button>
+                                      </Tooltip>
+                                    )}
+                                  {!isFarmer && (
+                                    <Tooltip content="Edit schedule">
                                       <button
                                         onClick={() =>
-                                          cancelSchedule.mutate(schedule.id)
+                                          router.push(
+                                            `/schedules/${schedule.id}/edit`,
+                                          )
                                         }
-                                        className="p-1.5 text-orange-400/70 bg-orange-50 hover:text-orange-600 hover:bg-orange-100 rounded-lg transition-all"
+                                        className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
                                       >
-                                        <MdCancel className="h-4 w-4" />
+                                        <FiEdit className="h-3.5 w-3.5" />
                                       </button>
                                     </Tooltip>
                                   )}
-                                  <Modal.Open opens="delete-schedule">
+                                  {!isFarmer &&
+                                    schedule.status !== "cancelled" && (
+                                      <Tooltip content="Cancel this schedule">
+                                        <button
+                                          onClick={() =>
+                                            cancelSchedule.mutate(schedule.id)
+                                          }
+                                          className="inline-flex items-center justify-center p-1.5 rounded-full bg-orange-100 text-orange-500 hover:bg-orange-200 transition-colors"
+                                        >
+                                          <MdCancel className="h-3.5 w-3.5" />
+                                        </button>
+                                      </Tooltip>
+                                    )}
+                                  {!isFarmer && (
                                     <Tooltip content="Delete schedule permanently">
-                                      <button
-                                        onClick={() =>
-                                          setSelectedSchedule(schedule)
-                                        }
-                                        className="p-1.5 text-red-400/70 bg-red-50 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
-                                      >
-                                        <FiTrash className="h-4 w-4" />
-                                      </button>
+                                      <Modal.Open opens="delete-schedule">
+                                        <button
+                                          onClick={() =>
+                                            setSelectedSchedule(schedule)
+                                          }
+                                          className="inline-flex items-center justify-center p-1.5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
+                                        >
+                                          <FiTrash className="h-3.5 w-3.5" />
+                                        </button>
+                                      </Modal.Open>
                                     </Tooltip>
-                                  </Modal.Open>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -805,26 +830,26 @@ export default function SchedulesPage() {
                   </div>
 
                   {pagination && pagination.total_pages > 1 && (
-                    <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between bg-gray-50">
-                      <p className="text-sm text-gray-500">
+                    <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+                      <p className="text-xs text-gray-500">
                         Page {pagination.current_page} of{" "}
-                        {pagination.total_pages} ({pagination.total_items}{" "}
-                        items)
+                        {pagination.total_pages} &nbsp;·&nbsp;{" "}
+                        {pagination.total_items} items
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <button
                           onClick={() => setPage((p) => Math.max(1, p - 1))}
                           disabled={pagination.current_page <= 1}
-                          className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                          className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                         >
-                          Previous
+                          ← Prev
                         </button>
                         <button
                           onClick={() => setPage((p) => p + 1)}
                           disabled={!pagination.next_page}
-                          className="px-3 py-1 text-sm font-medium text-white bg-primary rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/80 transition-colors"
+                          className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                         >
-                          Next
+                          Next →
                         </button>
                       </div>
                     </div>

@@ -11,6 +11,8 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateWorker } from "@/hooks/useWorkers";
 import { useZones } from "@/hooks/useZone";
+import { useFactories } from "@/hooks/useFactory";
+import { useClusters } from "@/hooks/useCluster";
 
 interface WorkerFormData {
   name: string;
@@ -21,6 +23,12 @@ export default function CreateWorkerPage() {
   const router = useRouter();
   const createWorker = useCreateWorker();
   const { data: zonesData, isLoading: isLoadingZones } = useZones();
+  const { data: factoriesData, isLoading: isLoadingFactories } = useFactories({
+    per_page: 100,
+  });
+  const { data: clustersData, isLoading: isLoadingClusters } = useClusters({
+    per_page: 100,
+  });
 
   const zonesList = Array.isArray(zonesData) ? zonesData : [];
 
@@ -34,11 +42,25 @@ export default function CreateWorkerPage() {
 
   const [pin, setPin] = useState("");
   const [zoneId, setZoneId] = useState("");
+  const [factoryId, setFactoryId] = useState("");
+  const [clusterId, setClusterId] = useState("");
 
   const zoneOptions = zonesList.map((zone: any) => ({
     value: zone.id,
     label: zone.name,
   }));
+
+  const factoryOptions =
+    factoriesData?.data?.map((f) => ({
+      value: f.id,
+      label: `${f.name} (${f.code})`,
+    })) || [];
+
+  const clusterOptions =
+    clustersData?.data?.map((c) => ({
+      value: c.id,
+      label: c.name,
+    })) || [];
 
   const onSubmit = (data: WorkerFormData) => {
     if (pin.length !== 4) return;
@@ -48,6 +70,8 @@ export default function CreateWorkerPage() {
         phone: data.phone,
         pin,
         zone_id: zoneId || undefined,
+        factory_id: factoryId || undefined,
+        cluster_id: clusterId || undefined,
       } as any,
       { onSuccess: () => router.push("/farm-workers") },
     );
@@ -103,6 +127,30 @@ export default function CreateWorkerPage() {
               required
             />
 
+            <SearchableSelect
+              label="Factory"
+              options={factoryOptions}
+              value={factoryId}
+              onChange={setFactoryId}
+              placeholder={
+                isLoadingFactories ? "Loading factories..." : "Select Factory"
+              }
+              isLoading={isLoadingFactories}
+              required
+            />
+
+            <SearchableSelect
+              label="Cluster"
+              options={clusterOptions}
+              value={clusterId}
+              onChange={setClusterId}
+              placeholder={
+                isLoadingClusters ? "Loading clusters..." : "Select Cluster"
+              }
+              isLoading={isLoadingClusters}
+              required
+            />
+
             <div>
               <label className="text-gray-700 mb-2 flex text-xs sm:text-sm font-semibold">
                 PIN (4 digits) <span className="ml-1 text-red-500">*</span>
@@ -132,7 +180,13 @@ export default function CreateWorkerPage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={createWorker.isPending || pin.length !== 4 || !zoneId}
+                disabled={
+                  createWorker.isPending ||
+                  pin.length !== 4 ||
+                  !zoneId ||
+                  !factoryId ||
+                  !clusterId
+                }
               >
                 {createWorker.isPending ? "Creating..." : "Create Worker"}
               </Button>

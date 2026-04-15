@@ -10,6 +10,7 @@ import {
   MdBookOnline,
   MdTrendingUp,
   MdScale,
+  MdSupervisorAccount,
 } from "react-icons/md";
 import {
   BarChart,
@@ -54,6 +55,9 @@ export default function AdminDashboard() {
   const [toDate, setToDate] = useState(defaults.toDate);
   const [zoneId, setZoneId] = useState("");
   const [factoryId, setFactoryId] = useState("");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "farmers" | "workers" | "supervisors"
+  >("overview");
 
   const { data, isLoading, error } = useAdminDashboard({
     from_date: fromDate,
@@ -162,35 +166,15 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Primary Cards - Always Visible (changing transactions) */}
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           <StatCard
-            icon={MdAgriculture}
-            label="Farms"
-            value={summary.total_farms}
+            icon={MdScale}
+            label="Total Kgs"
+            value={summary.total_kgs.toLocaleString()}
+            color="text-emerald-600"
           />
-          <StatCard
-            icon={MdPeople}
-            label="Workers"
-            value={summary.total_workers}
-          />
-          <StatCard
-            icon={MdPeople}
-            label="Farmers"
-            value={summary.total_farmers}
-          />
-          <StatCard
-            icon={MdPeople}
-            label="Supervisors"
-            value={summary.total_supervisors}
-          />
-          <StatCard
-            icon={MdFactory}
-            label="Factories"
-            value={summary.total_factories}
-          />
-          <StatCard icon={MdMap} label="Zones" value={summary.total_zones} />
           <StatCard
             icon={MdBookOnline}
             label="Total Bookings"
@@ -208,24 +192,192 @@ export default function AdminDashboard() {
             value={summary.pending_bookings}
             color="text-yellow-600"
           />
-          <StatCard
-            icon={MdScale}
-            label="Total Kgs"
-            value={summary.total_kgs.toLocaleString()}
-            color="text-emerald-600"
-          />
-          <StatCard
-            icon={MdFactory}
-            label="Factory Qty"
-            value={summary.factory_qty}
-          />
-          <StatCard
-            icon={MdTrendingUp}
-            label="Activities"
-            value={summary.total_activities}
-          />
         </div>
       )}
+
+      {/* Tabs - Secondary Views (workforce data) */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="border-b border-gray-200">
+          <nav className="flex -mb-px">
+            {[
+              { key: "overview" as const, label: "Overview" },
+              { key: "farmers" as const, label: "Farmers", icon: MdPeople },
+              {
+                key: "workers" as const,
+                label: "Farm Workers",
+                icon: MdPeople,
+              },
+              {
+                key: "supervisors" as const,
+                label: "Supervisors",
+                icon: MdSupervisorAccount,
+              },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? "border-emerald-500 text-emerald-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="p-4">
+          {activeTab === "overview" && summary && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              <StatCard
+                icon={MdAgriculture}
+                label="Farms"
+                value={summary.total_farms}
+              />
+              <StatCard
+                icon={MdFactory}
+                label="Factories"
+                value={summary.total_factories}
+              />
+              <StatCard
+                icon={MdMap}
+                label="Zones"
+                value={summary.total_zones}
+              />
+              <StatCard
+                icon={MdFactory}
+                label="Factory Qty"
+                value={summary.factory_qty}
+              />
+              <StatCard
+                icon={MdTrendingUp}
+                label="Activities"
+                value={summary.total_activities}
+              />
+            </div>
+          )}
+
+          {activeTab === "farmers" && summary && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <MdPeople className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Total Farmers: {summary.total_farmers}
+                </h3>
+              </div>
+              {charts?.top_farms && charts.top_farms.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                          #
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                          Farm
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
+                          Kgs
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
+                          Jobs
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {charts.top_farms.map((f, i) => (
+                        <tr key={f.farm.id + i}>
+                          <td className="px-4 py-2 text-gray-500">{i + 1}</td>
+                          <td className="px-4 py-2 font-medium text-gray-900">
+                            {f.farm.name}
+                          </td>
+                          <td className="px-4 py-2 text-right text-emerald-600 font-medium">
+                            {f.total_kgs.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900">
+                            {f.jobs}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "workers" && summary && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <MdPeople className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Total Workers: {summary.total_workers}
+                </h3>
+              </div>
+              {charts?.top_workers && charts.top_workers.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                          #
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                          Worker
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
+                          Phone
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
+                          Kgs
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
+                          Jobs
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {charts.top_workers.map((w, i) => (
+                        <tr key={w.worker.id + i}>
+                          <td className="px-4 py-2 text-gray-500">{i + 1}</td>
+                          <td className="px-4 py-2 font-medium text-gray-900">
+                            {w.worker.name}
+                          </td>
+                          <td className="px-4 py-2 text-gray-500">
+                            {w.worker.phone}
+                          </td>
+                          <td className="px-4 py-2 text-right text-emerald-600 font-medium">
+                            {w.total_kgs.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-900">
+                            {w.jobs}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "supervisors" && summary && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <MdSupervisorAccount className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Total Supervisors: {summary.total_supervisors}
+                </h3>
+              </div>
+              <p className="text-sm text-gray-500">
+                Supervisor performance data is available in the charts below.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Daily Bookings Chart */}
@@ -360,102 +512,6 @@ export default function AdminDashboard() {
             </div>
           )}
       </div>
-
-      {/* Top Workers */}
-      {charts?.top_workers && charts.top_workers.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">
-            Top Workers
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    #
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    Worker
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    Phone
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Kgs
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Jobs
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {charts.top_workers.map((w, i) => (
-                  <tr key={w.worker.id + i}>
-                    <td className="px-4 py-2 text-gray-500">{i + 1}</td>
-                    <td className="px-4 py-2 font-medium text-gray-900">
-                      {w.worker.name}
-                    </td>
-                    <td className="px-4 py-2 text-gray-500">
-                      {w.worker.phone}
-                    </td>
-                    <td className="px-4 py-2 text-right text-emerald-600 font-medium">
-                      {w.total_kgs.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-2 text-right text-gray-900">
-                      {w.jobs}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Top Farms */}
-      {charts?.top_farms && charts.top_farms.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">
-            Top Farms
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    #
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                    Farm
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Kgs
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                    Jobs
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {charts.top_farms.map((f, i) => (
-                  <tr key={f.farm.id + i}>
-                    <td className="px-4 py-2 text-gray-500">{i + 1}</td>
-                    <td className="px-4 py-2 font-medium text-gray-900">
-                      {f.farm.name}
-                    </td>
-                    <td className="px-4 py-2 text-right text-emerald-600 font-medium">
-                      {f.total_kgs.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-2 text-right text-gray-900">
-                      {f.jobs}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

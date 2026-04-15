@@ -65,11 +65,18 @@ export const deleteSchedule = async (
   return response.data;
 };
 
-export const cancelSchedule = async (
+export const cancelSchedule = async (id: string): Promise<ScheduleResponse> => {
+  const response = await axiosInstance.post<ScheduleResponse>(
+    `/schedules/${id}/cancel`,
+  );
+  return response.data;
+};
+
+export const approveSchedule = async (
   id: string,
 ): Promise<ScheduleResponse> => {
   const response = await axiosInstance.post<ScheduleResponse>(
-    `/schedules/${id}/cancel`,
+    `/schedules/${id}/approve`,
   );
   return response.data;
 };

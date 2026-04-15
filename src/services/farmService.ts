@@ -24,6 +24,13 @@ export const getFarms = async (
   return response.data;
 };
 
+export const getMineFarms = async (
+  params: FarmsParams = {},
+): Promise<FarmsResponse> => {
+  const response = await axiosInstance.get<FarmsResponse>("/farms/mine", { params });
+  return response.data;
+};
+
 export const getFarm = async (id: string): Promise<FarmResponse> => {
   const response = await axiosInstance.get<FarmResponse>(`/farms/${id}`);
   return response.data;
@@ -58,7 +65,7 @@ export const assignSupervisor = async (
   id: string,
   supervisor_id: string,
 ): Promise<FarmResponse> => {
-  const response = await axiosInstance.patch<FarmResponse>(
+  const response = await axiosInstance.post<FarmResponse>(
     `/farms/${id}/supervisor`,
     { supervisor_id },
   );

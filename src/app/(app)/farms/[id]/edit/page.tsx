@@ -174,7 +174,7 @@ export default function EditFarmPage() {
             />
 
             <InputField
-              label="Size (Ha)"
+              label="Size (Acres)"
               type="number"
               placeholder="Enter farm size"
               register={register("size", { required: "Size is required" })}

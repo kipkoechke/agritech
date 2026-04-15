@@ -7,6 +7,7 @@ import {
   updateSchedule,
   deleteSchedule,
   cancelSchedule,
+  approveSchedule,
   SchedulesParams,
 } from "@/services/scheduleService";
 import type { CreateScheduleData, UpdateScheduleData } from "@/types/schedule";
@@ -91,6 +92,24 @@ export const useCancelSchedule = () => {
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to cancel schedule"));
+    },
+  });
+};
+
+export const useApproveSchedule = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => approveSchedule(id),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({
+        queryKey: ["schedules", variables],
+      });
+      toast.success("Schedule approved successfully");
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to approve schedule"));
     },
   });
 };

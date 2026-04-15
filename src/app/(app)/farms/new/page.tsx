@@ -10,6 +10,8 @@ import { InputField } from "@/components/common/InputField";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateFarm } from "@/hooks/useFarm";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsFarmer } from "@/hooks/useAuth";
 import { useZones } from "@/hooks/useZone";
 import { useProducts } from "@/hooks/useProduct";
 import { useHrisUsers } from "@/hooks/useHrisUser";
@@ -39,10 +41,13 @@ interface FarmFormData {
 export default function NewFarmPage() {
   const router = useRouter();
   const createFarm = useCreateFarm();
+  const isFarmer = useIsFarmer();
+  const { user } = useAuth();
   const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: productsData, isLoading: productsLoading } = useProducts();
   const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
     role: "farmer",
+    per_page: 100,
   });
 
   const {
@@ -78,19 +83,20 @@ export default function NewFarmPage() {
     })) || [];
 
   const onSubmit = (data: FarmFormData) => {
-    if (!coords) {
-      alert("Please pick coordinates on the map");
-      return;
-    }
-
     const payload: CreateFarmData = {
       name: data.name,
       size: parseFloat(data.size) || 0,
-      coordinates: coords,
+      coordinates: coords || { lat: 0, lng: 0 },
       zone_id: zoneId,
       product_id: productId,
     };
-    if (ownerId) {
+    if (coords) {
+      payload.coordinates = coords;
+    }
+    // Farmers are auto-assigned as owner; admins/others select via dropdown
+    if (isFarmer && user?.id) {
+      payload.owner_id = user.id;
+    } else if (ownerId) {
       payload.owner_id = ownerId;
     }
 
@@ -140,9 +146,9 @@ export default function NewFarmPage() {
             />
 
             <InputField
-              label="Size (Ha)"
+              label="Size (Acres)"
               type="number"
-              placeholder="Enter farm size"
+              placeholder="Enter farm size in acres"
               register={register("size", { required: "Size is required" })}
               error={errors.size?.message}
               required
@@ -168,18 +174,20 @@ export default function NewFarmPage() {
               required
             />
 
-            <SearchableSelect
-              label="Owner (Farmer)"
-              options={farmerOptions}
-              value={ownerId}
-              onChange={setOwnerId}
-              placeholder="Select farm owner"
-              isLoading={farmersLoading}
-            />
+            {!isFarmer && (
+              <SearchableSelect
+                label="Owner (Farmer)"
+                options={farmerOptions}
+                value={ownerId}
+                onChange={setOwnerId}
+                placeholder="Select farm owner"
+                isLoading={farmersLoading}
+              />
+            )}
 
-            <div>
+            <div className="relative z-0">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pick Coordinates <span className="text-red-500">*</span>
+                Pick Coordinates (optional)
               </label>
               <div className="h-72 w-full border border-gray-300 rounded-lg overflow-hidden">
                 <MapContainer

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getFarms,
+  getMineFarms,
   getFarm,
   createFarm,
   updateFarm,
@@ -12,10 +13,19 @@ import type { CreateFarmData, UpdateFarmData } from "@/types/farm";
 import toast from "react-hot-toast";
 import { getApiErrorMessage } from "@/utils/getApiError";
 
-export const useFarms = (params: FarmsParams = {}) => {
+export const useFarms = (params: FarmsParams = {}, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["farms", params],
     queryFn: () => getFarms(params),
+    enabled: options?.enabled,
+  });
+};
+
+export const useMineFarms = (params: FarmsParams = {}, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: ["farms", "mine", params],
+    queryFn: () => getMineFarms(params),
+    enabled: options?.enabled,
   });
 };
 

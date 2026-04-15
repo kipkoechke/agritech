@@ -14,6 +14,8 @@ import {
   MdBookOnline,
   MdGroupWork,
   MdPayments,
+  MdInventory,
+  MdLocalActivity,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -92,28 +94,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         icon: MdFactory,
         href: "/factories",
         active: pathname.startsWith("/factories"),
-        roles: ["admin", "farmer"],
+        roles: ["admin"],
       },
       {
         name: "Schedules",
         icon: MdSchedule,
         href: "/schedules",
         active: pathname.startsWith("/schedules"),
-        roles: ["admin", "farmer"],
+        roles: ["admin", "farmer", "supervisor"],
       },
-      // {
-      //   name: "Bookings",
-      //   icon: MdBookOnline,
-      //   href: "/bookings",
-      //   active: pathname.startsWith("/bookings"),
-      //   roles: ["admin", "farmer"],
-      // },
       {
         name: "Farms",
         icon: MdMap,
-        href: "/farm-map",
-        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
-        roles: ["admin"],
+        href: "/farms",
+        active: pathname.startsWith("/farms"),
+        roles: ["admin", "farmer"],
+      },
+      {
+        name: "Bookings",
+        icon: MdBookOnline,
+        href: "/bookings",
+        active: pathname.startsWith("/bookings"),
+        roles: ["admin", "supervisor"],
       },
       {
         name: "Work Groups",
@@ -129,12 +131,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         active: pathname.startsWith("/worker-payments"),
         roles: ["admin", "farmer"],
       },
+      {
+        name: "Products",
+        icon: MdInventory,
+        href: "/products",
+        active: pathname.startsWith("/products"),
+        roles: ["admin"],
+      },
+      {
+        name: "Activities",
+        icon: MdLocalActivity,
+        href: "/activities",
+        active: pathname.startsWith("/activities"),
+        roles: ["admin"],
+      },
       // Supervisor only items (personal views)
       {
-        name: "My Schedules",
-        icon: MdSchedule,
-        href: "/schedules",
-        active: pathname.startsWith("/schedules"),
+        name: "Farm Workers",
+        icon: MdPeople,
+        href: "/farm-workers",
+        active: pathname.startsWith("/farm-workers"),
         roles: ["supervisor"],
       },
       // {
@@ -147,8 +163,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
       {
         name: "My Farms",
         icon: MdMap,
-        href: "/farm-map",
-        active: pathname === "/farm-map" || pathname.startsWith("/farms"),
+        href: "/farms",
+        active: pathname.startsWith("/farms"),
         roles: ["supervisor"],
       },
       {
