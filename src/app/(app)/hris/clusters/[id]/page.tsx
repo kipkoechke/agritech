@@ -31,7 +31,9 @@ function InfoCard({ label, value, icon: Icon }: InfoCardProps) {
       </span>
       <div className="flex items-center gap-1.5">
         <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-        <span className="text-sm font-medium text-gray-800">{value || "—"}</span>
+        <span className="text-sm font-medium text-gray-800">
+          {value || "—"}
+        </span>
       </div>
     </div>
   );
@@ -60,7 +62,9 @@ export default function ClusterDetailsPage() {
       <div className="min-h-screen p-6 bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <MdInfo className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h2 className="text-base font-semibold text-gray-800 mb-1">Cluster not found</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-1">
+            Cluster not found
+          </h2>
           <Link
             href="/hris/clusters"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
@@ -182,7 +186,9 @@ export default function ClusterDetailsPage() {
               </p>
               <div className="flex items-center gap-1 mt-1">
                 <MdAgriculture className="w-3.5 h-3.5 text-emerald-500" />
-                <p className="text-[11px] text-emerald-600 font-medium">Farms</p>
+                <p className="text-[11px] text-emerald-600 font-medium">
+                  Farms
+                </p>
               </div>
             </div>
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
@@ -191,7 +197,9 @@ export default function ClusterDetailsPage() {
               </p>
               <div className="flex items-center gap-1 mt-1">
                 <MdPeople className="w-3.5 h-3.5 text-blue-500" />
-                <p className="text-[11px] text-blue-600 font-medium">Farm Workers</p>
+                <p className="text-[11px] text-blue-600 font-medium">
+                  Farm Workers
+                </p>
               </div>
             </div>
           </div>
@@ -206,8 +214,16 @@ export default function ClusterDetailsPage() {
             </h2>
           </div>
           <div className="px-6 py-5 grid grid-cols-2 sm:grid-cols-3 gap-6">
-            <InfoCard label="Created" value={createdDate} icon={MdCalendarToday} />
-            <InfoCard label="Last Updated" value={updatedDate} icon={MdUpdate} />
+            <InfoCard
+              label="Created"
+              value={createdDate}
+              icon={MdCalendarToday}
+            />
+            <InfoCard
+              label="Last Updated"
+              value={updatedDate}
+              icon={MdUpdate}
+            />
           </div>
         </div>
       </div>

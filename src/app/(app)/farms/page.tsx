@@ -15,7 +15,12 @@ import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
 import PageHeader from "@/components/common/PageHeader";
-import { useFarms, useMineFarms, useDeleteFarm, useAssignSupervisor } from "@/hooks/useFarm";
+import {
+  useFarms,
+  useMineFarms,
+  useDeleteFarm,
+  useAssignSupervisor,
+} from "@/hooks/useFarm";
 import { useIsFarmer } from "@/hooks/useAuth";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useProducts } from "@/hooks/useProduct";
@@ -38,14 +43,16 @@ export default function FarmsPage() {
     zone_id: zoneFilter || undefined,
     product_id: productFilter || undefined,
   };
-  const { data: allFarmsData, isLoading: allFarmsLoading, error: allFarmsError } = useFarms(
-    farmsParams,
-    { enabled: !isFarmer },
-  );
-  const { data: mineFarmsData, isLoading: mineFarmsLoading, error: mineFarmsError } = useMineFarms(
-    farmsParams,
-    { enabled: isFarmer },
-  );
+  const {
+    data: allFarmsData,
+    isLoading: allFarmsLoading,
+    error: allFarmsError,
+  } = useFarms(farmsParams, { enabled: !isFarmer });
+  const {
+    data: mineFarmsData,
+    isLoading: mineFarmsLoading,
+    error: mineFarmsError,
+  } = useMineFarms(farmsParams, { enabled: isFarmer });
   const data = isFarmer ? mineFarmsData : allFarmsData;
   const isLoading = isFarmer ? mineFarmsLoading : allFarmsLoading;
   const error = isFarmer ? mineFarmsError : allFarmsError;
@@ -250,7 +257,9 @@ export default function FarmsPage() {
                           </Tooltip>
                           <Tooltip content="Edit farm">
                             <button
-                              onClick={() => router.push(`/farms/${farm.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/farms/${farm.id}/edit`)
+                              }
                               className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
                             >
                               <FiEdit className="h-3.5 w-3.5" />

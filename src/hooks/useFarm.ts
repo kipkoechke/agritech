@@ -13,7 +13,10 @@ import type { CreateFarmData, UpdateFarmData } from "@/types/farm";
 import toast from "react-hot-toast";
 import { getApiErrorMessage } from "@/utils/getApiError";
 
-export const useFarms = (params: FarmsParams = {}, options?: { enabled?: boolean }) => {
+export const useFarms = (
+  params: FarmsParams = {},
+  options?: { enabled?: boolean },
+) => {
   return useQuery({
     queryKey: ["farms", params],
     queryFn: () => getFarms(params),
@@ -21,7 +24,10 @@ export const useFarms = (params: FarmsParams = {}, options?: { enabled?: boolean
   });
 };
 
-export const useMineFarms = (params: FarmsParams = {}, options?: { enabled?: boolean }) => {
+export const useMineFarms = (
+  params: FarmsParams = {},
+  options?: { enabled?: boolean },
+) => {
   return useQuery({
     queryKey: ["farms", "mine", params],
     queryFn: () => getMineFarms(params),

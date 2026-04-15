@@ -27,7 +27,9 @@ export const getFarms = async (
 export const getMineFarms = async (
   params: FarmsParams = {},
 ): Promise<FarmsResponse> => {
-  const response = await axiosInstance.get<FarmsResponse>("/farms/mine", { params });
+  const response = await axiosInstance.get<FarmsResponse>("/farms/mine", {
+    params,
+  });
   return response.data;
 };
 

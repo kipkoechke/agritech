@@ -37,10 +37,9 @@ const Marker = dynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false },
 );
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false },
-);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 const getCoordinates = (farm: any): { lat: number; lng: number } | null => {
   if (!farm?.coordinates) return null;
@@ -48,7 +47,10 @@ const getCoordinates = (farm: any): { lat: number; lng: number } | null => {
   if (typeof coords.lat === "number" && typeof coords.lng === "number") {
     return { lat: coords.lat, lng: coords.lng };
   }
-  if (typeof coords.latitude === "number" && typeof coords.longitude === "number") {
+  if (
+    typeof coords.latitude === "number" &&
+    typeof coords.longitude === "number"
+  ) {
     return { lat: coords.latitude, lng: coords.longitude };
   }
   return null;
@@ -70,8 +72,14 @@ const InfoCard = ({
       {label}
     </span>
     <div className="flex items-center gap-1.5">
-      {Icon && <Icon className={`w-4 h-4 flex-shrink-0 ${accent ? "text-primary" : "text-gray-400"}`} />}
-      <span className={`text-sm font-medium ${accent ? "text-primary" : "text-gray-800"}`}>
+      {Icon && (
+        <Icon
+          className={`w-4 h-4 flex-shrink-0 ${accent ? "text-primary" : "text-gray-400"}`}
+        />
+      )}
+      <span
+        className={`text-sm font-medium ${accent ? "text-primary" : "text-gray-800"}`}
+      >
         {value || "—"}
       </span>
     </div>
@@ -120,8 +128,12 @@ export default function FarmDetailsPage() {
       <div className="min-h-screen p-6 bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <MdInfo className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h2 className="text-base font-semibold text-gray-800 mb-1">Farm not found</h2>
-          <p className="text-sm text-gray-500 mb-4">This farm doesn&apos;t exist or has been removed.</p>
+          <h2 className="text-base font-semibold text-gray-800 mb-1">
+            Farm not found
+          </h2>
+          <p className="text-sm text-gray-500 mb-4">
+            This farm doesn&apos;t exist or has been removed.
+          </p>
           <Link
             href="/farms"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
@@ -159,7 +171,9 @@ export default function FarmDetailsPage() {
               <MdArrowBack className="w-5 h-5" />
             </Link>
             <div className="min-w-0">
-              <h1 className="text-base font-bold text-gray-900 truncate">{farm.name}</h1>
+              <h1 className="text-base font-bold text-gray-900 truncate">
+                {farm.name}
+              </h1>
               {farm.farm_code && (
                 <p className="text-[11px] text-gray-400 font-mono leading-none mt-0.5">
                   {farm.farm_code}
@@ -188,9 +202,22 @@ export default function FarmDetailsPage() {
           </div>
           <div className="px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
             <InfoCard label="Farm Name" value={farm.name} icon={MdStore} />
-            <InfoCard label="Farm Code" value={farm.farm_code || "—"} icon={MdCode} />
-            <InfoCard label="Size" value={`${size.toLocaleString()} Ha`} icon={MdScale} accent />
-            <InfoCard label="Product Type" value={farm.product?.name || "Not specified"} icon={MdCategory} />
+            <InfoCard
+              label="Farm Code"
+              value={farm.farm_code || "—"}
+              icon={MdCode}
+            />
+            <InfoCard
+              label="Size"
+              value={`${size.toLocaleString()} Ha`}
+              icon={MdScale}
+              accent
+            />
+            <InfoCard
+              label="Product Type"
+              value={farm.product?.name || "Not specified"}
+              icon={MdCategory}
+            />
           </div>
         </div>
 
@@ -204,9 +231,17 @@ export default function FarmDetailsPage() {
           </div>
           <div className="px-6 py-5 space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-              <InfoCard label="Zone" value={farm.zone?.name || "Not assigned"} icon={MdLocationOn} />
+              <InfoCard
+                label="Zone"
+                value={farm.zone?.name || "Not assigned"}
+                icon={MdLocationOn}
+              />
               {farm.zone?.code && (
-                <InfoCard label="Zone Code" value={farm.zone.code} icon={MdCode} />
+                <InfoCard
+                  label="Zone Code"
+                  value={farm.zone.code}
+                  icon={MdCode}
+                />
               )}
               {coordinates && (
                 <div className="flex flex-col gap-1">
@@ -236,9 +271,15 @@ export default function FarmDetailsPage() {
                     <Marker position={[coordinates.lat, coordinates.lng]}>
                       <Popup>
                         <div className="text-center py-1">
-                          <p className="font-bold text-gray-900 text-sm">{farm.name}</p>
-                          <p className="text-xs text-gray-500">{farm.farm_code}</p>
-                          <p className="text-xs text-primary mt-0.5">{size.toFixed(2)} Ha</p>
+                          <p className="font-bold text-gray-900 text-sm">
+                            {farm.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {farm.farm_code}
+                          </p>
+                          <p className="text-xs text-primary mt-0.5">
+                            {size.toFixed(2)} Ha
+                          </p>
                         </div>
                       </Popup>
                     </Marker>
@@ -272,13 +313,29 @@ export default function FarmDetailsPage() {
             </h2>
           </div>
           <div className="px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-6">
-            <InfoCard label="Farmer" value={farm.farmer?.name || "Not assigned"} icon={MdPerson} />
-            <InfoCard label="Supervisor" value={farm.supervisor?.name || "Not assigned"} icon={MdSupervisorAccount} />
+            <InfoCard
+              label="Farmer"
+              value={farm.farmer?.name || "Not assigned"}
+              icon={MdPerson}
+            />
+            <InfoCard
+              label="Supervisor"
+              value={farm.supervisor?.name || "Not assigned"}
+              icon={MdSupervisorAccount}
+            />
             {farm.factory && (
-              <InfoCard label="Factory" value={farm.factory.name} icon={MdFactory} />
+              <InfoCard
+                label="Factory"
+                value={farm.factory.name}
+                icon={MdFactory}
+              />
             )}
             {farm.cluster && (
-              <InfoCard label="Cluster" value={farm.cluster.name} icon={MdCategory} />
+              <InfoCard
+                label="Cluster"
+                value={farm.cluster.name}
+                icon={MdCategory}
+              />
             )}
           </div>
         </div>
@@ -292,8 +349,16 @@ export default function FarmDetailsPage() {
             </h2>
           </div>
           <div className="px-6 py-5 grid grid-cols-2 gap-6">
-            <InfoCard label="Created" value={createdDate} icon={MdCalendarToday} />
-            <InfoCard label="Last Updated" value={updatedDate} icon={MdCalendarToday} />
+            <InfoCard
+              label="Created"
+              value={createdDate}
+              icon={MdCalendarToday}
+            />
+            <InfoCard
+              label="Last Updated"
+              value={updatedDate}
+              icon={MdCalendarToday}
+            />
           </div>
         </div>
       </div>

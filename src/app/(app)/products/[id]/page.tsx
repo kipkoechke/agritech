@@ -184,6 +184,3 @@ export default function ProductDetailsPage() {
     </div>
   );
 }
-
-
-

@@ -85,16 +85,22 @@ export default function WorkerDetailsPage() {
     );
   }
 
-  const createdDate = new Date(worker.created_at ?? "").toLocaleDateString("en-KE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const updatedDate = new Date(worker.updated_at ?? "").toLocaleDateString("en-KE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const createdDate = new Date(worker.created_at ?? "").toLocaleDateString(
+    "en-KE",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
+  const updatedDate = new Date(worker.updated_at ?? "").toLocaleDateString(
+    "en-KE",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
