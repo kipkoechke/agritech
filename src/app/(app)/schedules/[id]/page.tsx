@@ -36,7 +36,7 @@ import type { ScheduleBooking } from "@/types/schedule";
 /* ── helpers ── */
 const STATUS_STYLES: Record<string, string> = {
   scheduled: "bg-amber-100 text-amber-700",
-  approved:  "bg-green-100 text-green-700",
+  approved: "bg-green-100 text-green-700",
   cancelled: "bg-red-100   text-red-600",
 };
 
@@ -124,9 +124,21 @@ function MiniRing({
   return (
     <div className="flex items-center gap-1.5">
       <svg className="w-8 h-8 -rotate-90 shrink-0" viewBox="0 0 30 30">
-        <circle cx="15" cy="15" r={r} fill="none" strokeWidth="3" stroke={trackColor} />
         <circle
-          cx="15" cy="15" r={r} fill="none" strokeWidth="3" stroke={color}
+          cx="15"
+          cy="15"
+          r={r}
+          fill="none"
+          strokeWidth="3"
+          stroke={trackColor}
+        />
+        <circle
+          cx="15"
+          cy="15"
+          r={r}
+          fill="none"
+          strokeWidth="3"
+          stroke={color}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -135,7 +147,9 @@ function MiniRing({
       </svg>
       <div className="leading-tight">
         <p className="text-xs font-bold text-gray-800 tabular-nums">{value}%</p>
-        <p className="text-[9px] text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-[9px] text-gray-400 uppercase tracking-wide">
+          {label}
+        </p>
       </div>
     </div>
   );
@@ -167,7 +181,8 @@ function WorkerRow({
     showFarmQty: false,
     showFactoryQty: false,
     farmQtyInput: booking.farm_qty != null ? String(booking.farm_qty) : "",
-    factoryQtyInput: booking.factory_qty != null ? String(booking.factory_qty) : "",
+    factoryQtyInput:
+      booking.factory_qty != null ? String(booking.factory_qty) : "",
   });
 
   const toggleFarmQty = () =>
@@ -229,7 +244,7 @@ function WorkerRow({
           <StatusBadge
             on={booking.worker_signed}
             label="Signed"
-            onClass="border border-blue-300 bg-blue-100 text-blue-800"
+            onClass="border border-primary/30 bg-primary/10 text-primary"
           />
         </div>
       </div>
@@ -237,22 +252,30 @@ function WorkerRow({
       {/* Row 2: qty values + action buttons */}
       <div className="mt-2.5 ml-12 flex items-center gap-3 flex-wrap">
         {/* Farm qty chip */}
-        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 rounded-md">
-          <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Farm</span>
+        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/20 rounded-md">
+          <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
+            Farm
+          </span>
           <span className="text-xs font-bold text-gray-800 tabular-nums">
-            {booking.farm_qty != null
-              ? `${Number(booking.farm_qty).toFixed(2)} kg`
-              : <span className="text-gray-400 font-normal">—</span>}
+            {booking.farm_qty != null ? (
+              `${Number(booking.farm_qty).toFixed(2)} kg`
+            ) : (
+              <span className="text-gray-400 font-normal">—</span>
+            )}
           </span>
         </div>
 
         {/* Factory qty chip */}
-        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-md">
-          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Factory</span>
+        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/20 rounded-md">
+          <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
+            Factory
+          </span>
           <span className="text-xs font-bold text-gray-800 tabular-nums">
-            {booking.factory_qty != null
-              ? `${Number(booking.factory_qty).toFixed(2)} kg`
-              : <span className="text-gray-400 font-normal">—</span>}
+            {booking.factory_qty != null ? (
+              `${Number(booking.factory_qty).toFixed(2)} kg`
+            ) : (
+              <span className="text-gray-400 font-normal">—</span>
+            )}
           </span>
         </div>
 
@@ -275,7 +298,7 @@ function WorkerRow({
           <button
             onClick={toggleFarmQty}
             title="Capture farm quantity"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-500 text-white border border-amber-600 hover:bg-amber-600 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 transition-colors shadow-sm"
           >
             <MdScale className="w-3 h-3" />
             Farm Qty
@@ -284,7 +307,7 @@ function WorkerRow({
           <button
             onClick={toggleFactoryQty}
             title="Capture factory quantity"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-600 text-white border border-blue-700 hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 transition-colors shadow-sm"
           >
             <MdScale className="w-3 h-3" />
             Factory Qty
@@ -295,7 +318,7 @@ function WorkerRow({
               onClick={() => signOffMutation.mutate(booking.id)}
               disabled={signOffMutation.isPending}
               title="Sign off worker"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-purple-600 text-white border border-purple-700 hover:bg-purple-700 disabled:opacity-50 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
             >
               <MdCreate className="w-3 h-3" />
               Sign Off
@@ -312,15 +335,17 @@ function WorkerRow({
             min="0"
             step="0.01"
             value={state.farmQtyInput}
-            onChange={(e) => setState((s) => ({ ...s, farmQtyInput: e.target.value }))}
+            onChange={(e) =>
+              setState((s) => ({ ...s, farmQtyInput: e.target.value }))
+            }
             placeholder="Enter kg"
             autoFocus
-            className="w-32 px-3 py-1.5 text-sm font-medium bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors placeholder:text-gray-400"
+            className="w-32 px-3 py-1.5 text-sm font-medium bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors placeholder:text-gray-400"
           />
           <button
             onClick={submitFarmQty}
             disabled={farmQtyMutation.isPending}
-            className="px-3 py-1.5 text-xs font-bold bg-amber-500 text-white rounded-md hover:bg-amber-600 disabled:opacity-50 transition-colors shadow-sm"
+            className="px-3 py-1.5 text-xs font-bold bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
           >
             {farmQtyMutation.isPending ? "Saving…" : "Save"}
           </button>
@@ -341,15 +366,17 @@ function WorkerRow({
             min="0"
             step="0.01"
             value={state.factoryQtyInput}
-            onChange={(e) => setState((s) => ({ ...s, factoryQtyInput: e.target.value }))}
+            onChange={(e) =>
+              setState((s) => ({ ...s, factoryQtyInput: e.target.value }))
+            }
             placeholder="Enter kg"
             autoFocus
-            className="w-32 px-3 py-1.5 text-sm font-medium bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors placeholder:text-gray-400"
+            className="w-32 px-3 py-1.5 text-sm font-medium bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors placeholder:text-gray-400"
           />
           <button
             onClick={submitFactoryQty}
             disabled={factoryQtyMutation.isPending}
-            className="px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+            className="px-3 py-1.5 text-xs font-bold bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
           >
             {factoryQtyMutation.isPending ? "Saving…" : "Save"}
           </button>
@@ -402,7 +429,9 @@ export default function ScheduleDetailsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="text-center">
           <MdInfo className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h2 className="text-base font-semibold text-gray-800 mb-1">Schedule not found</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-1">
+            Schedule not found
+          </h2>
           <p className="text-sm text-gray-500 mb-4">
             This schedule doesn&apos;t exist or has been removed.
           </p>
@@ -444,13 +473,11 @@ export default function ScheduleDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       {/* ══════════════════════════════════
           Sticky Topbar
           ══════════════════════════════════ */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-
           {/* left: back + title + badge + ref */}
           <div className="flex items-center gap-3 min-w-0">
             <Link
@@ -470,7 +497,9 @@ export default function ScheduleDetailsPage() {
                   {statusLabel(schedule.status)}
                 </span>
                 <button
-                  onClick={() => navigator.clipboard.writeText(schedule.reference_code)}
+                  onClick={() =>
+                    navigator.clipboard.writeText(schedule.reference_code)
+                  }
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 transition-colors shrink-0 group"
                   title="Copy reference code"
                 >
@@ -519,56 +548,42 @@ export default function ScheduleDetailsPage() {
               label: "Total Workers",
               value: bookingsCount,
               icon: MdPeople,
-              color: "text-blue-700",
-              bg: "bg-blue-50",
-              border: "border-blue-200",
-              iconColor: "text-blue-400",
             },
             {
               label: "Confirmed",
               value: confirmedCount,
               icon: MdCheckCircle,
-              color: "text-emerald-700",
-              bg: "bg-emerald-50",
-              border: "border-emerald-200",
-              iconColor: "text-emerald-400",
             },
             {
               label: "Worker Signed",
               value: signedCount,
               icon: MdCreate,
-              color: "text-purple-700",
-              bg: "bg-purple-50",
-              border: "border-purple-200",
-              iconColor: "text-purple-400",
             },
             {
               label: "With Yield",
               value: withQuantitiesCount,
               icon: MdScale,
-              color: "text-amber-700",
-              bg: "bg-amber-50",
-              border: "border-amber-200",
-              iconColor: "text-amber-400",
             },
-          ].map(({ label, value, icon: Icon, color, bg, border, iconColor }) => (
-            <div
-              key={label}
-              className={`${bg} ${border} border rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm`}
-            >
-              <div className={`w-10 h-10 rounded-xl ${bg} border ${border} flex items-center justify-center shrink-0`}>
-                <Icon className={`w-5 h-5 ${iconColor}`} />
+          ].map(
+            ({ label, value, icon: Icon }) => (
+              <div
+                key={label}
+                className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5 text-primary/70" />
+                </div>
+                <div>
+                  <p className="text-3xl font-extrabold text-gray-900 tabular-nums leading-none">
+                    {value}
+                  </p>
+                  <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">
+                    {label}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className={`text-3xl font-extrabold ${color} tabular-nums leading-none`}>
-                  {value}
-                </p>
-                <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">
-                  {label}
-                </p>
-              </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
 
@@ -577,7 +592,6 @@ export default function ScheduleDetailsPage() {
           ══════════════════════════════════ */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
-
           {/* ── Left Card: Schedule Details ── */}
           <div className="lg:col-span-2 flex flex-col">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
@@ -589,15 +603,39 @@ export default function ScheduleDetailsPage() {
               </div>
 
               <div className="px-5 py-5 grid grid-cols-2 gap-x-6 gap-y-5 flex-1">
-                <InfoTile icon={MdAgriculture}   label="Activity"   value={schedule.activity.name} />
-                <InfoTile icon={MdCalendarToday} label="Date"       value={humanDate} />
-                <InfoTile icon={MdAccessTime}    label="Time"       value={humanTime} />
-                <InfoTile icon={MdLocationOn}    label="Farm"       value={schedule.farm.name} />
-                <InfoTile icon={MdLocationOn}    label="Zone"       value={schedule.farm.zone.name} />
+                <InfoTile
+                  icon={MdAgriculture}
+                  label="Activity"
+                  value={schedule.activity.name}
+                />
+                <InfoTile
+                  icon={MdCalendarToday}
+                  label="Date"
+                  value={humanDate}
+                />
+                <InfoTile icon={MdAccessTime} label="Time" value={humanTime} />
+                <InfoTile
+                  icon={MdLocationOn}
+                  label="Farm"
+                  value={schedule.farm.name}
+                />
+                <InfoTile
+                  icon={MdLocationOn}
+                  label="Zone"
+                  value={schedule.farm.zone.name}
+                />
                 {schedule.farm.area && (
-                  <InfoTile icon={MdScale} label="Farm Area" value={`${schedule.farm.area} acres`} />
+                  <InfoTile
+                    icon={MdScale}
+                    label="Farm Area"
+                    value={`${schedule.farm.area} acres`}
+                  />
                 )}
-                <InfoTile icon={MdPerson} label="Created By" value={schedule.created_by.name} />
+                <InfoTile
+                  icon={MdPerson}
+                  label="Created By"
+                  value={schedule.created_by.name}
+                />
                 {schedule.created_by.email && (
                   <InfoTile
                     icon={MdEmail}
@@ -630,16 +668,17 @@ export default function ScheduleDetailsPage() {
                     {schedule.notes}
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-400 italic">No notes recorded yet.</p>
+                  <p className="text-sm text-gray-400 italic">
+                    No notes recorded yet.
+                  </p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* ── Right Card: Assigned Workers ── */}
+          {/* ── Right Card: Booked Workers ── */}
           <div className="lg:col-span-3 flex flex-col">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
-
               {/* Workers card header — single row with title + mini rings + progress bars */}
               <div className="px-5 py-3.5 border-b border-gray-100 shrink-0">
                 <div className="flex items-center gap-4 flex-wrap">
@@ -647,7 +686,7 @@ export default function ScheduleDetailsPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <MdPeople className="w-4 h-4 text-primary" />
                     <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-600">
-                      Assigned Workers
+                      Booked Workers
                     </h2>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
                       {bookingsCount}
@@ -681,7 +720,9 @@ export default function ScheduleDetailsPage() {
                       {/* Progress bars */}
                       <div className="flex flex-col gap-1.5 ml-auto">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-gray-500 font-semibold w-16">Confirmed</span>
+                          <span className="text-[10px] text-gray-500 font-semibold w-16">
+                            Confirmed
+                          </span>
                           <div className="w-24 h-1.5 rounded-full bg-gray-200 overflow-hidden">
                             <div
                               className="h-1.5 rounded-full bg-emerald-500 transition-all duration-500"
@@ -693,7 +734,9 @@ export default function ScheduleDetailsPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-gray-500 font-semibold w-16">Signed</span>
+                          <span className="text-[10px] text-gray-500 font-semibold w-16">
+                            Signed
+                          </span>
                           <div className="w-24 h-1.5 rounded-full bg-gray-200 overflow-hidden">
                             <div
                               className="h-1.5 rounded-full bg-blue-500 transition-all duration-500"
@@ -736,7 +779,6 @@ export default function ScheduleDetailsPage() {
               )}
             </div>
           </div>
-
         </div>
       </div>
     </div>

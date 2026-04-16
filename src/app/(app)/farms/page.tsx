@@ -226,7 +226,7 @@ export default function FarmsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {parseFloat(farm.size).toLocaleString()} Ha
+                          {(parseFloat(farm.size) * 2.471).toFixed(2)} Acres
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

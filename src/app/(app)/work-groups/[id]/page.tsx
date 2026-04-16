@@ -29,17 +29,18 @@ export default function WorkGroupDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [selectedMember, setSelectedMember] = useState<WorkGroupMember | null>(
+    null,
+  );
+  const [workerSearch, setWorkerSearch] = useState("");
+
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const { data: membersResponse, isLoading: membersLoading } =
     useWorkGroupMembers(id);
   const addMembers = useAddWorkGroupMembers();
   const deleteMember = useDeleteWorkGroupMember();
-  const { data: workersData, isLoading: workersLoading } = useWorkers({});
-
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
-  const [selectedMember, setSelectedMember] = useState<WorkGroupMember | null>(
-    null,
-  );
+  const { data: workersData, isLoading: workersLoading } = useWorkers({ search: workerSearch });
 
   const group = groupResponse?.data;
   const members = membersResponse?.data || [];
@@ -219,8 +220,10 @@ export default function WorkGroupDetailPage() {
                         setSelectedMemberIds((prev) => [...prev, val]);
                       }
                     }}
-                    placeholder="Search and select workers…"
+                    placeholder="Search by name or phone…"
                     isLoading={workersLoading}
+                    onSearchChange={setWorkerSearch}
+                    searchPlaceholder="Search by phone or name…"
                   />
                   {selectedMemberIds.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">

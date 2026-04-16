@@ -11,6 +11,7 @@ import Button from "@/components/common/Button";
 import { useCreateSchedule } from "@/hooks/useSchedule";
 import { useFarms } from "@/hooks/useFarm";
 import { useActivities } from "@/hooks/useActivity";
+import { useWorkGroups } from "@/hooks/useWorkGroup";
 import type { CreateScheduleData } from "@/types/schedule";
 
 interface ScheduleFormData {
@@ -25,6 +26,8 @@ export default function NewSchedulePage() {
   const { data: farmsData, isLoading: farmsLoading } = useFarms();
   const { data: activitiesData, isLoading: activitiesLoading } =
     useActivities();
+  const { data: workGroupsData, isLoading: workGroupsLoading } =
+    useWorkGroups({ active: true });
 
   const {
     register,
@@ -36,6 +39,7 @@ export default function NewSchedulePage() {
 
   const [farmId, setFarmId] = useState("");
   const [activityId, setActivityId] = useState("");
+  const [workGroupId, setWorkGroupId] = useState("");
 
   const farms = farmsData?.data || [];
   const activities = activitiesData?.data || [];
@@ -50,11 +54,18 @@ export default function NewSchedulePage() {
     label: a.name,
   }));
 
+  const workGroups = workGroupsData?.data || [];
+  const workGroupOptions = workGroups.map((g) => ({
+    value: g.id,
+    label: g.name,
+  }));
+
   const onSubmit = (data: ScheduleFormData) => {
     if (!farmId || !activityId) return;
     const payload: CreateScheduleData = {
       farm_id: farmId,
       farm_activity_id: activityId,
+      work_group_id: workGroupId || undefined,
       scheduled_date: data.scheduled_date,
       notes: data.notes || undefined,
     };
@@ -104,6 +115,15 @@ export default function NewSchedulePage() {
               placeholder="Select activity"
               isLoading={activitiesLoading}
               required
+            />
+
+            <SearchableSelect
+              label="Worker Group"
+              options={workGroupOptions}
+              value={workGroupId}
+              onChange={setWorkGroupId}
+              placeholder="Select worker group (optional)"
+              isLoading={workGroupsLoading}
             />
 
             <InputField
