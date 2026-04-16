@@ -26,7 +26,7 @@ export default function SupervisorDashboard() {
   const [fromDate, setFromDate] = useState(formatDate(thirtyDaysAgo));
   const [toDate, setToDate] = useState(formatDate(today));
   const [farmId, setFarmId] = useState("");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   const router = useRouter();
 

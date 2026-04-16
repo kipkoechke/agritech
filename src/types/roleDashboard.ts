@@ -107,10 +107,11 @@ export interface FarmerDashboardSummary {
   completed_bookings: number;
   pending_bookings: number;
   total_kgs: number;
+  revenue: number;
   monthly_comparison: {
-    current_month_kgs: number;
-    last_month_kgs: number;
-    change_percentage: number;
+    current: number;
+    last: number;
+    change: number;
   };
 }
 
@@ -119,13 +120,13 @@ export interface FarmerFarm {
   name: string;
   size: number;
   zone: string;
-  factory: string;
-  cluster: string;
+  factory: string | null;
+  cluster: string | null;
   supervisor: {
     name: string;
     phone: string;
   };
-  coordinates: {
+  coordinates?: {
     latitude: number;
     longitude: number;
   };
@@ -134,10 +135,8 @@ export interface FarmerFarm {
 export interface FarmerWorkGroup {
   id: string;
   name: string;
-  code: string;
+  members: number;
   active: boolean | null;
-  members_count: number;
-  total_kgs: number;
 }
 
 export interface WorkerPaymentChart {
@@ -147,7 +146,7 @@ export interface WorkerPaymentChart {
     phone: string;
   };
   total_kgs: number;
-  total_jobs: number;
+  jobs: number;
 }
 
 export interface DailyProduction {
@@ -179,7 +178,7 @@ export interface FarmPerformance {
     zone: string;
   };
   size: number;
-  total_bookings: number;
+  total_jobs: number;
   completed: number;
   pending: number;
   total_kgs: number;

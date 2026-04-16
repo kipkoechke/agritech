@@ -555,16 +555,14 @@ export default function SchedulesPage() {
               ) : undefined
             }
             action={
-              !isFarmer ? (
-                <Button
-                  type="small"
-                  to="/schedules/new"
-                  className="flex items-center gap-1 bg-primary hover:bg-primary/90"
-                >
-                  <MdAdd className="w-4 h-4" />
-                  Add Schedule
-                </Button>
-              ) : undefined
+              <Button
+                type="small"
+                to="/schedules/new"
+                className="flex items-center gap-1 bg-primary hover:bg-primary/90"
+              >
+                <MdAdd className="w-4 h-4" />
+                Add Schedule
+              </Button>
             }
           />
 
