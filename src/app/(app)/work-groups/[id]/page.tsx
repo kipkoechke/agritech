@@ -11,18 +11,20 @@ import {
   MdCalendarToday,
   MdEdit,
   MdInfo,
+  MdPersonAdd,
 } from "react-icons/md";
 import { FiTrash } from "react-icons/fi";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
+import { InputField } from "@/components/common/InputField";
 import {
   useWorkGroup,
   useWorkGroupMembers,
   useAddWorkGroupMembers,
   useDeleteWorkGroupMember,
 } from "@/hooks/useWorkGroup";
-import { useWorkers } from "@/hooks/useWorkers";
+import { useWorkers, useCreateWorker } from "@/hooks/useWorkers";
 import type { WorkGroupMember } from "@/types/workGroup";
 
 export default function WorkGroupDetailPage() {
@@ -34,12 +36,15 @@ export default function WorkGroupDetailPage() {
     null,
   );
   const [workerSearch, setWorkerSearch] = useState("");
+  const [showCreateWorker, setShowCreateWorker] = useState(false);
+  const [newWorker, setNewWorker] = useState({ name: "", phone: "", pin: "" });
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const { data: membersResponse, isLoading: membersLoading } =
     useWorkGroupMembers(id);
   const addMembers = useAddWorkGroupMembers();
   const deleteMember = useDeleteWorkGroupMember();
+  const createWorker = useCreateWorker();
   const { data: workersData, isLoading: workersLoading } = useWorkers({ search: workerSearch });
 
   const group = groupResponse?.data;
@@ -60,6 +65,19 @@ export default function WorkGroupDetailPage() {
     addMembers.mutate(
       { workGroupId: id, data: { members: selectedMemberIds } },
       { onSuccess: () => setSelectedMemberIds([]) },
+    );
+  };
+
+  const handleCreateWorker = () => {
+    if (!newWorker.name || !newWorker.phone || !newWorker.pin) return;
+    createWorker.mutate(
+      { name: newWorker.name, phone: newWorker.phone, pin: newWorker.pin },
+      {
+        onSuccess: () => {
+          setNewWorker({ name: "", phone: "", pin: "" });
+          setShowCreateWorker(false);
+        },
+      },
     );
   };
 
@@ -225,6 +243,23 @@ export default function WorkGroupDetailPage() {
                     onSearchChange={setWorkerSearch}
                     searchPlaceholder="Search by phone or name…"
                   />
+                  {/* No worker found prompt */}
+                  {!workersLoading && workerSearch.trim().length > 0 && availableUsers.length === 0 && (
+                    <div className="mt-2 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-dashed border-gray-300 bg-gray-50">
+                      <MdInfo className="w-4 h-4 text-gray-400 shrink-0" />
+                      <p className="text-xs text-gray-500 flex-1">
+                        No worker found for &ldquo;{workerSearch}&rdquo;
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateWorker(true)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
+                      >
+                        <MdPersonAdd className="w-3.5 h-3.5" />
+                        Add Worker
+                      </button>
+                    </div>
+                  )}
                   {selectedMemberIds.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {selectedMemberIds.map((uid) => {
@@ -372,5 +407,67 @@ export default function WorkGroupDetailPage() {
         )}
       </Modal.Window>
     </Modal>
+
+    {/* Create Worker Modal */}
+    {showCreateWorker && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MdPersonAdd className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-bold text-gray-900">Add New Worker</h2>
+            </div>
+            <button
+              onClick={() => setShowCreateWorker(false)}
+              className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <InputField
+              label="Full Name"
+              placeholder="e.g. Jane Muthoni"
+              value={newWorker.name}
+              onChange={(e) => setNewWorker((s) => ({ ...s, name: e.target.value }))}
+              required
+            />
+            <InputField
+              label="Phone"
+              placeholder="e.g. 0712345678"
+              value={newWorker.phone}
+              onChange={(e) => setNewWorker((s) => ({ ...s, phone: e.target.value }))}
+              required
+            />
+            <InputField
+              label="PIN"
+              type="password"
+              placeholder="4-digit PIN"
+              value={newWorker.pin}
+              onChange={(e) => setNewWorker((s) => ({ ...s, pin: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setShowCreateWorker(false)}
+              className="px-4 py-2 rounded-full text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleCreateWorker}
+              disabled={createWorker.isPending || !newWorker.name || !newWorker.phone || !newWorker.pin}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              <MdPersonAdd className="w-3.5 h-3.5" />
+              {createWorker.isPending ? "Creating…" : "Create Worker"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
