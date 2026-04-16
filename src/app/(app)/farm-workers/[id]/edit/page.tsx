@@ -100,7 +100,9 @@ export default function EditWorkerPage() {
                   <MdPerson className="w-6 h-6 text-emerald-600" />
                   Edit Farm Worker
                 </h1>
-                <p className="text-gray-500 mt-1">Update farm worker information</p>
+                <p className="text-gray-500 mt-1">
+                  Update farm worker information
+                </p>
               </div>
             </div>
           </div>

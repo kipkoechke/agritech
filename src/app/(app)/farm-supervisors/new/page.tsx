@@ -72,7 +72,9 @@ export default function NewSupervisorPage() {
                   <MdSupervisorAccount className="w-6 h-6 text-emerald-600" />
                   Add New Supervisor
                 </h1>
-                <p className="text-gray-500 mt-1">Register a new farm supervisor in the system</p>
+                <p className="text-gray-500 mt-1">
+                  Register a new farm supervisor in the system
+                </p>
               </div>
             </div>
           </div>

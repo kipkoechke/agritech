@@ -153,7 +153,9 @@ export default function NewSchedulePage() {
                   className="border-gray-300 focus:border-emerald-500 text-gray-900 focus:ring-emerald-500 hover:border-gray-400 w-full rounded-lg border px-4 py-3 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 />
                 {errors.scheduled_date && (
-                  <p className="text-red-500 text-xs mt-1">{errors.scheduled_date.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.scheduled_date.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -173,7 +175,12 @@ export default function NewSchedulePage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={createSchedule.isPending || !farmId || !activityId || workGroupIds.length === 0}
+                disabled={
+                  createSchedule.isPending ||
+                  !farmId ||
+                  !activityId ||
+                  workGroupIds.length === 0
+                }
               >
                 {createSchedule.isPending ? "Creating..." : "Create Schedule"}
               </Button>

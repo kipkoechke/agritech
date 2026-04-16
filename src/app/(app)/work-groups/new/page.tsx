@@ -89,7 +89,9 @@ export default function NewWorkGroupPage() {
                   <MdGroup className="w-6 h-6 text-emerald-600" />
                   Create Work Group
                 </h1>
-                <p className="text-gray-500 mt-1">Create a new work group and assign an owner</p>
+                <p className="text-gray-500 mt-1">
+                  Create a new work group and assign an owner
+                </p>
               </div>
             </div>
           </div>

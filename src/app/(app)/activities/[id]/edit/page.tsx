@@ -30,14 +30,13 @@ export default function EditActivityPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<ActivityFormData>({
-    values: activity
-      ? { name: activity.name, uom: activity.uom }
-      : undefined,
+    values: activity ? { name: activity.name, uom: activity.uom } : undefined,
   });
 
   const [isActive, setIsActive] = useState<string | null>(null);
 
-  const activeValue = isActive ?? (activity ? String(activity.is_active) : "true");
+  const activeValue =
+    isActive ?? (activity ? String(activity.is_active) : "true");
 
   const onSubmit = (data: ActivityFormData) => {
     const payload: UpdateActivityData = {
@@ -86,7 +85,9 @@ export default function EditActivityPage() {
                   <MdLocalActivity className="w-6 h-6 text-emerald-600" />
                   Edit Activity
                 </h1>
-                <p className="text-gray-500 mt-1">Update activity information</p>
+                <p className="text-gray-500 mt-1">
+                  Update activity information
+                </p>
               </div>
             </div>
           </div>

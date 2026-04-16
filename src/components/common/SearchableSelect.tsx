@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MdExpandMore, MdSearch, MdClose, MdPersonAdd, MdCheck } from "react-icons/md";
+import {
+  MdExpandMore,
+  MdSearch,
+  MdClose,
+  MdPersonAdd,
+  MdCheck,
+} from "react-icons/md";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 interface Option {
@@ -141,7 +147,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   {values.map((v) => {
                     const opt = options.find((o) => o.value === v);
                     return (
-                      <span key={v} className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full">
+                      <span
+                        key={v}
+                        className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full"
+                      >
                         {opt?.label || v}
                         <MdClose
                           className="w-3 h-3 cursor-pointer hover:text-red-600"
@@ -155,7 +164,9 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   })}
                 </div>
               ) : (
-                <span className="block text-sm text-gray-500">{placeholder}</span>
+                <span className="block text-sm text-gray-500">
+                  {placeholder}
+                </span>
               )
             ) : (
               <span
@@ -243,7 +254,11 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   className={`
                     w-full text-left px-3 py-2.5 hover:bg-blue-50 transition-colors text-sm font-semibold flex items-center gap-2
                     ${
-                      (multiSelect ? values.includes(option.value) : value === option.value)
+                      (
+                        multiSelect
+                          ? values.includes(option.value)
+                          : value === option.value
+                      )
                         ? "bg-blue-100 text-blue-900"
                         : "text-gray-900"
                     }
@@ -251,7 +266,9 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 >
                   {multiSelect && (
                     <span className="w-4 h-4 shrink-0 flex items-center justify-center">
-                      {values.includes(option.value) && <MdCheck className="w-4 h-4 text-emerald-600" />}
+                      {values.includes(option.value) && (
+                        <MdCheck className="w-4 h-4 text-emerald-600" />
+                      )}
                     </span>
                   )}
                   {option?.label || option?.value || "Unknown"}

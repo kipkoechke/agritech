@@ -38,7 +38,8 @@ export default function EditProductPage() {
 
   const [isActive, setIsActive] = useState<string | null>(null);
 
-  const activeValue = isActive ?? (product ? String(product.is_active) : "true");
+  const activeValue =
+    isActive ?? (product ? String(product.is_active) : "true");
 
   const onSubmit = (data: ProductFormData) => {
     const payload: UpdateProductData = {

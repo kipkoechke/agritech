@@ -318,7 +318,12 @@ function WorkerRow({
           {!booking.worker_signed && (
             <button
               onClick={() => signOffMutation.mutate(booking.id)}
-              disabled={!booking.is_confirmed || booking.farm_qty == null || booking.factory_qty == null || signOffMutation.isPending}
+              disabled={
+                !booking.is_confirmed ||
+                booking.farm_qty == null ||
+                booking.factory_qty == null ||
+                signOffMutation.isPending
+              }
               title="Sign off worker"
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >

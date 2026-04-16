@@ -35,7 +35,7 @@ export default function FarmerDashboard() {
       to_date: toDate || undefined,
       farm_id: farmId || undefined,
     }),
-    [fromDate, toDate, farmId]
+    [fromDate, toDate, farmId],
   );
 
   const { data, isLoading: loading, isError } = useFarmerDashboard(params);
@@ -51,7 +51,7 @@ export default function FarmerDashboard() {
         value: wp.total_kgs,
         jobs: wp.jobs,
       })),
-    [charts]
+    [charts],
   );
 
   const farmRankingData = useMemo(
@@ -62,7 +62,7 @@ export default function FarmerDashboard() {
         size: (fp.size * HA_TO_ACRES).toFixed(1),
         zone: fp.farm.zone,
       })),
-    [charts]
+    [charts],
   );
 
   const SkeletonBox = ({ h = 16 }: { h?: number }) => (

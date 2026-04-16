@@ -48,8 +48,7 @@ export default function EditSchedulePage() {
   const [activityId, setActivityId] = useState<string | null>(null);
 
   const farmValue = farmId ?? (schedule ? schedule.farm.id : "");
-  const activityValue =
-    activityId ?? (schedule ? schedule.activity.id : "");
+  const activityValue = activityId ?? (schedule ? schedule.activity.id : "");
 
   const farms = farmsData?.data || [];
   const activities = activitiesData?.data || [];
@@ -112,7 +111,9 @@ export default function EditSchedulePage() {
                   <MdSchedule className="w-6 h-6 text-emerald-600" />
                   Edit Schedule
                 </h1>
-                <p className="text-gray-500 mt-1">Update schedule information</p>
+                <p className="text-gray-500 mt-1">
+                  Update schedule information
+                </p>
               </div>
             </div>
           </div>
