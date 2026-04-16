@@ -413,7 +413,7 @@ export default function WorkGroupDetailPage() {
     {/* Create Worker Modal */}
     {showCreateWorker && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MdPersonAdd className="w-4 h-4 text-primary" />
@@ -426,7 +426,7 @@ export default function WorkGroupDetailPage() {
               ×
             </button>
           </div>
-          <div className="px-6 py-5 space-y-4">
+          <div className="px-6 py-5 grid grid-cols-2 gap-4">
             <InputField
               label="Full Name"
               placeholder="e.g. Jane Muthoni"
