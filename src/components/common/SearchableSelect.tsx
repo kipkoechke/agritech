@@ -126,7 +126,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full px-3 py-2 border rounded-lg text-left
+          w-full px-3 py-3 border rounded-lg text-left
           focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
           disabled:bg-gray-100 disabled:cursor-not-allowed
           ${error ? "border-red-500" : "border-gray-300"}

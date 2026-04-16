@@ -18,7 +18,7 @@ export default function Pagination({
 
   return (
     <div className="px-3 md:px-4 py-2 border-t border-slate-200 flex items-center justify-between gap-2">
-      <p className="text-xs md:text-sm text-slate-500 shrink-0">
+      <p className="text-xs md:text-sm text-slate-700 shrink-0">
         <span className="hidden sm:inline">Page </span>
         {currentPage}
         <span className="hidden sm:inline"> of {totalPages}</span>
@@ -34,7 +34,7 @@ export default function Pagination({
           <span className="hidden sm:inline">Previous</span>
           <span className="sm:hidden">Prev</span>
         </button>
-        <span className="text-xs md:text-sm text-slate-600 px-1 md:px-2 hidden sm:block">
+        <span className="text-xs md:text-sm text-slate-700 px-1 md:px-2 hidden sm:block">
           {currentPage} / {totalPages}
         </span>
         <button

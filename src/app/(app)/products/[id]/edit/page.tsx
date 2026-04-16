@@ -72,24 +72,24 @@ export default function EditProductPage() {
 
   return (
     <div className="min-h-screen p-4">
-      <div className="mb-6">
-        <Link
-          href={`/products/${id}`}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <MdArrowBack className="w-5 h-5" />
-          Back to Product Details
-        </Link>
-      </div>
-
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <MdInventory className="w-6 h-6 text-emerald-600" />
-              Edit Product
-            </h1>
-            <p className="text-gray-500 mt-1">Update product information</p>
+            <div className="flex items-center gap-3">
+              <Link
+                href={`/products/${id}`}
+                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors shrink-0"
+              >
+                <MdArrowBack className="w-5 h-5" />
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <MdInventory className="w-6 h-6 text-emerald-600" />
+                  Edit Product
+                </h1>
+                <p className="text-gray-500 mt-1">Update product information</p>
+              </div>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">

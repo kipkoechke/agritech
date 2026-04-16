@@ -297,8 +297,9 @@ function WorkerRow({
 
           <button
             onClick={toggleFarmQty}
+            disabled={!booking.is_confirmed}
             title="Capture farm quantity"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             <MdScale className="w-3 h-3" />
             Farm Qty
@@ -306,8 +307,9 @@ function WorkerRow({
 
           <button
             onClick={toggleFactoryQty}
+            disabled={booking.farm_qty == null}
             title="Capture factory quantity"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             <MdScale className="w-3 h-3" />
             Factory Qty
@@ -316,9 +318,9 @@ function WorkerRow({
           {!booking.worker_signed && (
             <button
               onClick={() => signOffMutation.mutate(booking.id)}
-              disabled={signOffMutation.isPending}
+              disabled={!booking.is_confirmed || booking.farm_qty == null || booking.factory_qty == null || signOffMutation.isPending}
               title="Sign off worker"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               <MdCreate className="w-3 h-3" />
               Sign Off
