@@ -24,10 +24,17 @@ export const getFactories = async (
   return response.data;
 };
 
-export const getFactory = async (id: string): Promise<FactoryResponse> => {
-  const response = await axiosInstance.get<FactoryResponse>(
-    `/factories/${id}`,
+export const getZoneFactories = async (
+  zoneId: string,
+): Promise<FactoriesResponse> => {
+  const response = await axiosInstance.get<FactoriesResponse>(
+    `/zones/${zoneId}/factories`,
   );
+  return response.data;
+};
+
+export const getFactory = async (id: string): Promise<FactoryResponse> => {
+  const response = await axiosInstance.get<FactoryResponse>(`/factories/${id}`);
   return response.data;
 };
 

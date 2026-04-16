@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getFactories,
   getFactory,
+  getZoneFactories,
   createFactory,
   updateFactory,
   deleteFactory,
@@ -15,6 +16,14 @@ export const useFactories = (params: FactoriesParams = {}) => {
   return useQuery({
     queryKey: ["factories", params],
     queryFn: () => getFactories(params),
+  });
+};
+
+export const useZoneFactories = (zoneId: string) => {
+  return useQuery({
+    queryKey: ["zone-factories", zoneId],
+    queryFn: () => getZoneFactories(zoneId),
+    enabled: !!zoneId,
   });
 };
 

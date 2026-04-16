@@ -17,7 +17,7 @@ import {
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useRoleDashboard";
 import { useZones } from "@/hooks/useZone";
-import { useFactories } from "@/hooks/useFactory";
+import { useZoneFactories } from "@/hooks/useFactory";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useFarms } from "@/hooks/useFarm";
 import StatCard from "@/components/common/StatCard";
@@ -61,10 +61,8 @@ export default function AdminDashboard() {
 
   // Filter data sources
   const { data: zonesData } = useZones();
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
-    zone_id: zoneId || undefined,
-    per_page: 200,
-  });
+  const { data: zoneFactoriesData, isLoading: factoriesLoading } =
+    useZoneFactories(zoneId);
   const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers(
     {
       role: "supervisor",
@@ -230,31 +228,33 @@ export default function AdminDashboard() {
               </select>
             </div>
 
-            {/* Factory */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">
-                Factory
-              </label>
-              <select
-                value={factoryId}
-                onChange={(e) => {
-                  setFactoryId(e.target.value);
-                  setSupervisorId("");
-                  setFarmerId("");
-                  setFarmId("");
-                }}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              >
-                <option value="">
-                  {factoriesLoading ? "Loading..." : "All Factories"}
-                </option>
-                {(factoriesData?.data ?? []).map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.name} ({f.code})
+            {/* Factory — only when zone selected */}
+            {zoneId && (
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Factory
+                </label>
+                <select
+                  value={factoryId}
+                  onChange={(e) => {
+                    setFactoryId(e.target.value);
+                    setSupervisorId("");
+                    setFarmerId("");
+                    setFarmId("");
+                  }}
+                  className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="">
+                    {factoriesLoading ? "Loading..." : "All Factories"}
                   </option>
-                ))}
-              </select>
-            </div>
+                  {(zoneFactoriesData?.data ?? []).map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name} ({f.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Supervisor */}
             <div>
@@ -281,58 +281,52 @@ export default function AdminDashboard() {
               </select>
             </div>
 
-            {/* Farmer */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Farmer</label>
-              <select
-                value={farmerId}
-                onChange={(e) => {
-                  setFarmerId(e.target.value);
-                  setFarmId("");
-                }}
-                disabled={!supervisorId}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                <option value="">
-                  {!supervisorId
-                    ? "Select supervisor first"
-                    : farmersLoading
-                      ? "Loading..."
-                      : "All Farmers"}
-                </option>
-                {supervisorId &&
-                  (farmersData?.data ?? []).map((f) => (
+            {/* Farmer — only when supervisor selected */}
+            {supervisorId && (
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Farmer
+                </label>
+                <select
+                  value={farmerId}
+                  onChange={(e) => {
+                    setFarmerId(e.target.value);
+                    setFarmId("");
+                  }}
+                  className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="">
+                    {farmersLoading ? "Loading..." : "All Farmers"}
+                  </option>
+                  {(farmersData?.data ?? []).map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.name}
                     </option>
                   ))}
-              </select>
-            </div>
+                </select>
+              </div>
+            )}
 
-            {/* Farm */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Farm</label>
-              <select
-                value={farmId}
-                onChange={(e) => setFarmId(e.target.value)}
-                disabled={!farmerId}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                <option value="">
-                  {!farmerId
-                    ? "Select farmer first"
-                    : farmsLoading
-                      ? "Loading..."
-                      : "All Farms"}
-                </option>
-                {farmerId &&
-                  (farmsData?.data ?? []).map((f) => (
+            {/* Farm — only when farmer selected */}
+            {farmerId && (
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Farm</label>
+                <select
+                  value={farmId}
+                  onChange={(e) => setFarmId(e.target.value)}
+                  className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="">
+                    {farmsLoading ? "Loading..." : "All Farms"}
+                  </option>
+                  {(farmsData?.data ?? []).map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.name}
                     </option>
                   ))}
-              </select>
-            </div>
+                </select>
+              </div>
+            )}
 
             {/* From Date */}
             <div>
@@ -409,12 +403,12 @@ export default function AdminDashboard() {
               {
                 title: "Total Farmers",
                 mainValue: summary?.total_farmers ?? 0,
-                subtitle: "Registered farmers",
+                subtitle: `${summary?.total_farms ?? 0} farms`,
               },
               {
                 title: "Total Factories",
                 mainValue: summary?.total_factories ?? 0,
-                subtitle: "Processing units",
+                subtitle: `${summary?.total_zones ?? 0} zones`,
               },
             ].map((card) => (
               <StatCard
@@ -426,10 +420,10 @@ export default function AdminDashboard() {
             ))}
       </div>
 
-      {/* StatCards Row 2: Bookings breakdown */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* StatCards Row 2: Bookings + Factory Qty */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {isLoading
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 2 }).map((_, i) => (
               <div key={i} className="bg-white rounded-lg shadow p-3 space-y-2">
                 <SkeletonBox h={12} />
                 <SkeletonBox h={24} />
@@ -439,17 +433,7 @@ export default function AdminDashboard() {
               {
                 title: "Total Bookings",
                 mainValue: summary?.total_bookings ?? 0,
-                subtitle: "All schedules",
-              },
-              {
-                title: "Completed",
-                mainValue: summary?.completed_bookings ?? 0,
-                subtitle: "Finished",
-              },
-              {
-                title: "Pending",
-                mainValue: summary?.pending_bookings ?? 0,
-                subtitle: "Awaiting action",
+                subtitle: `${summary?.completed_bookings ?? 0} done · ${summary?.pending_bookings ?? 0} pending`,
               },
               {
                 title: "Factory Qty",
