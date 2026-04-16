@@ -118,7 +118,8 @@ export default function WorkGroupDetailPage() {
   });
 
   return (
-    <Modal>
+    <>
+      <Modal>
       <div className="min-h-screen bg-gray-50">
         {/* Sticky Header */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
@@ -469,5 +470,6 @@ export default function WorkGroupDetailPage() {
         </div>
       </div>
     )}
+    </>
   );
 }
