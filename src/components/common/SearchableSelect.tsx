@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MdExpandMore, MdSearch, MdClose, MdPersonAdd } from "react-icons/md";
+import { MdExpandMore, MdSearch, MdClose, MdPersonAdd, MdCheck } from "react-icons/md";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 interface Option {
@@ -14,7 +14,7 @@ interface SearchableSelectProps {
   label: string;
   options: Option[];
   value?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   error?: string;
   disabled?: boolean;
   placeholder?: string;
@@ -25,6 +25,9 @@ interface SearchableSelectProps {
   showSearchHint?: boolean;
   onCreateNew?: (search: string) => void;
   createNewLabel?: string;
+  multiSelect?: boolean;
+  values?: string[];
+  onChangeMulti?: (values: string[]) => void;
 }
 
 export const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -42,6 +45,9 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   showSearchHint = false,
   onCreateNew,
   createNewLabel = "Add New",
+  multiSelect = false,
+  values = [],
+  onChangeMulti,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,14 +88,25 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const selectedLabel = selectedOption?.label || "";
 
   const handleSelect = (optionValue: string) => {
-    onChange(optionValue);
-    setIsOpen(false);
-    setSearchQuery("");
+    if (multiSelect) {
+      const newValues = values.includes(optionValue)
+        ? values.filter((v) => v !== optionValue)
+        : [...values, optionValue];
+      onChangeMulti?.(newValues);
+    } else {
+      onChange?.(optionValue);
+      setIsOpen(false);
+      setSearchQuery("");
+    }
   };
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange("");
+    if (multiSelect) {
+      onChangeMulti?.([]);
+    } else {
+      onChange?.("");
+    }
     setSearchQuery("");
   };
 
@@ -116,16 +133,42 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           ${isOpen ? "ring-2 ring-emerald-500 border-emerald-500" : ""}
         `}
       >
-        <div className="flex items-center justify-between">
-          <span
-            className={`block truncate text-sm ${
-              selectedLabel ? "text-gray-900" : "text-gray-500"
-            }`}
-          >
-            {selectedLabel || placeholder}
-          </span>
-          <div className="flex items-center space-x-1">
-            {value && !disabled && (
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            {multiSelect ? (
+              values.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {values.map((v) => {
+                    const opt = options.find((o) => o.value === v);
+                    return (
+                      <span key={v} className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full">
+                        {opt?.label || v}
+                        <MdClose
+                          className="w-3 h-3 cursor-pointer hover:text-red-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onChangeMulti?.(values.filter((val) => val !== v));
+                          }}
+                        />
+                      </span>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="block text-sm text-gray-500">{placeholder}</span>
+              )
+            ) : (
+              <span
+                className={`block truncate text-sm ${
+                  selectedLabel ? "text-gray-900" : "text-gray-500"
+                }`}
+              >
+                {selectedLabel || placeholder}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center space-x-1 shrink-0">
+            {(multiSelect ? values.length > 0 : value) && !disabled && (
               <MdClose
                 className="w-4 h-4 text-gray-400 hover:text-gray-600 shrink-0"
                 onClick={handleClear}
@@ -198,14 +241,19 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   type="button"
                   onClick={() => handleSelect(option.value)}
                   className={`
-                    w-full text-left px-3 py-2.5 hover:bg-blue-50 transition-colors text-sm font-semibold
+                    w-full text-left px-3 py-2.5 hover:bg-blue-50 transition-colors text-sm font-semibold flex items-center gap-2
                     ${
-                      value === option.value
+                      (multiSelect ? values.includes(option.value) : value === option.value)
                         ? "bg-blue-100 text-blue-900"
                         : "text-gray-900"
                     }
                   `}
                 >
+                  {multiSelect && (
+                    <span className="w-4 h-4 shrink-0 flex items-center justify-center">
+                      {values.includes(option.value) && <MdCheck className="w-4 h-4 text-emerald-600" />}
+                    </span>
+                  )}
                   {option?.label || option?.value || "Unknown"}
                 </button>
               ))

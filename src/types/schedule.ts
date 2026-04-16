@@ -64,7 +64,7 @@ export interface Schedule {
 export interface CreateScheduleData {
   farm_id: string;
   farm_activity_id: string;
-  work_group_id?: string;
+  work_group_ids: string[];
   scheduled_date: string;
   status?: string;
   notes?: string;

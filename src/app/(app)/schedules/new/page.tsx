@@ -40,7 +40,8 @@ export default function NewSchedulePage() {
 
   const [farmId, setFarmId] = useState("");
   const [activityId, setActivityId] = useState("");
-  const [workGroupId, setWorkGroupId] = useState("");
+  const [workGroupIds, setWorkGroupIds] = useState<string[]>([]);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const farms = farmsData?.data || [];
   const activities = activitiesData?.data || [];
@@ -62,11 +63,12 @@ export default function NewSchedulePage() {
   }));
 
   const onSubmit = (data: ScheduleFormData) => {
-    if (!farmId || !activityId) return;
+    setSubmitAttempted(true);
+    if (!farmId || !activityId || workGroupIds.length === 0) return;
     const payload: CreateScheduleData = {
       farm_id: farmId,
       farm_activity_id: activityId,
-      work_group_id: workGroupId || undefined,
+      work_group_ids: workGroupIds,
       scheduled_date: data.scheduled_date,
       notes: data.notes || undefined,
     };
@@ -119,12 +121,19 @@ export default function NewSchedulePage() {
             />
 
             <SearchableSelect
-              label="Worker Group"
+              label="Work Groups"
               options={workGroupOptions}
-              value={workGroupId}
-              onChange={setWorkGroupId}
-              placeholder="Select worker group (optional)"
+              multiSelect
+              values={workGroupIds}
+              onChangeMulti={setWorkGroupIds}
+              placeholder="Select work groups"
               isLoading={workGroupsLoading}
+              required
+              error={
+                submitAttempted && workGroupIds.length === 0
+                  ? "Please select at least one work group"
+                  : undefined
+              }
             />
 
             <InputField
@@ -150,7 +159,7 @@ export default function NewSchedulePage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={createSchedule.isPending || !farmId || !activityId}
+                disabled={createSchedule.isPending || !farmId || !activityId || workGroupIds.length === 0}
               >
                 {createSchedule.isPending ? "Creating..." : "Create Schedule"}
               </Button>
