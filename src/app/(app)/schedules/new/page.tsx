@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { MdArrowBack, MdSchedule } from "react-icons/md";
-import { InputField } from "@/components/common/InputField";
+import { TextAreaField } from "@/components/common/TextAreaField";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateSchedule } from "@/hooks/useSchedule";
@@ -100,56 +100,70 @@ export default function NewSchedulePage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-            <SearchableSelect
-              label="Farm"
-              options={farmOptions}
-              value={farmId}
-              onChange={setFarmId}
-              placeholder="Select farm"
-              isLoading={farmsLoading}
-              required
-            />
+            {/* Row 1: Farm | Work Groups */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <SearchableSelect
+                label="Farm"
+                options={farmOptions}
+                value={farmId}
+                onChange={setFarmId}
+                placeholder="Select farm"
+                isLoading={farmsLoading}
+                required
+              />
 
-            <SearchableSelect
-              label="Activity"
-              options={activityOptions}
-              value={activityId}
-              onChange={setActivityId}
-              placeholder="Select activity"
-              isLoading={activitiesLoading}
-              required
-            />
+              <SearchableSelect
+                label="Work Groups"
+                options={workGroupOptions}
+                multiSelect
+                values={workGroupIds}
+                onChangeMulti={setWorkGroupIds}
+                placeholder="Select work groups"
+                isLoading={workGroupsLoading}
+                required
+                error={
+                  submitAttempted && workGroupIds.length === 0
+                    ? "Please select at least one work group"
+                    : undefined
+                }
+              />
+            </div>
 
-            <SearchableSelect
-              label="Work Groups"
-              options={workGroupOptions}
-              multiSelect
-              values={workGroupIds}
-              onChangeMulti={setWorkGroupIds}
-              placeholder="Select work groups"
-              isLoading={workGroupsLoading}
-              required
-              error={
-                submitAttempted && workGroupIds.length === 0
-                  ? "Please select at least one work group"
-                  : undefined
-              }
-            />
+            {/* Row 2: Activity | Scheduled Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <SearchableSelect
+                label="Activity"
+                options={activityOptions}
+                value={activityId}
+                onChange={setActivityId}
+                placeholder="Select activity"
+                isLoading={activitiesLoading}
+                required
+              />
 
-            <InputField
-              label="Scheduled Date"
-              type="date"
-              register={register("scheduled_date", {
-                required: "Scheduled date is required",
-              })}
-              error={errors.scheduled_date?.message}
-              required
-            />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Scheduled Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  {...register("scheduled_date", {
+                    required: "Scheduled date is required",
+                  })}
+                  className="border-gray-300 focus:border-emerald-500 text-gray-900 focus:ring-emerald-500 hover:border-gray-400 w-full rounded-lg border px-4 py-3 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                />
+                {errors.scheduled_date && (
+                  <p className="text-red-500 text-xs mt-1">{errors.scheduled_date.message}</p>
+                )}
+              </div>
+            </div>
 
-            <InputField
+            {/* Row 3: Notes (Full Width) */}
+            <TextAreaField
               label="Notes"
               placeholder="Optional notes"
               register={register("notes")}
+              rows={3}
             />
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
