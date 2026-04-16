@@ -25,6 +25,9 @@ import {
   useDeleteWorkGroupMember,
 } from "@/hooks/useWorkGroup";
 import { useWorkers, useCreateWorker } from "@/hooks/useWorkers";
+import { useZones } from "@/hooks/useZone";
+import { useFactories } from "@/hooks/useFactory";
+import { useClusters } from "@/hooks/useCluster";
 import type { WorkGroupMember } from "@/types/workGroup";
 
 export default function WorkGroupDetailPage() {
@@ -37,7 +40,7 @@ export default function WorkGroupDetailPage() {
   );
   const [workerSearch, setWorkerSearch] = useState("");
   const [showCreateWorker, setShowCreateWorker] = useState(false);
-  const [newWorker, setNewWorker] = useState({ name: "", phone: "", pin: "" });
+  const [newWorker, setNewWorker] = useState({ name: "", phone: "", pin: "", zone_id: "", factory_id: "", cluster_id: "" });
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const { data: membersResponse, isLoading: membersLoading } =
@@ -46,6 +49,9 @@ export default function WorkGroupDetailPage() {
   const deleteMember = useDeleteWorkGroupMember();
   const createWorker = useCreateWorker();
   const { data: workersData, isLoading: workersLoading } = useWorkers({ search: workerSearch });
+  const { data: zonesData } = useZones();
+  const { data: factoriesData } = useFactories();
+  const { data: clustersData } = useClusters({ factory_id: newWorker.factory_id || undefined });
 
   const group = groupResponse?.data;
   const members = membersResponse?.data || [];
@@ -69,12 +75,19 @@ export default function WorkGroupDetailPage() {
   };
 
   const handleCreateWorker = () => {
-    if (!newWorker.name || !newWorker.phone || !newWorker.pin) return;
+    if (!newWorker.name || !newWorker.phone || !newWorker.pin || !newWorker.zone_id || !newWorker.factory_id || !newWorker.cluster_id) return;
     createWorker.mutate(
-      { name: newWorker.name, phone: newWorker.phone, pin: newWorker.pin },
+      {
+        name: newWorker.name,
+        phone: newWorker.phone,
+        pin: newWorker.pin,
+        zone_id: newWorker.zone_id,
+        factory_id: newWorker.factory_id,
+        cluster_id: newWorker.cluster_id,
+      },
       {
         onSuccess: () => {
-          setNewWorker({ name: "", phone: "", pin: "" });
+          setNewWorker({ name: "", phone: "", pin: "", zone_id: "", factory_id: "", cluster_id: "" });
           setShowCreateWorker(false);
         },
       },
@@ -436,6 +449,31 @@ export default function WorkGroupDetailPage() {
               onChange={(e) => setNewWorker((s) => ({ ...s, pin: e.target.value }))}
               required
             />
+            <SearchableSelect
+              label="Zone"
+              options={(zonesData ?? []).map((z: { id: string; name: string }) => ({ value: z.id, label: z.name }))}
+              value={newWorker.zone_id}
+              onChange={(val) => setNewWorker((s) => ({ ...s, zone_id: val }))}
+              placeholder="Select zone"
+              required
+            />
+            <SearchableSelect
+              label="Factory"
+              options={(factoriesData?.data ?? []).map((f: { id: string; name: string }) => ({ value: f.id, label: f.name }))}
+              value={newWorker.factory_id}
+              onChange={(val) => setNewWorker((s) => ({ ...s, factory_id: val, cluster_id: "" }))}
+              placeholder="Select factory"
+              required
+            />
+            <SearchableSelect
+              label="Cluster"
+              options={(clustersData?.data ?? []).map((c: { id: string; name: string }) => ({ value: c.id, label: c.name }))}
+              value={newWorker.cluster_id}
+              onChange={(val) => setNewWorker((s) => ({ ...s, cluster_id: val }))}
+              placeholder={newWorker.factory_id ? "Select cluster" : "Select factory first"}
+              disabled={!newWorker.factory_id}
+              required
+            />
           </div>
           <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
             <button
@@ -448,7 +486,7 @@ export default function WorkGroupDetailPage() {
             <button
               type="button"
               onClick={handleCreateWorker}
-              disabled={createWorker.isPending || !newWorker.name || !newWorker.phone || !newWorker.pin}
+              disabled={createWorker.isPending || !newWorker.name || !newWorker.phone || !newWorker.pin || !newWorker.zone_id || !newWorker.factory_id || !newWorker.cluster_id}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               <MdPersonAdd className="w-3.5 h-3.5" />
