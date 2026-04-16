@@ -375,7 +375,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* StatCards Row 1: KGs, Zones, Farms, Farmers, Factories */}
+      {/* StatCards: KGs, Farmers, Factories, Bookings, Factory Qty */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (
@@ -391,16 +391,6 @@ export default function AdminDashboard() {
                 subtitle: "Farm harvest",
               },
               {
-                title: "Total Zones",
-                mainValue: summary?.total_zones ?? 0,
-                subtitle: "Coverage areas",
-              },
-              {
-                title: "Total Farms",
-                mainValue: summary?.total_farms ?? 0,
-                subtitle: "Registered farms",
-              },
-              {
                 title: "Total Farmers",
                 mainValue: summary?.total_farmers ?? 0,
                 subtitle: `${summary?.total_farms ?? 0} farms`,
@@ -410,26 +400,6 @@ export default function AdminDashboard() {
                 mainValue: summary?.total_factories ?? 0,
                 subtitle: `${summary?.total_zones ?? 0} zones`,
               },
-            ].map((card) => (
-              <StatCard
-                key={card.title}
-                title={card.title}
-                mainValue={card.mainValue}
-                subtitle={card.subtitle}
-              />
-            ))}
-      </div>
-
-      {/* StatCards Row 2: Bookings + Factory Qty */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {isLoading
-          ? Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow p-3 space-y-2">
-                <SkeletonBox h={12} />
-                <SkeletonBox h={24} />
-              </div>
-            ))
-          : [
               {
                 title: "Total Bookings",
                 mainValue: summary?.total_bookings ?? 0,
