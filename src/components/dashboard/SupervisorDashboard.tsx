@@ -345,8 +345,8 @@ export default function SupervisorDashboard() {
                   tickFormatter={(v) => v.toLocaleString()}
                 />
                 <Tooltip
-                  formatter={(value: number) => [
-                    `${value.toLocaleString()} Kgs`,
+                  formatter={(value) => [
+                    `${Number(value ?? 0).toLocaleString()} Kgs`,
                     "Production",
                   ]}
                   labelFormatter={(label) =>
