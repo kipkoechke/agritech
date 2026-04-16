@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MdExpandMore, MdSearch, MdClose } from "react-icons/md";
+import { MdExpandMore, MdSearch, MdClose, MdPersonAdd } from "react-icons/md";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 interface Option {
@@ -23,6 +23,8 @@ interface SearchableSelectProps {
   onSearchChange?: (search: string) => void;
   isLoading?: boolean;
   showSearchHint?: boolean;
+  onCreateNew?: (search: string) => void;
+  createNewLabel?: string;
 }
 
 export const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -38,6 +40,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   onSearchChange,
   isLoading = false,
   showSearchHint = false,
+  onCreateNew,
+  createNewLabel = "Add New",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -206,10 +210,29 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 </button>
               ))
             ) : (
-              <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                {onSearchChange && !searchQuery
-                  ? "Start typing to search..."
-                  : "No results found"}
+              <div className="px-3 py-3 text-center text-sm">
+                {onSearchChange && !searchQuery ? (
+                  <span className="text-gray-500">Start typing to search...</span>
+                ) : onCreateNew && searchQuery ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-gray-400 text-xs">
+                      No results for &ldquo;{searchQuery}&rdquo;
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onCreateNew(searchQuery);
+                        setIsOpen(false);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors"
+                    >
+                      <MdPersonAdd className="w-3.5 h-3.5" />
+                      {createNewLabel}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-gray-500">No results found</span>
+                )}
               </div>
             )}
           </div>

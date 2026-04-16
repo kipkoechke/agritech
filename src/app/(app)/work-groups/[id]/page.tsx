@@ -243,24 +243,12 @@ export default function WorkGroupDetailPage() {
                     isLoading={workersLoading}
                     onSearchChange={setWorkerSearch}
                     searchPlaceholder="Search by phone or name…"
+                    onCreateNew={(search) => {
+                      setNewWorker((s) => ({ ...s, phone: search }));
+                      setShowCreateWorker(true);
+                    }}
+                    createNewLabel="Add New Worker"
                   />
-                  {/* No worker found prompt */}
-                  {!workersLoading && workerSearch.trim().length > 0 && availableUsers.length === 0 && (
-                    <div className="mt-2 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-dashed border-gray-300 bg-gray-50">
-                      <MdInfo className="w-4 h-4 text-gray-400 shrink-0" />
-                      <p className="text-xs text-gray-500 flex-1">
-                        No worker found for &ldquo;{workerSearch}&rdquo;
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setShowCreateWorker(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
-                      >
-                        <MdPersonAdd className="w-3.5 h-3.5" />
-                        Add Worker
-                      </button>
-                    </div>
-                  )}
                   {selectedMemberIds.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {selectedMemberIds.map((uid) => {
