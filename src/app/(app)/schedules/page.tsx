@@ -465,7 +465,6 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
               })}
             </div>
           )}
-
         </div>
       </div>
 

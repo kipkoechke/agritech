@@ -156,6 +156,22 @@ export interface DailyProduction {
   jobs: number;
 }
 
+export interface SupervisorDailyProduction {
+  date: string;
+  total_kgs: number;
+  jobs: number;
+}
+
+export interface UpcomingSchedule {
+  id: string;
+  reference_code: string;
+  farm: string;
+  activity: string;
+  scheduled_date: string;
+  status: string;
+  notes: string | null;
+}
+
 export interface FarmPerformance {
   farm: {
     id: string;
@@ -200,12 +216,14 @@ export interface FarmerDashboardParams {
 
 // Supervisor Dashboard Types
 export interface SupervisorDashboardSummary {
-  total_assigned_farms: number;
+  total_my_farms: number;
+  total_my_workgroups: number;
   total_workers: number;
   total_bookings: number;
   completed_bookings: number;
   pending_bookings: number;
-  total_kgs: number;
+  net_kgs: number;
+  revenue: number;
 }
 
 export interface AssignedFarm {
@@ -259,11 +277,11 @@ export interface WorkerPerformance {
     phone: string;
   };
   total_kgs: number;
-  total_jobs: number;
+  jobs: number;
 }
 
 export interface SupervisorDashboardCharts {
-  daily_production: DailyProduction[];
+  daily_production: SupervisorDailyProduction[];
   worker_performance: WorkerPerformance[];
 }
 
@@ -308,6 +326,7 @@ export interface FactoryKgRecord {
 export interface SupervisorDashboardResponse {
   summary: SupervisorDashboardSummary;
   assigned_farms: AssignedFarm[];
+  upcoming_schedules: UpcomingSchedule[];
   tasks: SupervisorTasks;
   charts: SupervisorDashboardCharts;
   farm_kgs?: FarmKgRecord[];

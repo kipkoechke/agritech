@@ -26,13 +26,23 @@ export function getApiErrorMessage(
 
   if (data) {
     // Handle string-array errors (e.g. ["You do not manage a farm..."])
-    if (Array.isArray(data.errors) && data.errors.length > 0 && typeof data.errors[0] === "string") {
+    if (
+      Array.isArray(data.errors) &&
+      data.errors.length > 0 &&
+      typeof data.errors[0] === "string"
+    ) {
       return (data.errors as string[])[0];
     }
 
     // Handle record-style field errors (e.g. { field: ["message"] })
-    if (data.errors && typeof data.errors === "object" && !Array.isArray(data.errors)) {
-      const firstError = Object.values(data.errors as Record<string, string[]>)[0]?.[0];
+    if (
+      data.errors &&
+      typeof data.errors === "object" &&
+      !Array.isArray(data.errors)
+    ) {
+      const firstError = Object.values(
+        data.errors as Record<string, string[]>,
+      )[0]?.[0];
       if (firstError) return firstError;
     }
 

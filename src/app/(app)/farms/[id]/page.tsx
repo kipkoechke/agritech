@@ -254,7 +254,9 @@ export default function FarmDetailsPage() {
                   </span>
                   <div className="flex items-center gap-1.5">
                     <MdPinDrop className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <span className="text-xs text-gray-400 italic">See map below</span>
+                    <span className="text-xs text-gray-400 italic">
+                      See map below
+                    </span>
                   </div>
                 </div>
               )}

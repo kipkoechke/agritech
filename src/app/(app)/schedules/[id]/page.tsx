@@ -564,26 +564,24 @@ export default function ScheduleDetailsPage() {
               value: withQuantitiesCount,
               icon: MdScale,
             },
-          ].map(
-            ({ label, value, icon: Icon }) => (
-              <div
-                key={label}
-                className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-primary/70" />
-                </div>
-                <div>
-                  <p className="text-3xl font-extrabold text-gray-900 tabular-nums leading-none">
-                    {value}
-                  </p>
-                  <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">
-                    {label}
-                  </p>
-                </div>
+          ].map(({ label, value, icon: Icon }) => (
+            <div
+              key={label}
+              className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Icon className="w-5 h-5 text-primary/70" />
               </div>
-            ),
-          )}
+              <div>
+                <p className="text-3xl font-extrabold text-gray-900 tabular-nums leading-none">
+                  {value}
+                </p>
+                <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">
+                  {label}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

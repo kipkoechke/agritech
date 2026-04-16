@@ -212,7 +212,9 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
             ) : (
               <div className="px-3 py-3 text-center text-sm">
                 {onSearchChange && !searchQuery ? (
-                  <span className="text-gray-500">Start typing to search...</span>
+                  <span className="text-gray-500">
+                    Start typing to search...
+                  </span>
                 ) : onCreateNew && searchQuery ? (
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-gray-400 text-xs">

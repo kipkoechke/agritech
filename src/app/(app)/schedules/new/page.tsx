@@ -26,8 +26,9 @@ export default function NewSchedulePage() {
   const { data: farmsData, isLoading: farmsLoading } = useFarms();
   const { data: activitiesData, isLoading: activitiesLoading } =
     useActivities();
-  const { data: workGroupsData, isLoading: workGroupsLoading } =
-    useWorkGroups({ active: true });
+  const { data: workGroupsData, isLoading: workGroupsLoading } = useWorkGroups({
+    active: true,
+  });
 
   const {
     register,
