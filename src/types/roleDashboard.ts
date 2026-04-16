@@ -12,18 +12,23 @@ export interface AdminDashboardSummary {
   pending_bookings: number;
   total_kgs: number;
   factory_qty: number;
+  revenue: number;
 }
 
 export interface DailyBooking {
   date: string;
   count: number;
-  total_kgs: string | null;
+  total_kgs: number;
 }
 
 export interface ZoneDistribution {
+  zone_id: string;
   zone: string;
-  farms: number;
+  farm_count: number;
   total_size: number;
+  kgs_collected: number;
+  farmers_count: number;
+  revenue: number;
 }
 
 export interface BookingStatus {
@@ -38,18 +43,29 @@ export interface TopWorker {
     id: string;
     name: string;
     phone: string;
+    zone: string | null;
   };
   total_kgs: number;
   jobs: number;
+  days_worked: number;
+  farms_worked: number;
+  avg_kgs_per_job: number;
+  revenue: number;
 }
 
 export interface TopFarm {
   farm: {
     id: string;
     name: string;
-  };
+    zone: string;
+    owner: null;
+  } | null;
   total_kgs: number;
   jobs: number;
+  workers_count: number;
+  days_active: number;
+  avg_kgs_per_job: number;
+  revenue: number;
 }
 
 export interface FactoryPerformance {
@@ -59,6 +75,9 @@ export interface FactoryPerformance {
   zone: string;
   farms: number;
   clusters: number;
+  total_kgs: number;
+  workers_count: number;
+  revenue: number;
 }
 
 export interface FilterOption {
@@ -69,22 +88,16 @@ export interface FilterOption {
 
 export interface AdminDashboardCharts {
   daily_bookings: DailyBooking[];
-  zone_distribution: ZoneDistribution[];
+  top_10_zone_distribution: ZoneDistribution[];
   booking_status: BookingStatus;
-  top_workers: TopWorker[];
-  top_farms: TopFarm[];
-  factory_performance: FactoryPerformance[];
-}
-
-export interface AdminDashboardFilters {
-  available_zones: FilterOption[];
-  available_factories: FilterOption[];
+  top_10_workers: TopWorker[];
+  top_10_farms: TopFarm[];
+  top_10_factories: FactoryPerformance[];
 }
 
 export interface AdminDashboardResponse {
   summary: AdminDashboardSummary;
   charts: AdminDashboardCharts;
-  filters: AdminDashboardFilters;
   date_range: { from: string; to: string };
 }
 

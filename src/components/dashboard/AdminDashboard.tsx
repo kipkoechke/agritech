@@ -1,42 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { FiFilter, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import {
-  MdDashboard,
-  MdAgriculture,
-  MdPeople,
-  MdFactory,
-  MdMap,
-  MdBookOnline,
-  MdTrendingUp,
-  MdScale,
-  MdSupervisorAccount,
-} from "react-icons/md";
-import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
-  CartesianGrid,
-  Legend,
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useRoleDashboard";
-
-function getDefaultDateRange() {
-  const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  return {
-    fromDate: firstDay.toISOString().split("T")[0],
-    toDate: now.toISOString().split("T")[0],
-  };
-}
+import { useZones } from "@/hooks/useZone";
+import { useFactories } from "@/hooks/useFactory";
+import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useFarms } from "@/hooks/useFarm";
+import StatCard from "@/components/common/StatCard";
+import RankingChart from "@/components/common/RankingChart";
 
 const COLORS = [
   "#059669",
@@ -49,493 +34,675 @@ const COLORS = [
   "#65a30d",
 ];
 
+function formatDate(d: Date) {
+  return d.toISOString().split("T")[0];
+}
+
+const SkeletonBox = ({ h = 16 }: { h?: number }) => (
+  <div
+    className="bg-gray-200 animate-pulse rounded"
+    style={{ height: `${h}px` }}
+  />
+);
+
 export default function AdminDashboard() {
-  const defaults = getDefaultDateRange();
-  const [fromDate, setFromDate] = useState(defaults.fromDate);
-  const [toDate, setToDate] = useState(defaults.toDate);
+  const today = new Date();
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [fromDate, setFromDate] = useState(formatDate(thirtyDaysAgo));
+  const [toDate, setToDate] = useState(formatDate(today));
   const [zoneId, setZoneId] = useState("");
   const [factoryId, setFactoryId] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "farmers" | "workers" | "supervisors"
-  >("overview");
+  const [supervisorId, setSupervisorId] = useState("");
+  const [farmerId, setFarmerId] = useState("");
+  const [farmId, setFarmId] = useState("");
 
-  const { data, isLoading, error } = useAdminDashboard({
-    from_date: fromDate,
-    to_date: toDate,
+  // Filter data sources
+  const { data: zonesData } = useZones();
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
     zone_id: zoneId || undefined,
-    factory_id: factoryId || undefined,
+    per_page: 200,
   });
+  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers(
+    {
+      role: "supervisor",
+      per_page: 200,
+    },
+  );
+  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
+    role: "farmer",
+    supervisor_id: supervisorId || undefined,
+    per_page: 200,
+  });
+  const { data: farmsData, isLoading: farmsLoading } = useFarms(
+    { owner_id: farmerId, per_page: 200 },
+    { enabled: !!farmerId },
+  );
+
+  const params = useMemo(
+    () => ({
+      from_date: fromDate || undefined,
+      to_date: toDate || undefined,
+      zone_id: zoneId || undefined,
+      factory_id: factoryId || undefined,
+      supervisor_id: supervisorId || undefined,
+      farmer_id: farmerId || undefined,
+      farm_id: farmId || undefined,
+    }),
+    [fromDate, toDate, zoneId, factoryId, supervisorId, farmerId, farmId],
+  );
+
+  const { data, isLoading, isError } = useAdminDashboard(params);
 
   const summary = data?.summary;
   const charts = data?.charts;
-  const filters = data?.filters;
 
-  const bookingStatusData = charts?.booking_status
-    ? [
-        { name: "Confirmed", value: charts.booking_status.confirmed },
-        { name: "Pending", value: charts.booking_status.pending },
-        { name: "Completed", value: charts.booking_status.completed },
-        {
-          name: "Factory Received",
-          value: charts.booking_status.factory_received,
-        },
-      ]
-    : [];
+  const activeFilterCount = [
+    zoneId,
+    factoryId,
+    supervisorId,
+    farmerId,
+    farmId,
+  ].filter(Boolean).length;
 
-  if (isLoading) {
+  // Prepare ranking data
+  const zoneRankingData = useMemo(
+    () =>
+      (charts?.top_10_zone_distribution ?? []).map((z) => ({
+        name: z.zone,
+        value: z.kgs_collected,
+        farms: z.farm_count,
+        revenue: z.revenue,
+      })),
+    [charts],
+  );
+
+  const factoryRankingData = useMemo(
+    () =>
+      (charts?.top_10_factories ?? []).map((f) => ({
+        name: f.name,
+        value: f.total_kgs,
+        code: f.code,
+        zone: f.zone,
+        workers: f.workers_count,
+      })),
+    [charts],
+  );
+
+  const farmRankingData = useMemo(
+    () =>
+      (charts?.top_10_farms ?? [])
+        .filter((f) => f.farm != null)
+        .map((f) => ({
+          name: f.farm!.name,
+          value: f.total_kgs,
+          zone: f.farm!.zone,
+          jobs: f.jobs,
+        })),
+    [charts],
+  );
+
+  const workerRankingData = useMemo(
+    () =>
+      (charts?.top_10_workers ?? []).map((w) => ({
+        name: w.worker.name,
+        value: w.total_kgs,
+        jobs: w.jobs,
+        avg: w.avg_kgs_per_job,
+      })),
+    [charts],
+  );
+
+  const bookingStatusData = useMemo(
+    () =>
+      charts?.booking_status
+        ? [
+            { name: "Confirmed", value: charts.booking_status.confirmed },
+            { name: "Pending", value: charts.booking_status.pending },
+            { name: "Completed", value: charts.booking_status.completed },
+            {
+              name: "Factory Received",
+              value: charts.booking_status.factory_received,
+            },
+          ]
+        : [],
+    [charts],
+  );
+
+  const hasPieData = bookingStatusData.some((d) => d.value > 0);
+
+  if (isError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-        Failed to load dashboard data. Please try again later.
+      <div className="p-6 text-center text-red-500 text-sm">
+        Failed to load dashboard data. Please try again.
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex gap-3 items-end flex-wrap">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              From
-            </label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              To
-            </label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900"
-            />
-          </div>
-          {filters?.available_zones && (
+    <div className="space-y-4 p-4">
+      {/* Collapsible Filters */}
+      <div className="bg-white rounded-lg shadow p-3">
+        <button
+          className="flex items-center gap-2 text-sm font-semibold text-gray-700 w-full text-left"
+          onClick={() => setShowFilters((prev) => !prev)}
+        >
+          <FiFilter className="text-gray-400" />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">
+              {activeFilterCount} active
+            </span>
+          )}
+          <span className="ml-auto">
+            {showFilters ? (
+              <FiChevronUp className="text-gray-400" />
+            ) : (
+              <FiChevronDown className="text-gray-400" />
+            )}
+          </span>
+        </button>
+
+        {showFilters && (
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Zone */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Zone
-              </label>
+              <label className="block text-xs text-gray-500 mb-1">Zone</label>
               <select
                 value={zoneId}
-                onChange={(e) => setZoneId(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900"
+                onChange={(e) => {
+                  setZoneId(e.target.value);
+                  setFactoryId("");
+                  setSupervisorId("");
+                  setFarmerId("");
+                  setFarmId("");
+                }}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">All Zones</option>
-                {filters.available_zones.map((z) => (
+                {(Array.isArray(zonesData) ? zonesData : []).map((z) => (
                   <option key={z.id} value={z.id}>
                     {z.name}
                   </option>
                 ))}
               </select>
             </div>
-          )}
-          {filters?.available_factories && (
+
+            {/* Factory */}
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs text-gray-500 mb-1">
                 Factory
               </label>
               <select
                 value={factoryId}
-                onChange={(e) => setFactoryId(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900"
+                onChange={(e) => {
+                  setFactoryId(e.target.value);
+                  setSupervisorId("");
+                  setFarmerId("");
+                  setFarmId("");
+                }}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
-                <option value="">All Factories</option>
-                {filters.available_factories.map((f) => (
+                <option value="">
+                  {factoriesLoading ? "Loading..." : "All Factories"}
+                </option>
+                {(factoriesData?.data ?? []).map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name} ({f.code})
                   </option>
                 ))}
               </select>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Primary Cards - Always Visible (changing transactions) */}
-      {summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          <StatCard
-            icon={MdScale}
-            label="Total Kgs"
-            value={summary.total_kgs.toLocaleString()}
-            color="text-emerald-600"
-          />
-          <StatCard
-            icon={MdBookOnline}
-            label="Total Bookings"
-            value={summary.total_bookings}
-          />
-          <StatCard
-            icon={MdBookOnline}
-            label="Completed"
-            value={summary.completed_bookings}
-            color="text-green-600"
-          />
-          <StatCard
-            icon={MdBookOnline}
-            label="Pending"
-            value={summary.pending_bookings}
-            color="text-yellow-600"
-          />
-        </div>
-      )}
-
-      {/* Tabs - Secondary Views (workforce data) */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
-            {[
-              { key: "overview" as const, label: "Overview" },
-              { key: "farmers" as const, label: "Farmers", icon: MdPeople },
-              {
-                key: "workers" as const,
-                label: "Farm Workers",
-                icon: MdPeople,
-              },
-              {
-                key: "supervisors" as const,
-                label: "Supervisors",
-                icon: MdSupervisorAccount,
-              },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.key
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+            {/* Supervisor */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">
+                Supervisor
+              </label>
+              <select
+                value={supervisorId}
+                onChange={(e) => {
+                  setSupervisorId(e.target.value);
+                  setFarmerId("");
+                  setFarmId("");
+                }}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <div className="p-4">
-          {activeTab === "overview" && summary && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              <StatCard
-                icon={MdAgriculture}
-                label="Farms"
-                value={summary.total_farms}
-              />
-              <StatCard
-                icon={MdFactory}
-                label="Factories"
-                value={summary.total_factories}
-              />
-              <StatCard
-                icon={MdMap}
-                label="Zones"
-                value={summary.total_zones}
-              />
-              <StatCard
-                icon={MdFactory}
-                label="Factory Qty"
-                value={summary.factory_qty}
-              />
-              <StatCard
-                icon={MdTrendingUp}
-                label="Activities"
-                value={summary.total_activities}
-              />
+                <option value="">
+                  {supervisorsLoading ? "Loading..." : "All Supervisors"}
+                </option>
+                {(supervisorsData?.data ?? []).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
 
-          {activeTab === "farmers" && summary && (
+            {/* Farmer */}
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <MdPeople className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Total Farmers: {summary.total_farmers}
-                </h3>
-              </div>
-              {charts?.top_farms && charts.top_farms.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                          #
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                          Farm
-                        </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                          Kgs
-                        </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                          Jobs
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {charts.top_farms.map((f, i) => (
-                        <tr key={f.farm.id + i}>
-                          <td className="px-4 py-2 text-gray-500">{i + 1}</td>
-                          <td className="px-4 py-2 font-medium text-gray-900">
-                            {f.farm.name}
-                          </td>
-                          <td className="px-4 py-2 text-right text-emerald-600 font-medium">
-                            {f.total_kgs.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-2 text-right text-gray-900">
-                            {f.jobs}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <label className="block text-xs text-gray-500 mb-1">Farmer</label>
+              <select
+                value={farmerId}
+                onChange={(e) => {
+                  setFarmerId(e.target.value);
+                  setFarmId("");
+                }}
+                disabled={!supervisorId}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {!supervisorId
+                    ? "Select supervisor first"
+                    : farmersLoading
+                      ? "Loading..."
+                      : "All Farmers"}
+                </option>
+                {supervisorId &&
+                  (farmersData?.data ?? []).map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+              </select>
             </div>
-          )}
 
-          {activeTab === "workers" && summary && (
+            {/* Farm */}
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <MdPeople className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Total Workers: {summary.total_workers}
-                </h3>
-              </div>
-              {charts?.top_workers && charts.top_workers.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                          #
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                          Worker
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">
-                          Phone
-                        </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                          Kgs
-                        </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">
-                          Jobs
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {charts.top_workers.map((w, i) => (
-                        <tr key={w.worker.id + i}>
-                          <td className="px-4 py-2 text-gray-500">{i + 1}</td>
-                          <td className="px-4 py-2 font-medium text-gray-900">
-                            {w.worker.name}
-                          </td>
-                          <td className="px-4 py-2 text-gray-500">
-                            {w.worker.phone}
-                          </td>
-                          <td className="px-4 py-2 text-right text-emerald-600 font-medium">
-                            {w.total_kgs.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-2 text-right text-gray-900">
-                            {w.jobs}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <label className="block text-xs text-gray-500 mb-1">Farm</label>
+              <select
+                value={farmId}
+                onChange={(e) => setFarmId(e.target.value)}
+                disabled={!farmerId}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {!farmerId
+                    ? "Select farmer first"
+                    : farmsLoading
+                      ? "Loading..."
+                      : "All Farms"}
+                </option>
+                {farmerId &&
+                  (farmsData?.data ?? []).map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+              </select>
             </div>
-          )}
 
-          {activeTab === "supervisors" && summary && (
+            {/* From Date */}
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <MdSupervisorAccount className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Total Supervisors: {summary.total_supervisors}
-                </h3>
-              </div>
-              <p className="text-sm text-gray-500">
-                Supervisor performance data is available in the charts below.
-              </p>
+              <label className="block text-xs text-gray-500 mb-1">
+                From Date
+              </label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
             </div>
-          )}
-        </div>
+
+            {/* To Date */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">
+                To Date
+              </label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+
+            {/* Clear button */}
+            {activeFilterCount > 0 && (
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setZoneId("");
+                    setFactoryId("");
+                    setSupervisorId("");
+                    setFarmerId("");
+                    setFarmId("");
+                  }}
+                  className="text-xs text-red-500 hover:text-red-700 underline"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
+      {/* StatCards Row 1: KGs, Zones, Farms, Farmers, Factories */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {isLoading
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-3 space-y-2">
+                <SkeletonBox h={12} />
+                <SkeletonBox h={24} />
+              </div>
+            ))
+          : [
+              {
+                title: "Total Production",
+                mainValue: `${(summary?.total_kgs ?? 0).toLocaleString()} Kgs`,
+                subtitle: "Farm harvest",
+              },
+              {
+                title: "Total Zones",
+                mainValue: summary?.total_zones ?? 0,
+                subtitle: "Coverage areas",
+              },
+              {
+                title: "Total Farms",
+                mainValue: summary?.total_farms ?? 0,
+                subtitle: "Registered farms",
+              },
+              {
+                title: "Total Farmers",
+                mainValue: summary?.total_farmers ?? 0,
+                subtitle: "Registered farmers",
+              },
+              {
+                title: "Total Factories",
+                mainValue: summary?.total_factories ?? 0,
+                subtitle: "Processing units",
+              },
+            ].map((card) => (
+              <StatCard
+                key={card.title}
+                title={card.title}
+                mainValue={card.mainValue}
+                subtitle={card.subtitle}
+              />
+            ))}
+      </div>
+
+      {/* StatCards Row 2: Bookings breakdown */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-3 space-y-2">
+                <SkeletonBox h={12} />
+                <SkeletonBox h={24} />
+              </div>
+            ))
+          : [
+              {
+                title: "Total Bookings",
+                mainValue: summary?.total_bookings ?? 0,
+                subtitle: "All schedules",
+              },
+              {
+                title: "Completed",
+                mainValue: summary?.completed_bookings ?? 0,
+                subtitle: "Finished",
+              },
+              {
+                title: "Pending",
+                mainValue: summary?.pending_bookings ?? 0,
+                subtitle: "Awaiting action",
+              },
+              {
+                title: "Factory Qty",
+                mainValue: `${(summary?.factory_qty ?? 0).toLocaleString()} Kgs`,
+                subtitle: "Received at factory",
+              },
+            ].map((card) => (
+              <StatCard
+                key={card.title}
+                title={card.title}
+                mainValue={card.mainValue}
+                subtitle={card.subtitle}
+              />
+            ))}
+      </div>
+
+      {/* Ranking Charts Row A: Zones | Factories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Daily Bookings Chart */}
-        {charts?.daily_bookings && charts.daily_bookings.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Daily Bookings
-            </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={charts.daily_bookings}>
-                <CartesianGrid strokeDasharray="3 3" />
+        <RankingChart
+          title="Top Zones by KGs Collected"
+          data={zoneRankingData}
+          loading={isLoading}
+          color="#059669"
+          borderColor="border-emerald-200"
+          textColor="text-emerald-700"
+          noDataMessage="No zone data for this period"
+          metricLabel="KGs Collected"
+          dataKey="name"
+          renderTooltip={(d) => (
+            <>
+              <div className="font-bold text-emerald-700 mb-2">{d.name}</div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">KGs Collected</span>
+                  <span className="font-bold">
+                    {Number(d.value).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Farms</span>
+                  <span className="font-bold">{d.farms}</span>
+                </div>
+              </div>
+            </>
+          )}
+        />
+        <RankingChart
+          title="Top Factories by KG Throughput"
+          data={factoryRankingData}
+          loading={isLoading}
+          color="#0891b2"
+          borderColor="border-cyan-200"
+          textColor="text-cyan-700"
+          noDataMessage="No factory data for this period"
+          metricLabel="Total KGs"
+          dataKey="name"
+          renderTooltip={(d) => (
+            <>
+              <div className="font-bold text-cyan-700 mb-2">
+                {d.name} ({d.code})
+              </div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Zone</span>
+                  <span className="font-bold">{d.zone}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Total KGs</span>
+                  <span className="font-bold">
+                    {Number(d.value).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Workers</span>
+                  <span className="font-bold">{d.workers}</span>
+                </div>
+              </div>
+            </>
+          )}
+        />
+      </div>
+
+      {/* Ranking Charts Row B: Farms | Workers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <RankingChart
+          title="Top Farms by KGs Collected"
+          data={farmRankingData}
+          loading={isLoading}
+          color="#7c3aed"
+          borderColor="border-violet-200"
+          textColor="text-violet-700"
+          noDataMessage="No farm data for this period"
+          metricLabel="Total KGs"
+          dataKey="name"
+          renderTooltip={(d) => (
+            <>
+              <div className="font-bold text-violet-700 mb-2">{d.name}</div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Zone</span>
+                  <span className="font-bold">{d.zone || "—"}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Total KGs</span>
+                  <span className="font-bold">
+                    {Number(d.value).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Jobs</span>
+                  <span className="font-bold">{d.jobs}</span>
+                </div>
+              </div>
+            </>
+          )}
+        />
+        <RankingChart
+          title="Top Workers by KGs Collected"
+          data={workerRankingData}
+          loading={isLoading}
+          color="#d97706"
+          borderColor="border-amber-200"
+          textColor="text-amber-700"
+          noDataMessage="No worker data for this period"
+          metricLabel="Total KGs"
+          dataKey="name"
+          renderTooltip={(d) => (
+            <>
+              <div className="font-bold text-amber-700 mb-2">{d.name}</div>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Total KGs</span>
+                  <span className="font-bold">
+                    {Number(d.value).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Jobs</span>
+                  <span className="font-bold">{d.jobs}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Avg KGs / Job</span>
+                  <span className="font-bold">
+                    {Number(d.avg ?? 0).toFixed(1)}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        />
+      </div>
+
+      {/* Trends Row: Daily Bookings + Booking Status Pie */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Daily Bookings Line Chart */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-gray-800 mb-3">
+            Daily Bookings Trend
+          </h3>
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <SkeletonBox key={i} h={16} />
+              ))}
+            </div>
+          ) : (charts?.daily_bookings?.length ?? 0) > 0 ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart
+                data={charts!.daily_bookings}
+                margin={{ top: 5, right: 10, bottom: 5, left: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11 }}
+                  tick={{ fontSize: 10 }}
                   tickFormatter={(d) => d.slice(5)}
                 />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  formatter={(value, name) => [
+                    Number(value ?? 0).toLocaleString(),
+                    name,
+                  ]}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Line
                   type="monotone"
                   dataKey="count"
                   stroke="#059669"
                   name="Bookings"
                   strokeWidth={2}
+                  dot={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="total_kgs"
                   stroke="#0891b2"
-                  name="Kgs"
+                  name="KGs"
                   strokeWidth={2}
+                  dot={false}
                 />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-400">No data for this period</p>
+            </div>
+          )}
+        </div>
 
-        {/* Booking Status Pie */}
-        {bookingStatusData.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Booking Status
-            </h3>
-            <ResponsiveContainer width="100%" height={250}>
+        {/* Booking Status Pie Chart */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-gray-800 mb-3">
+            Booking Status Distribution
+          </h3>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-40">
+              <div className="w-10 h-10 border-4 border-gray-200 border-t-emerald-600 rounded-full animate-spin" />
+            </div>
+          ) : hasPieData ? (
+            <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
                   data={bookingStatusData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
+                  innerRadius={55}
                   outerRadius={90}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
+                  paddingAngle={2}
                 >
                   {bookingStatusData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  formatter={(value) => [
+                    Number(value ?? 0).toLocaleString(),
+                    "",
+                  ]}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* Zone Distribution */}
-        {charts?.zone_distribution && charts.zone_distribution.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Zone Distribution
-            </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={charts.zone_distribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="zone" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="farms" fill="#059669" name="Farms" />
-                <Bar dataKey="total_size" fill="#0891b2" name="Total Size" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* Factory Performance */}
-        {charts?.factory_performance &&
-          charts.factory_performance.length > 0 && (
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                Factory Performance
-              </h3>
-              <div className="overflow-x-auto max-h-[250px] overflow-y-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                        Factory
-                      </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                        Zone
-                      </th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-                        Farms
-                      </th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">
-                        Clusters
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {charts.factory_performance.map((f) => (
-                      <tr key={f.id}>
-                        <td className="px-3 py-1.5 text-gray-900">
-                          {f.name}{" "}
-                          <span className="text-gray-400 text-xs">
-                            ({f.code})
-                          </span>
-                        </td>
-                        <td className="px-3 py-1.5 text-gray-500">{f.zone}</td>
-                        <td className="px-3 py-1.5 text-right text-gray-900">
-                          {f.farms}
-                        </td>
-                        <td className="px-3 py-1.5 text-right text-gray-900">
-                          {f.clusters}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          ) : (
+            <div className="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-400">No data for this period</p>
             </div>
           )}
+        </div>
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string | number;
-  color?: string;
-}) {
-  return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3">
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="w-4 h-4 text-gray-400" />
-        <p className="text-xs text-gray-500">{label}</p>
-      </div>
-      <p className={`text-lg font-semibold ${color || "text-gray-900"}`}>
-        {value}
-      </p>
     </div>
   );
 }
