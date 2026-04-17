@@ -13,6 +13,7 @@ import { HiUserGroup } from "react-icons/hi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
+import { useIsAdmin } from "@/hooks/useAuth";
 
 interface HRISLayoutProps {
   children: ReactNode;
@@ -31,12 +32,14 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
   filters,
 }) => {
   const pathname = usePathname();
+  const isAdmin = useIsAdmin();
 
-  const tabs = [
+  const allTabs = [
     {
       name: "User Management",
       icon: MdGroup,
       href: "/hris/users",
+      adminOnly: true,
       active:
         pathname.startsWith("/hris/users") ||
         pathname.startsWith("/hris/roles"),
@@ -45,39 +48,47 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
       name: "Geo Hierarchy",
       icon: MdPublic,
       href: "/hris/geo-hierarchy",
+      adminOnly: true,
       active: pathname.startsWith("/hris/geo-hierarchy"),
     },
     {
       name: "Farmers",
       icon: MdPerson,
       href: "/farmers",
+      adminOnly: true,
       active: pathname.startsWith("/farmers"),
     },
     {
       name: "Work Groups",
       icon: HiUserGroup,
       href: "/work-groups",
+      adminOnly: true,
       active: pathname.startsWith("/work-groups"),
     },
     {
       name: "Supervisors",
       icon: MdSupervisorAccount,
       href: "/farm-supervisors",
+      adminOnly: true,
       active: pathname.startsWith("/farm-supervisors"),
     },
     {
       name: "Farm Activities",
       icon: MdLocalActivity,
       href: "/activities",
+      adminOnly: true,
       active: pathname.startsWith("/activities"),
     },
     {
       name: "Products",
       icon: MdInventory,
       href: "/products",
+      adminOnly: true,
       active: pathname.startsWith("/products"),
     },
   ];
+
+  const tabs = allTabs.filter((tab) => !tab.adminOnly || isAdmin);
 
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">

@@ -10,6 +10,7 @@ import {
   MdGroupWork,
   MdSchedule,
   MdPayments,
+  MdSupervisorAccount,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -73,18 +74,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         roles: ["admin"],
       },
       {
-        name: "Farms",
+        name: isAdmin ? "Farms" : "My Farms",
         icon: MdMap,
         href: "/farms",
         active: pathname.startsWith("/farms"),
         roles: ["admin", "farmer", "supervisor"],
       },
       {
-        name: "Work Groups",
+        name: "My Work Groups",
         icon: MdGroupWork,
         href: "/work-groups",
         active: pathname.startsWith("/work-groups"),
         roles: ["farmer", "supervisor"],
+      },
+      {
+        name: "My Supervisors",
+        icon: MdSupervisorAccount,
+        href: "/farm-supervisors",
+        active: pathname.startsWith("/farm-supervisors"),
+        roles: ["farmer"],
       },
       {
         name: "HRIS",
