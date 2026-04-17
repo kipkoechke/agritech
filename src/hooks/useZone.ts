@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getZones, createZone, updateZone, deleteZone } from "@/services/zoneService";
+import {
+  getZones,
+  createZone,
+  updateZone,
+  deleteZone,
+} from "@/services/zoneService";
 import type { Zone } from "@/types/zone";
 import toast from "react-hot-toast";
 
@@ -15,7 +20,7 @@ export const useZones = () => {
 
 export const useCreateZone = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (name: string) => createZone(name),
     onSuccess: () => {
@@ -30,9 +35,10 @@ export const useCreateZone = () => {
 
 export const useUpdateZone = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => updateZone(id, name),
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      updateZone(id, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["zones"] });
       toast.success("Zone updated successfully");
@@ -45,7 +51,7 @@ export const useUpdateZone = () => {
 
 export const useDeleteZone = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => deleteZone(id),
     onSuccess: () => {

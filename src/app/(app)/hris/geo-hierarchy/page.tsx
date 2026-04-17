@@ -13,10 +13,20 @@ import {
 } from "react-icons/md";
 import Button from "@/components/common/Button";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/common/TabBar";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/common/TabBar";
 import { HRISLayout } from "@/components/hris";
 import Tooltip from "@/components/common/Tooltip";
-import { useZones, useCreateZone, useUpdateZone, useDeleteZone } from "@/hooks/useZone";
+import {
+  useZones,
+  useCreateZone,
+  useUpdateZone,
+  useDeleteZone,
+} from "@/hooks/useZone";
 import { useFactories, useDeleteFactory } from "@/hooks/useFactory";
 import { useClusters, useDeleteCluster } from "@/hooks/useCluster";
 import { useFarms, useDeleteFarm } from "@/hooks/useFarm";
@@ -40,9 +50,12 @@ function InlineDeleteDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-2">Confirm Delete</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-2">
+          Confirm Delete
+        </h2>
         <p className="text-sm text-gray-600 mb-4">
-          Are you sure you want to delete <strong>{itemName}</strong>? This action cannot be undone.
+          Are you sure you want to delete <strong>{itemName}</strong>? This
+          action cannot be undone.
         </p>
         <div className="flex gap-2 justify-end">
           <button
@@ -80,7 +93,10 @@ function ZoneFormModal({
     e.preventDefault();
     if (!name.trim()) return;
     if (zone) {
-      updateZone.mutate({ id: zone.id, name: name.trim() }, { onSuccess: onClose });
+      updateZone.mutate(
+        { id: zone.id, name: name.trim() },
+        { onSuccess: onClose },
+      );
     } else {
       createZone.mutate(name.trim(), { onSuccess: onClose });
     }
@@ -144,12 +160,11 @@ function ZonesTab({
 
   const zones: Zone[] = Array.isArray(zonesData) ? zonesData : [];
   const filtered = zones.filter((z) =>
-    z.name.toLowerCase().includes(search.toLowerCase())
+    z.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="space-y-4">
-
       {isLoading && (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
@@ -159,7 +174,9 @@ function ZonesTab({
       {!isLoading && filtered.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <MdPublic className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No zones found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No zones found
+          </h3>
           <p className="text-gray-500">Add your first zone to get started.</p>
         </div>
       )}
@@ -180,11 +197,16 @@ function ZonesTab({
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filtered.map((zone) => (
-                  <tr key={zone.id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={zone.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <MdLocationOn className="w-4 h-4 text-emerald-500" />
-                        <span className="text-sm font-medium text-gray-900">{zone.name}</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {zone.name}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -219,9 +241,13 @@ function ZonesTab({
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-2">Delete Zone</h2>
+            <h2 className="text-base font-semibold text-gray-900 mb-2">
+              Delete Zone
+            </h2>
             <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to delete <strong>{deleteTarget.name}</strong>? This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <strong>{deleteTarget.name}</strong>? This action cannot be
+              undone.
             </p>
             <div className="flex gap-2 justify-end">
               <button
@@ -232,7 +258,9 @@ function ZonesTab({
               </button>
               <button
                 onClick={() => {
-                  deleteZone.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+                  deleteZone.mutate(deleteTarget.id, {
+                    onSuccess: () => setDeleteTarget(null),
+                  });
                 }}
                 disabled={deleteZone.isPending}
                 className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
@@ -267,7 +295,6 @@ function FactoriesTab({ search }: { search: string }) {
   return (
     <>
       <div className="space-y-4">
-
         {isLoading && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
@@ -277,8 +304,12 @@ function FactoriesTab({ search }: { search: string }) {
         {!isLoading && factories.length === 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
             <MdFactory className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No factories found</h3>
-            <p className="text-gray-500">Add your first factory to get started.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No factories found
+            </h3>
+            <p className="text-gray-500">
+              Add your first factory to get started.
+            </p>
           </div>
         )}
 
@@ -288,10 +319,18 @@ function FactoriesTab({ search }: { search: string }) {
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-gray-50/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zone</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Code
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Zone
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -306,8 +345,12 @@ function FactoriesTab({ search }: { search: string }) {
                           {factory.name}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{factory.code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{factory.zone?.name || "—"}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {factory.code}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {factory.zone?.name || "—"}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div
                           className="flex items-center justify-end gap-1"
@@ -315,7 +358,9 @@ function FactoriesTab({ search }: { search: string }) {
                         >
                           <Tooltip content="View factory">
                             <button
-                              onClick={() => router.push(`/factories/${factory.id}`)}
+                              onClick={() =>
+                                router.push(`/factories/${factory.id}`)
+                              }
                               className="inline-flex items-center justify-center p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                             >
                               <FiEye className="h-3.5 w-3.5" />
@@ -323,7 +368,9 @@ function FactoriesTab({ search }: { search: string }) {
                           </Tooltip>
                           <Tooltip content="Edit factory">
                             <button
-                              onClick={() => router.push(`/factories/${factory.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/factories/${factory.id}/edit`)
+                              }
                               className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                             >
                               <FiEdit className="h-3.5 w-3.5" />
@@ -351,7 +398,8 @@ function FactoriesTab({ search }: { search: string }) {
         {pagination && pagination.total_pages > 1 && (
           <div className="flex items-center justify-between px-2">
             <p className="text-xs text-gray-500">
-              Page {pagination.current_page} of {pagination.total_pages} · {pagination.total_items} items
+              Page {pagination.current_page} of {pagination.total_pages} ·{" "}
+              {pagination.total_items} items
             </p>
             <div className="flex gap-2">
               <button
@@ -376,7 +424,11 @@ function FactoriesTab({ search }: { search: string }) {
       {deleteTarget && (
         <InlineDeleteDialog
           itemName={deleteTarget.name}
-          onConfirm={() => deleteFactory.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) })}
+          onConfirm={() =>
+            deleteFactory.mutate(deleteTarget.id, {
+              onSuccess: () => setDeleteTarget(null),
+            })
+          }
           onCancel={() => setDeleteTarget(null)}
           isPending={deleteFactory.isPending}
         />
@@ -405,7 +457,6 @@ function ClustersTab({ search }: { search: string }) {
   return (
     <>
       <div className="space-y-4">
-
         {isLoading && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
@@ -415,8 +466,12 @@ function ClustersTab({ search }: { search: string }) {
         {!isLoading && clusters.length === 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
             <MdHub className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No clusters found</h3>
-            <p className="text-gray-500">Add your first cluster to get started.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No clusters found
+            </h3>
+            <p className="text-gray-500">
+              Add your first cluster to get started.
+            </p>
           </div>
         )}
 
@@ -426,12 +481,24 @@ function ClustersTab({ search }: { search: string }) {
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-gray-50/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factory</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farms</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Code
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Factory
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Zone
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Farms
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -439,17 +506,27 @@ function ClustersTab({ search }: { search: string }) {
                     <tr
                       key={cluster.id}
                       className="hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => router.push(`/hris/clusters/${cluster.id}`)}
+                      onClick={() =>
+                        router.push(`/hris/clusters/${cluster.id}`)
+                      }
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline">
                           {cluster.name}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cluster.code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cluster.factory?.name || "—"}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cluster.zone?.name || "—"}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cluster.farms_count}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {cluster.code}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {cluster.factory?.name || "—"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {cluster.zone?.name || "—"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {cluster.farms_count}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div
                           className="flex items-center justify-end gap-1"
@@ -457,7 +534,9 @@ function ClustersTab({ search }: { search: string }) {
                         >
                           <Tooltip content="View cluster">
                             <button
-                              onClick={() => router.push(`/hris/clusters/${cluster.id}`)}
+                              onClick={() =>
+                                router.push(`/hris/clusters/${cluster.id}`)
+                              }
                               className="inline-flex items-center justify-center p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                             >
                               <FiEye className="h-3.5 w-3.5" />
@@ -465,7 +544,9 @@ function ClustersTab({ search }: { search: string }) {
                           </Tooltip>
                           <Tooltip content="Edit cluster">
                             <button
-                              onClick={() => router.push(`/hris/clusters/${cluster.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/hris/clusters/${cluster.id}/edit`)
+                              }
                               className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                             >
                               <FiEdit className="h-3.5 w-3.5" />
@@ -492,7 +573,8 @@ function ClustersTab({ search }: { search: string }) {
         {pagination && pagination.total_pages > 1 && (
           <div className="flex items-center justify-between px-2">
             <p className="text-xs text-gray-500">
-              Page {pagination.current_page} of {pagination.total_pages} · {pagination.total_items} items
+              Page {pagination.current_page} of {pagination.total_pages} ·{" "}
+              {pagination.total_items} items
             </p>
             <div className="flex gap-2">
               <button
@@ -517,7 +599,11 @@ function ClustersTab({ search }: { search: string }) {
       {deleteTarget && (
         <InlineDeleteDialog
           itemName={deleteTarget.name}
-          onConfirm={() => deleteCluster.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) })}
+          onConfirm={() =>
+            deleteCluster.mutate(deleteTarget.id, {
+              onSuccess: () => setDeleteTarget(null),
+            })
+          }
           onCancel={() => setDeleteTarget(null)}
           isPending={deleteCluster.isPending}
         />
@@ -541,7 +627,6 @@ function FarmsTab({ search }: { search: string }) {
   return (
     <>
       <div className="space-y-4">
-
         {isLoading && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
@@ -551,7 +636,9 @@ function FarmsTab({ search }: { search: string }) {
         {!isLoading && farms.length === 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
             <MdAgriculture className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No farms found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No farms found
+            </h3>
             <p className="text-gray-500">Add your first farm to get started.</p>
           </div>
         )}
@@ -562,12 +649,24 @@ function FarmsTab({ search }: { search: string }) {
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-gray-50/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cluster</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size (Ha)</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Code
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Zone
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Cluster
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Size (Ha)
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -582,10 +681,18 @@ function FarmsTab({ search }: { search: string }) {
                           {farm.name}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farm.farm_code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farm.zone?.name || "—"}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farm.cluster?.name || "—"}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farm.size}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {farm.farm_code}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {farm.zone?.name || "—"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {farm.cluster?.name || "—"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {farm.size}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div
                           className="flex items-center justify-end gap-1"
@@ -601,7 +708,9 @@ function FarmsTab({ search }: { search: string }) {
                           </Tooltip>
                           <Tooltip content="Edit farm">
                             <button
-                              onClick={() => router.push(`/farms/${farm.id}/edit`)}
+                              onClick={() =>
+                                router.push(`/farms/${farm.id}/edit`)
+                              }
                               className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                             >
                               <FiEdit className="h-3.5 w-3.5" />
@@ -628,7 +737,8 @@ function FarmsTab({ search }: { search: string }) {
         {pagination && pagination.total_pages > 1 && (
           <div className="flex items-center justify-between px-2">
             <p className="text-xs text-gray-500">
-              Page {pagination.current_page} of {pagination.total_pages} · {pagination.total_items} items
+              Page {pagination.current_page} of {pagination.total_pages} ·{" "}
+              {pagination.total_items} items
             </p>
             <div className="flex gap-2">
               <button
@@ -653,7 +763,11 @@ function FarmsTab({ search }: { search: string }) {
       {deleteTarget && (
         <InlineDeleteDialog
           itemName={deleteTarget.name}
-          onConfirm={() => deleteFarm.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) })}
+          onConfirm={() =>
+            deleteFarm.mutate(deleteTarget.id, {
+              onSuccess: () => setDeleteTarget(null),
+            })
+          }
           onCancel={() => setDeleteTarget(null)}
           isPending={deleteFarm.isPending}
         />
@@ -665,9 +779,27 @@ function FarmsTab({ search }: { search: string }) {
 // ─── Tab config ──────────────────────────────────────────────────────────────
 const GEO_TABS = [
   { value: "zones", label: "Zones", addLabel: "Add Zone", icon: MdPublic },
-  { value: "factories", label: "Factories", addLabel: "Add Factory", icon: MdFactory, href: "/factories/new" },
-  { value: "clusters", label: "Clusters", addLabel: "Add Cluster", icon: MdHub, href: "/hris/clusters/new" },
-  { value: "farms", label: "Farms", addLabel: "Add Farm", icon: MdAgriculture, href: "/farms/new" },
+  {
+    value: "factories",
+    label: "Factories",
+    addLabel: "Add Factory",
+    icon: MdFactory,
+    href: "/factories/new",
+  },
+  {
+    value: "clusters",
+    label: "Clusters",
+    addLabel: "Add Cluster",
+    icon: MdHub,
+    href: "/hris/clusters/new",
+  },
+  {
+    value: "farms",
+    label: "Farms",
+    addLabel: "Add Farm",
+    icon: MdAgriculture,
+    href: "/farms/new",
+  },
 ] as const;
 
 type GeoTab = (typeof GEO_TABS)[number]["value"];
@@ -677,7 +809,10 @@ export default function GeoHierarchyPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<GeoTab>("zones");
   const [search, setSearch] = useState("");
-  const [zoneFormState, setZoneFormState] = useState<{ open: boolean; zone?: Zone }>({ open: false });
+  const [zoneFormState, setZoneFormState] = useState<{
+    open: boolean;
+    zone?: Zone;
+  }>({ open: false });
 
   const currentTab = GEO_TABS.find((t) => t.value === activeTab)!;
 
@@ -711,7 +846,11 @@ export default function GeoHierarchyPage() {
         </div>
       }
       action={
-        <Button type="small" onClick={handleAdd} className="flex items-center gap-1">
+        <Button
+          type="small"
+          onClick={handleAdd}
+          className="flex items-center gap-1"
+        >
           <MdAdd className="w-4 h-4" />
           {currentTab.addLabel}
         </Button>
@@ -725,7 +864,11 @@ export default function GeoHierarchyPage() {
         >
           <TabsList>
             {GEO_TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} icon={<tab.icon />}>
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                icon={<tab.icon />}
+              >
                 {tab.label}
               </TabsTrigger>
             ))}
@@ -733,7 +876,10 @@ export default function GeoHierarchyPage() {
 
           <div className="flex-1 overflow-y-auto">
             <TabsContent value="zones">
-              <ZonesTab search={search} onEditZone={(zone) => setZoneFormState({ open: true, zone })} />
+              <ZonesTab
+                search={search}
+                onEditZone={(zone) => setZoneFormState({ open: true, zone })}
+              />
             </TabsContent>
             <TabsContent value="factories">
               <FactoriesTab search={search} />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   MdExpandMore,
   MdSearch,
@@ -8,7 +9,6 @@ import {
   MdPersonAdd,
   MdCheck,
 } from "react-icons/md";
-import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 interface Option {
   value: string;
@@ -57,8 +57,39 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const containerRef = useOutsideClick(() => setIsOpen(false));
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Outside click: close if click is outside both trigger and dropdown portal
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, []);
+
+  // Calculate portal position when opening
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
 
   // Focus search input when dropdown opens
   useEffect(() => {
@@ -128,6 +159,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       )}
       {/* Select Button */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -201,9 +233,18 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </p>
       )}
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+      {/* Dropdown via portal — escapes overflow:hidden on parent modals */}
+      {isOpen && createPortal(
+        <div
+          ref={dropdownRef}
+          style={{
+            position: "fixed",
+            top: dropdownPos.top,
+            left: dropdownPos.left,
+            width: dropdownPos.width,
+          }}
+          className="z-9999 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
+        >
           {/* Search Input */}
           <div className="p-2 border-b border-gray-200 bg-white">
             <div className="relative">
@@ -303,7 +344,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Error Message */}

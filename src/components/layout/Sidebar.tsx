@@ -7,6 +7,7 @@ import {
   MdMap,
   MdPerson,
   MdGroup,
+  MdGroupWork,
   MdSchedule,
   MdPayments,
 } from "react-icons/md";
@@ -77,6 +78,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         href: "/farms",
         active: pathname.startsWith("/farms"),
         roles: ["admin", "farmer", "supervisor"],
+      },
+      {
+        name: "Work Groups",
+        icon: MdGroupWork,
+        href: "/work-groups",
+        active: pathname.startsWith("/work-groups"),
+        roles: ["farmer", "supervisor"],
       },
       {
         name: "HRIS",

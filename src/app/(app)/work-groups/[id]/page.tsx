@@ -12,6 +12,8 @@ import {
   MdEdit,
   MdInfo,
   MdPersonAdd,
+  MdSearch,
+  MdCheck,
 } from "react-icons/md";
 import { FiTrash } from "react-icons/fi";
 import Modal from "@/components/common/Modal";
@@ -40,6 +42,7 @@ export default function WorkGroupDetailPage() {
   );
   const [workerSearch, setWorkerSearch] = useState("");
   const [showCreateWorker, setShowCreateWorker] = useState(false);
+  const [showAddExisting, setShowAddExisting] = useState(false);
   const [newWorker, setNewWorker] = useState({
     name: "",
     phone: "",
@@ -59,7 +62,9 @@ export default function WorkGroupDetailPage() {
     search: workerSearch,
   });
   const { data: zonesData } = useZones();
-  const { data: factoriesData } = useFactories();
+  const { data: factoriesData } = useFactories({
+    zone_id: newWorker.zone_id || undefined,
+  });
   const { data: clustersData } = useClusters({
     factory_id: newWorker.factory_id || undefined,
   });
@@ -166,7 +171,7 @@ export default function WorkGroupDetailPage() {
               <div className="flex items-center gap-3 min-w-0">
                 <Link
                   href="/work-groups"
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors flex-shrink-0"
+                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors shrink-0"
                 >
                   <MdArrowBack className="w-5 h-5" />
                 </Link>
@@ -183,7 +188,7 @@ export default function WorkGroupDetailPage() {
               </div>
               <Link
                 href={`/work-groups/${id}/edit`}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors flex-shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
               >
                 <MdEdit className="w-3.5 h-3.5" />
                 Edit
@@ -206,7 +211,7 @@ export default function WorkGroupDetailPage() {
                     Name
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <MdGroup className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <MdGroup className="w-4 h-4 text-gray-400 shrink-0" />
                     <span className="text-sm font-medium text-gray-800">
                       {group.name}
                     </span>
@@ -217,7 +222,7 @@ export default function WorkGroupDetailPage() {
                     Owner
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <MdPerson className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <MdPerson className="w-4 h-4 text-gray-400 shrink-0" />
                     <span className="text-sm font-medium text-gray-800">
                       {group.owner?.name || "—"}
                     </span>
@@ -242,7 +247,7 @@ export default function WorkGroupDetailPage() {
                     Created
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <MdCalendarToday className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <MdCalendarToday className="w-4 h-4 text-gray-400 shrink-0" />
                     <span className="text-sm font-medium text-gray-800">
                       {createdDate}
                     </span>
@@ -263,69 +268,24 @@ export default function WorkGroupDetailPage() {
                     {members.length}
                   </span>
                 </div>
-              </div>
-
-              {/* Add Members */}
-              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                <div className="flex items-end gap-3">
-                  <div className="flex-1">
-                    <SearchableSelect
-                      label="Add Members"
-                      options={availableUsers}
-                      value={selectedMemberIds[0] || ""}
-                      onChange={(val) => {
-                        if (val && !selectedMemberIds.includes(val)) {
-                          setSelectedMemberIds((prev) => [...prev, val]);
-                        }
-                      }}
-                      placeholder="Search by name or phone…"
-                      isLoading={workersLoading}
-                      onSearchChange={setWorkerSearch}
-                      searchPlaceholder="Search by phone or name…"
-                      onCreateNew={(search) => {
-                        setNewWorker((s) => ({ ...s, phone: search }));
-                        setShowCreateWorker(true);
-                      }}
-                      createNewLabel="Add New Worker"
-                    />
-                    {selectedMemberIds.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {selectedMemberIds.map((uid) => {
-                          const worker = workersData?.data?.find(
-                            (w) => w.id === uid,
-                          );
-                          return (
-                            <span
-                              key={uid}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
-                            >
-                              {worker?.name || uid}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setSelectedMemberIds((prev) =>
-                                    prev.filter((i) => i !== uid),
-                                  )
-                                }
-                                className="hover:text-primary/70 ml-0.5"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={handleAddMembers}
-                    disabled={
-                      selectedMemberIds.length === 0 || addMembers.isPending
-                    }
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors flex-shrink-0"
+                    onClick={() => {
+                      setSelectedMemberIds([]);
+                      setWorkerSearch("");
+                      setShowAddExisting(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary text-primary text-xs font-semibold hover:bg-primary/5 transition-colors"
                   >
                     <MdAdd className="w-3.5 h-3.5" />
-                    {addMembers.isPending ? "Adding…" : "Add"}
+                    Existing Worker
+                  </button>
+                  <button
+                    onClick={() => setShowCreateWorker(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    <MdPersonAdd className="w-3.5 h-3.5" />
+                    New Worker
                   </button>
                 </div>
               </div>
@@ -436,6 +396,160 @@ export default function WorkGroupDetailPage() {
         </Modal.Window>
       </Modal>
 
+      {/* Add Existing Worker Modal */}
+      {showAddExisting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <MdPersonAdd className="w-4 h-4 text-primary" />
+                <h2 className="text-sm font-bold text-gray-900">
+                  Add Existing Worker
+                </h2>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddExisting(false);
+                  setSelectedMemberIds([]);
+                  setWorkerSearch("");
+                }}
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="px-6 py-4 space-y-3 overflow-y-auto flex-1">
+              {/* Search */}
+              <div className="relative">
+                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name or phone…"
+                  value={workerSearch}
+                  onChange={(e) => setWorkerSearch(e.target.value)}
+                  autoFocus
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-gray-900 placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* Worker list */}
+              <div className="border border-gray-100 rounded-lg overflow-hidden divide-y divide-gray-50">
+                {workersLoading && (
+                  <div className="flex justify-center py-8">
+                    <div className="w-6 h-6 border-2 border-gray-200 border-t-primary rounded-full animate-spin" />
+                  </div>
+                )}
+                {!workersLoading && availableUsers.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-8">
+                    No workers found
+                  </p>
+                )}
+                {availableUsers.map((w) => {
+                  const selected = selectedMemberIds.includes(w.value);
+                  return (
+                    <button
+                      key={w.value}
+                      type="button"
+                      onClick={() =>
+                        setSelectedMemberIds((prev) =>
+                          selected
+                            ? prev.filter((i) => i !== w.value)
+                            : [...prev, w.value],
+                        )
+                      }
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors hover:bg-gray-50 ${
+                        selected ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {w.label}
+                        </p>
+                        {w.description && (
+                          <p className="text-xs text-gray-400">
+                            {w.description}
+                          </p>
+                        )}
+                      </div>
+                      {selected && (
+                        <MdCheck className="w-4 h-4 text-primary shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected chips */}
+              {selectedMemberIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedMemberIds.map((uid) => {
+                    const worker = workersData?.data?.find((w) => w.id === uid);
+                    return (
+                      <span
+                        key={uid}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
+                      >
+                        {worker?.name || uid}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedMemberIds((prev) =>
+                              prev.filter((i) => i !== uid),
+                            )
+                          }
+                          className="hover:text-primary/70 ml-0.5"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddExisting(false);
+                  setSelectedMemberIds([]);
+                  setWorkerSearch("");
+                }}
+                className="px-4 py-2 rounded-full text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  addMembers.mutate(
+                    { workGroupId: id, data: { members: selectedMemberIds } },
+                    {
+                      onSuccess: () => {
+                        setSelectedMemberIds([]);
+                        setShowAddExisting(false);
+                        setWorkerSearch("");
+                      },
+                    },
+                  );
+                }}
+                disabled={
+                  selectedMemberIds.length === 0 || addMembers.isPending
+                }
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                <MdAdd className="w-3.5 h-3.5" />
+                {addMembers.isPending
+                  ? "Adding…"
+                  : `Add${selectedMemberIds.length > 0 ? ` (${selectedMemberIds.length})` : ""}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Create Worker Modal */}
       {showCreateWorker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -493,50 +607,54 @@ export default function WorkGroupDetailPage() {
                 )}
                 value={newWorker.zone_id}
                 onChange={(val) =>
-                  setNewWorker((s) => ({ ...s, zone_id: val }))
+                  setNewWorker((s) => ({
+                    ...s,
+                    zone_id: val,
+                    factory_id: "",
+                    cluster_id: "",
+                  }))
                 }
                 placeholder="Select zone"
                 required
               />
-              <SearchableSelect
-                label="Factory"
-                options={(factoriesData?.data ?? []).map(
-                  (f: { id: string; name: string }) => ({
-                    value: f.id,
-                    label: f.name,
-                  }),
-                )}
-                value={newWorker.factory_id}
-                onChange={(val) =>
-                  setNewWorker((s) => ({
-                    ...s,
-                    factory_id: val,
-                    cluster_id: "",
-                  }))
-                }
-                placeholder="Select factory"
-                required
-              />
-              <SearchableSelect
-                label="Cluster"
-                options={(clustersData?.data ?? []).map(
-                  (c: { id: string; name: string }) => ({
-                    value: c.id,
-                    label: c.name,
-                  }),
-                )}
-                value={newWorker.cluster_id}
-                onChange={(val) =>
-                  setNewWorker((s) => ({ ...s, cluster_id: val }))
-                }
-                placeholder={
-                  newWorker.factory_id
-                    ? "Select cluster"
-                    : "Select factory first"
-                }
-                disabled={!newWorker.factory_id}
-                required
-              />
+              {newWorker.zone_id && (
+                <SearchableSelect
+                  label="Factory"
+                  options={(factoriesData?.data ?? []).map(
+                    (f: { id: string; name: string }) => ({
+                      value: f.id,
+                      label: f.name,
+                    }),
+                  )}
+                  value={newWorker.factory_id}
+                  onChange={(val) =>
+                    setNewWorker((s) => ({
+                      ...s,
+                      factory_id: val,
+                      cluster_id: "",
+                    }))
+                  }
+                  placeholder="Select factory"
+                  required
+                />
+              )}
+              {newWorker.factory_id && (
+                <SearchableSelect
+                  label="Cluster"
+                  options={(clustersData?.data ?? []).map(
+                    (c: { id: string; name: string }) => ({
+                      value: c.id,
+                      label: c.name,
+                    }),
+                  )}
+                  value={newWorker.cluster_id}
+                  onChange={(val) =>
+                    setNewWorker((s) => ({ ...s, cluster_id: val }))
+                  }
+                  placeholder="Select cluster"
+                  required
+                />
+              )}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
               <button

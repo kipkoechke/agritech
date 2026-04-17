@@ -60,7 +60,13 @@ export const GeoHierarchyFilter: React.FC<GeoHierarchyFilterProps> = ({
   const workerOptions = workers.map((w) => ({ value: w.id, label: w.name }));
 
   const handleZoneChange = (zoneId: string) => {
-    onChange({ zoneId, factoryId: "", clusterId: "", farmId: "", workerId: "" });
+    onChange({
+      zoneId,
+      factoryId: "",
+      clusterId: "",
+      farmId: "",
+      workerId: "",
+    });
   };
 
   const handleFactoryChange = (factoryId: string) => {
