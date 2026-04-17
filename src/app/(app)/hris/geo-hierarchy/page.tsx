@@ -11,10 +11,10 @@ import {
   MdAgriculture,
   MdLocationOn,
 } from "react-icons/md";
+import Button from "@/components/common/Button";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/common/TabBar";
 import { HRISLayout } from "@/components/hris";
-import Button from "@/components/common/Button";
 import Tooltip from "@/components/common/Tooltip";
 import { useZones, useCreateZone, useUpdateZone, useDeleteZone } from "@/hooks/useZone";
 import { useFactories, useDeleteFactory } from "@/hooks/useFactory";
@@ -131,11 +131,15 @@ function ZoneFormModal({
 }
 
 // ─── Zones Tab ──────────────────────────────────────────────────────────────
-function ZonesTab() {
+function ZonesTab({
+  search,
+  onEditZone,
+}: {
+  search: string;
+  onEditZone: (zone: Zone) => void;
+}) {
   const { data: zonesData, isLoading } = useZones();
   const deleteZone = useDeleteZone();
-  const [search, setSearch] = useState("");
-  const [zoneForm, setZoneForm] = useState<{ open: boolean; zone?: Zone }>({ open: false });
   const [deleteTarget, setDeleteTarget] = useState<Zone | null>(null);
 
   const zones: Zone[] = Array.isArray(zonesData) ? zonesData : [];
@@ -145,27 +149,6 @@ function ZonesTab() {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search zones..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-          />
-        </div>
-        <Button
-          type="small"
-          onClick={() => setZoneForm({ open: true })}
-          className="flex items-center gap-1"
-        >
-          <MdAdd className="w-4 h-4" />
-          Add Zone
-        </Button>
-      </div>
 
       {isLoading && (
         <div className="flex justify-center py-12">
@@ -208,7 +191,7 @@ function ZonesTab() {
                       <div className="flex items-center justify-end gap-1">
                         <Tooltip content="Edit zone">
                           <button
-                            onClick={() => setZoneForm({ open: true, zone })}
+                            onClick={() => onEditZone(zone)}
                             className="inline-flex items-center justify-center p-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                           >
                             <FiEdit className="h-3.5 w-3.5" />
@@ -230,14 +213,6 @@ function ZonesTab() {
             </table>
           </div>
         </div>
-      )}
-
-      {/* Zone form modal */}
-      {zoneForm.open && (
-        <ZoneFormModal
-          zone={zoneForm.zone}
-          onClose={() => setZoneForm({ open: false })}
-        />
       )}
 
       {/* Delete confirmation */}
@@ -273,9 +248,8 @@ function ZonesTab() {
 }
 
 // ─── Factories Tab ──────────────────────────────────────────────────────────
-function FactoriesTab() {
+function FactoriesTab({ search }: { search: string }) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<Factory | null>(null);
 
@@ -293,27 +267,6 @@ function FactoriesTab() {
   return (
     <>
       <div className="space-y-4">
-        {/* Toolbar */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-xs">
-            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search factories..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-            />
-          </div>
-          <Button
-            type="small"
-            to="/factories/new"
-            className="flex items-center gap-1"
-          >
-            <MdAdd className="w-4 h-4" />
-            Add Factory
-          </Button>
-        </div>
 
         {isLoading && (
           <div className="flex justify-center py-12">
@@ -433,9 +386,8 @@ function FactoriesTab() {
 }
 
 // ─── Clusters Tab ────────────────────────────────────────────────────────────
-function ClustersTab() {
+function ClustersTab({ search }: { search: string }) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<Cluster | null>(null);
 
@@ -453,27 +405,6 @@ function ClustersTab() {
   return (
     <>
       <div className="space-y-4">
-        {/* Toolbar */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-xs">
-            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search clusters..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-            />
-          </div>
-          <Button
-            type="small"
-            to="/hris/clusters/new"
-            className="flex items-center gap-1"
-          >
-            <MdAdd className="w-4 h-4" />
-            Add Cluster
-          </Button>
-        </div>
 
         {isLoading && (
           <div className="flex justify-center py-12">
@@ -596,12 +527,12 @@ function ClustersTab() {
 }
 
 // ─── Farms Tab ──────────────────────────────────────────────────────────────
-function FarmsTab() {
+function FarmsTab({ search }: { search: string }) {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<Farm | null>(null);
 
-  const { data, isLoading } = useFarms({ page });
+  const { data, isLoading } = useFarms({ page, search: search || undefined });
   const deleteFarm = useDeleteFarm();
 
   const farms = data?.data || [];
@@ -610,17 +541,6 @@ function FarmsTab() {
   return (
     <>
       <div className="space-y-4">
-        {/* Toolbar */}
-        <div className="flex items-center justify-end">
-          <Button
-            type="small"
-            to="/farms/new"
-            className="flex items-center gap-1"
-          >
-            <MdAdd className="w-4 h-4" />
-            Add Farm
-          </Button>
-        </div>
 
         {isLoading && (
           <div className="flex justify-center py-12">
@@ -744,32 +664,63 @@ function FarmsTab() {
 
 // ─── Tab config ──────────────────────────────────────────────────────────────
 const GEO_TABS = [
-  { value: "zones", label: "Zones", icon: MdPublic },
-  { value: "factories", label: "Factories", icon: MdFactory },
-  { value: "clusters", label: "Clusters", icon: MdHub },
-  { value: "farms", label: "Farms", icon: MdAgriculture },
+  { value: "zones", label: "Zones", addLabel: "Add Zone", icon: MdPublic },
+  { value: "factories", label: "Factories", addLabel: "Add Factory", icon: MdFactory, href: "/factories/new" },
+  { value: "clusters", label: "Clusters", addLabel: "Add Cluster", icon: MdHub, href: "/hris/clusters/new" },
+  { value: "farms", label: "Farms", addLabel: "Add Farm", icon: MdAgriculture, href: "/farms/new" },
 ] as const;
 
 type GeoTab = (typeof GEO_TABS)[number]["value"];
 
-const TAB_TITLES: Record<GeoTab, string> = {
-  zones: "Zones",
-  factories: "Factories",
-  clusters: "Clusters",
-  farms: "Farms",
-};
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function GeoHierarchyPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<GeoTab>("zones");
+  const [search, setSearch] = useState("");
+  const [zoneFormState, setZoneFormState] = useState<{ open: boolean; zone?: Zone }>({ open: false });
+
+  const currentTab = GEO_TABS.find((t) => t.value === activeTab)!;
+
+  const handleTabChange = (v: string) => {
+    setActiveTab(v as GeoTab);
+    setSearch("");
+  };
+
+  const handleAdd = () => {
+    if (activeTab === "zones") {
+      setZoneFormState({ open: true, zone: undefined });
+    } else {
+      const tab = GEO_TABS.find((t) => t.value === activeTab);
+      if (tab && "href" in tab) router.push(tab.href as string);
+    }
+  };
 
   return (
-    <HRISLayout title={`Geo Hierarchy — ${TAB_TITLES[activeTab]}`}>
+    <HRISLayout
+      title={currentTab.label}
+      search={
+        <div className="relative">
+          <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder={`Search ${currentTab.label.toLowerCase()}...`}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+          />
+        </div>
+      }
+      action={
+        <Button type="small" onClick={handleAdd} className="flex items-center gap-1">
+          <MdAdd className="w-4 h-4" />
+          {currentTab.addLabel}
+        </Button>
+      }
+    >
       <div className="flex flex-col h-full overflow-hidden">
-        {/* Tab Bar */}
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as GeoTab)}
+          onValueChange={handleTabChange}
           className="flex flex-col h-full overflow-hidden"
         >
           <TabsList>
@@ -782,20 +733,27 @@ export default function GeoHierarchyPage() {
 
           <div className="flex-1 overflow-y-auto">
             <TabsContent value="zones">
-              <ZonesTab />
+              <ZonesTab search={search} onEditZone={(zone) => setZoneFormState({ open: true, zone })} />
             </TabsContent>
             <TabsContent value="factories">
-              <FactoriesTab />
+              <FactoriesTab search={search} />
             </TabsContent>
             <TabsContent value="clusters">
-              <ClustersTab />
+              <ClustersTab search={search} />
             </TabsContent>
             <TabsContent value="farms">
-              <FarmsTab />
+              <FarmsTab search={search} />
             </TabsContent>
           </div>
         </Tabs>
       </div>
+
+      {zoneFormState.open && (
+        <ZoneFormModal
+          zone={zoneFormState.zone}
+          onClose={() => setZoneFormState({ open: false })}
+        />
+      )}
     </HRISLayout>
   );
 }

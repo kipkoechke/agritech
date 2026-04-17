@@ -6,7 +6,7 @@ import { MdPerson, MdAdd, MdSearch } from "react-icons/md";
 import { FiEye } from "react-icons/fi";
 import Tooltip from "@/components/common/Tooltip";
 import Button from "@/components/common/Button";
-import PageHeader from "@/components/common/PageHeader";
+import { HRISLayout } from "@/components/hris";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 
 export default function FarmersPage() {
@@ -26,35 +26,35 @@ export default function FarmersPage() {
   const pagination = data?.pagination;
 
   return (
-    <div className="min-h-screen p-4 space-y-4">
-      <PageHeader
-        title="Farmers"
-        search={
-          <div className="relative">
-            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search farmers..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-            />
-          </div>
-        }
-        action={
-          <Button
-            type="small"
-            to="/farmers/new"
-            className="flex items-center gap-1"
-          >
-            <MdAdd className="w-4 h-4" />
-            Add Farmer
-          </Button>
-        }
-      />
+    <HRISLayout
+      title="Farmers"
+      search={
+        <div className="relative">
+          <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search farmers..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+          />
+        </div>
+      }
+      action={
+        <Button
+          type="small"
+          to="/farmers/new"
+          className="flex items-center gap-1"
+        >
+          <MdAdd className="w-4 h-4" />
+          Add Farmer
+        </Button>
+      }
+    >
+      <div className="flex-1 overflow-y-auto space-y-4">
 
       {isLoading && (
         <div className="flex justify-center items-center py-12">
@@ -179,6 +179,7 @@ export default function FarmersPage() {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </HRISLayout>
   );
 }

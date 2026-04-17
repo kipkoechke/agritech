@@ -8,7 +8,7 @@ import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
-import PageHeader from "@/components/common/PageHeader";
+import { HRISLayout } from "@/components/hris";
 import { useWorkGroups, useDeleteWorkGroup } from "@/hooks/useWorkGroup";
 import type { WorkGroup } from "@/types/workGroup";
 
@@ -31,49 +31,49 @@ export default function WorkGroupsPage() {
 
   return (
     <Modal>
-      <div className="min-h-screen p-4 space-y-4">
-        <PageHeader
-          title="Work Groups"
-          search={
-            <div className="relative">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search work groups..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-              />
-            </div>
-          }
-          filters={
-            <select
-              value={activeFilter}
+      <HRISLayout
+        title="Work Groups"
+        search={
+          <div className="relative">
+            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search work groups..."
+              value={search}
               onChange={(e) => {
-                setActiveFilter(e.target.value);
+                setSearch(e.target.value);
                 setPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-          }
-          action={
-            <Button
-              type="small"
-              to="/work-groups/new"
-              className="flex items-center gap-1"
-            >
-              <MdAdd className="w-4 h-4" />
-              Add Work Group
-            </Button>
-          }
-        />
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+            />
+          </div>
+        }
+        filters={
+          <select
+            value={activeFilter}
+            onChange={(e) => {
+              setActiveFilter(e.target.value);
+              setPage(1);
+            }}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          >
+            <option value="">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        }
+        action={
+          <Button
+            type="small"
+            to="/work-groups/new"
+            className="flex items-center gap-1"
+          >
+            <MdAdd className="w-4 h-4" />
+            Add Work Group
+          </Button>
+        }
+      >
+        <div className="flex-1 overflow-y-auto space-y-4">
 
         {isLoading && (
           <div className="flex justify-center items-center py-12">
@@ -224,20 +224,21 @@ export default function WorkGroupsPage() {
             )}
           </div>
         )}
-      </div>
+        </div>
 
-      <Modal.Window name="delete-work-group">
-        {selectedGroup ? (
-          <DeleteConfirmationModal
-            itemName={selectedGroup.name}
-            itemType="Work Group"
-            onConfirm={() => deleteWorkGroup.mutateAsync(selectedGroup.id)}
-            isDeleting={deleteWorkGroup.isPending}
-          />
-        ) : (
-          <div />
-        )}
-      </Modal.Window>
+        <Modal.Window name="delete-work-group">
+          {selectedGroup ? (
+            <DeleteConfirmationModal
+              itemName={selectedGroup.name}
+              itemType="Work Group"
+              onConfirm={() => deleteWorkGroup.mutateAsync(selectedGroup.id)}
+              isDeleting={deleteWorkGroup.isPending}
+            />
+          ) : (
+            <div />
+          )}
+        </Modal.Window>
+      </HRISLayout>
     </Modal>
   );
 }

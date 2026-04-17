@@ -9,6 +9,7 @@ import type {
 export interface FarmsParams {
   page?: number;
   per_page?: number;
+  search?: string;
   zone_id?: string;
   product_id?: string;
   owner_id?: string;

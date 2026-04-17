@@ -1,7 +1,15 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { MdGroup, MdHub, MdPublic } from "react-icons/md";
+import {
+  MdGroup,
+  MdPublic,
+  MdPerson,
+  MdSupervisorAccount,
+  MdLocalActivity,
+  MdInventory,
+} from "react-icons/md";
+import { HiUserGroup } from "react-icons/hi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
@@ -34,16 +42,40 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
         pathname.startsWith("/hris/roles"),
     },
     {
-      name: "Clusters",
-      icon: MdHub,
-      href: "/hris/clusters",
-      active: pathname.startsWith("/hris/clusters"),
-    },
-    {
       name: "Geo Hierarchy",
       icon: MdPublic,
       href: "/hris/geo-hierarchy",
       active: pathname.startsWith("/hris/geo-hierarchy"),
+    },
+    {
+      name: "Farmers",
+      icon: MdPerson,
+      href: "/farmers",
+      active: pathname.startsWith("/farmers"),
+    },
+    {
+      name: "Work Groups",
+      icon: HiUserGroup,
+      href: "/work-groups",
+      active: pathname.startsWith("/work-groups"),
+    },
+    {
+      name: "Supervisors",
+      icon: MdSupervisorAccount,
+      href: "/farm-supervisors",
+      active: pathname.startsWith("/farm-supervisors"),
+    },
+    {
+      name: "Farm Activities",
+      icon: MdLocalActivity,
+      href: "/activities",
+      active: pathname.startsWith("/activities"),
+    },
+    {
+      name: "Products",
+      icon: MdInventory,
+      href: "/products",
+      active: pathname.startsWith("/products"),
     },
   ];
 

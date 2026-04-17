@@ -9,7 +9,7 @@ import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
-import PageHeader from "@/components/common/PageHeader";
+import { HRISLayout } from "@/components/hris";
 import { useActivities, useDeleteActivity } from "@/hooks/useActivity";
 import type { Activity } from "@/types/activity";
 
@@ -36,53 +36,53 @@ export default function ActivitiesPage() {
 
   return (
     <Modal>
-      <div className="min-h-screen p-4 space-y-4">
-        <PageHeader
-          title="Farm Activities"
-          search={
-            <div className="relative">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search activities..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
-              />
-            </div>
-          }
-          filters={
-            <div className="w-40">
-              <SearchableSelect
-                label=""
-                options={[
-                  { value: "", label: "All Status" },
-                  { value: "true", label: "Active" },
-                  { value: "false", label: "Inactive" },
-                ]}
-                value={statusFilter}
-                onChange={(val) => {
-                  setStatusFilter(val);
-                  setPage(1);
-                }}
-                placeholder="Filter by status"
-              />
-            </div>
-          }
-          action={
-            <Button
-              type="small"
-              to="/activities/new"
-              className="flex items-center gap-1"
-            >
-              <MdAdd className="w-4 h-4" />
-              Add Activity
-            </Button>
-          }
-        />
+      <HRISLayout
+        title="Farm Activities"
+        search={
+          <div className="relative">
+            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search activities..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
+            />
+          </div>
+        }
+        filters={
+          <div className="w-40">
+            <SearchableSelect
+              label=""
+              options={[
+                { value: "", label: "All Status" },
+                { value: "true", label: "Active" },
+                { value: "false", label: "Inactive" },
+              ]}
+              value={statusFilter}
+              onChange={(val) => {
+                setStatusFilter(val);
+                setPage(1);
+              }}
+              placeholder="Filter by status"
+            />
+          </div>
+        }
+        action={
+          <Button
+            type="small"
+            to="/activities/new"
+            className="flex items-center gap-1"
+          >
+            <MdAdd className="w-4 h-4" />
+            Add Activity
+          </Button>
+        }
+      >
+        <div className="flex-1 overflow-y-auto space-y-4">
 
         {isLoading && (
           <div className="flex justify-center items-center py-12">
@@ -225,20 +225,21 @@ export default function ActivitiesPage() {
             )}
           </div>
         )}
-      </div>
+        </div>
 
-      <Modal.Window name="delete-activity">
-        {selectedActivity ? (
-          <DeleteConfirmationModal
-            itemName={selectedActivity.name}
-            itemType="Activity"
-            onConfirm={() => deleteActivity.mutateAsync(selectedActivity.id)}
-            isDeleting={deleteActivity.isPending}
-          />
-        ) : (
-          <div />
-        )}
-      </Modal.Window>
+        <Modal.Window name="delete-activity">
+          {selectedActivity ? (
+            <DeleteConfirmationModal
+              itemName={selectedActivity.name}
+              itemType="Activity"
+              onConfirm={() => deleteActivity.mutateAsync(selectedActivity.id)}
+              isDeleting={deleteActivity.isPending}
+            />
+          ) : (
+            <div />
+          )}
+        </Modal.Window>
+      </HRISLayout>
     </Modal>
   );
 }
