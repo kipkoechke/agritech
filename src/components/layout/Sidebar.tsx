@@ -4,18 +4,11 @@ import {
   MdDashboard,
   MdLogout,
   MdClose,
-  MdPeople,
-  MdFactory,
   MdMap,
-  MdSupervisorAccount,
   MdPerson,
   MdGroup,
   MdSchedule,
-  MdBookOnline,
-  MdGroupWork,
   MdPayments,
-  MdInventory,
-  MdLocalActivity,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -49,52 +42,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
   }, []);
 
   const menuItems = useMemo(() => {
-    // Define items with proper role-based visibility
     const allMenuItems = [
-      // Common items for all roles
       {
         name: "Dashboard",
         icon: MdDashboard,
         href: "/dashboard",
         active: pathname === "/dashboard",
         roles: ["admin", "farmer", "supervisor"],
-      },
-      // Admin only items
-      {
-        name: "Farm Workers",
-        icon: MdPeople,
-        href: "/farm-workers",
-        active: pathname.startsWith("/farm-workers"),
-        roles: ["admin"],
-      },
-      {
-        name: "Farmers",
-        icon: MdPerson,
-        href: "/farmers",
-        active: pathname.startsWith("/farmers"),
-        roles: ["admin"],
-      },
-      {
-        name: "HRIS",
-        icon: MdGroup,
-        href: "/hris/users",
-        active: pathname.startsWith("/hris"),
-        roles: ["admin"],
-      },
-      // Admin & Farmer items (management views)
-      {
-        name: "Farm Supervisors",
-        icon: MdSupervisorAccount,
-        href: "/farm-supervisors",
-        active: pathname.startsWith("/farm-supervisors"),
-        roles: ["admin", "farmer"],
-      },
-      {
-        name: "Factory",
-        icon: MdFactory,
-        href: "/factories",
-        active: pathname.startsWith("/factories"),
-        roles: ["admin"],
       },
       {
         name: "Schedules",
@@ -104,64 +58,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         roles: ["admin", "farmer", "supervisor"],
       },
       {
-        name: "Farms",
-        icon: MdMap,
-        href: "/farms",
-        active: pathname.startsWith("/farms"),
-        roles: ["admin", "farmer"],
-      },
-      {
-        name: "Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        roles: ["admin", "farmer"],
-      },
-      {
-        name: "Worker Payments",
+        name: "Payments",
         icon: MdPayments,
         href: "/worker-payments",
         active: pathname.startsWith("/worker-payments"),
         roles: ["admin", "farmer"],
       },
       {
-        name: "Products",
-        icon: MdInventory,
-        href: "/products",
-        active: pathname.startsWith("/products"),
+        name: "Farmers",
+        icon: MdPerson,
+        href: "/farmers",
+        active: pathname.startsWith("/farmers"),
         roles: ["admin"],
       },
       {
-        name: "Activities",
-        icon: MdLocalActivity,
-        href: "/activities",
-        active: pathname.startsWith("/activities"),
-        roles: ["admin"],
-      },
-      // Supervisor only items (personal views)
-      {
-        name: "My Farms",
+        name: "Farms",
         icon: MdMap,
         href: "/farms",
         active: pathname.startsWith("/farms"),
-        roles: ["supervisor"],
+        roles: ["admin", "farmer", "supervisor"],
       },
       {
-        name: "My Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        roles: ["supervisor"],
+        name: "HRIS",
+        icon: MdGroup,
+        href: "/hris/users",
+        active: pathname.startsWith("/hris"),
+        roles: ["admin"],
       },
     ];
 
-    // Get user role
     const role = user?.role;
-
-    // Filter based on role - NO special admin override
-    return allMenuItems.filter((item) => {
-      return role && item.roles.includes(role);
-    });
+    return allMenuItems.filter((item) => role && item.roles.includes(role));
   }, [pathname, user]);
 
   const handleLogout = () => {

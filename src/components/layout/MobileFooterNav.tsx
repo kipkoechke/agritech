@@ -4,12 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   MdDashboard,
-  MdAgriculture,
-  MdPeople,
-  MdSupervisorAccount,
-  MdFactory,
-  MdScale,
-  MdMap, MdGroup, MdSchedule,
+  MdMap,
+  MdGroup,
+  MdSchedule,
+  MdPayments,
 } from "react-icons/md";
 
 interface NavItem {
@@ -25,18 +23,23 @@ const agritechNavItems: NavItem[] = [
     icon: MdDashboard,
   },
   {
-    name: "Schdeules",
+    name: "Schedules",
     href: "/schedules",
     icon: MdSchedule,
   },
   {
+    name: "Payments",
+    href: "/worker-payments",
+    icon: MdPayments,
+  },
+  {
     name: "Farms",
-    href: "/farm-map",
+    href: "/farms",
     icon: MdMap,
   },
   {
-    name: "Work Group",
-    href: "/work-groups",
+    name: "HRIS",
+    href: "/hris/users",
     icon: MdGroup,
   },
 ];
