@@ -25,6 +25,15 @@ export const getClusters = async (
   return response.data;
 };
 
+export const getFactoryClusters = async (
+  factoryId: string,
+): Promise<ClustersResponse> => {
+  const response = await axiosInstance.get<ClustersResponse>(
+    `/factories/${factoryId}/clusters`,
+  );
+  return response.data;
+};
+
 export const getCluster = async (id: string): Promise<ClusterResponse> => {
   const response = await axiosInstance.get<ClusterResponse>(
     `/clusters/${id}`,

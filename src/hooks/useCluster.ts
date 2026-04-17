@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getClusters,
   getCluster,
+  getFactoryClusters,
   createCluster,
   updateCluster,
   deleteCluster,
@@ -15,6 +16,14 @@ export const useClusters = (params: ClustersParams = {}) => {
   return useQuery({
     queryKey: ["clusters", params],
     queryFn: () => getClusters(params),
+  });
+};
+
+export const useFactoryClusters = (factoryId: string) => {
+  return useQuery({
+    queryKey: ["factory-clusters", factoryId],
+    queryFn: () => getFactoryClusters(factoryId),
+    enabled: !!factoryId,
   });
 };
 

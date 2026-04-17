@@ -10,6 +10,7 @@ import {
 } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
+import { GeoHierarchyFilter, GeoHierarchyValues } from "@/components/common/GeoHierarchyFilter";
 import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
@@ -24,13 +25,18 @@ import {
 import { useIsFarmer, useIsSupervisor } from "@/hooks/useAuth";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useProducts } from "@/hooks/useProduct";
-import { useZones } from "@/hooks/useZone";
 import type { Farm } from "@/types/farm";
 
 export default function FarmsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [zoneFilter, setZoneFilter] = useState("");
+  const [geoFilters, setGeoFilters] = useState<GeoHierarchyValues>({
+    zoneId: "",
+    factoryId: "",
+    clusterId: "",
+    farmId: "",
+    workerId: "",
+  });
   const [productFilter, setProductFilter] = useState("");
   const [page, setPage] = useState(1);
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
@@ -41,7 +47,7 @@ export default function FarmsPage() {
   const isSupervisor = useIsSupervisor();
   const farmsParams = {
     page,
-    zone_id: zoneFilter || undefined,
+    zone_id: geoFilters.zoneId || undefined,
     product_id: productFilter || undefined,
   };
   const {
@@ -58,7 +64,6 @@ export default function FarmsPage() {
   const isLoading = isFarmer ? mineFarmsLoading : allFarmsLoading;
   const error = isFarmer ? mineFarmsError : allFarmsError;
   const { data: productsData } = useProducts();
-  const { data: zonesData } = useZones();
   const deleteFarm = useDeleteFarm();
   const assignSupervisor = useAssignSupervisor();
 
@@ -75,12 +80,6 @@ export default function FarmsPage() {
 
   const productOptions =
     productsData?.data?.map((p) => ({ value: p.id, label: p.name })) || [];
-  const zoneOptions = Array.isArray(zonesData)
-    ? zonesData.map((z: { id: string; name: string }) => ({
-        value: z.id,
-        label: z.name,
-      }))
-    : [];
 
   return (
     <Modal>
@@ -104,18 +103,15 @@ export default function FarmsPage() {
           }
           filters={
             <>
-              <div className="w-40">
-                <SearchableSelect
-                  label=""
-                  options={[{ value: "", label: "All Zones" }, ...zoneOptions]}
-                  value={zoneFilter}
-                  onChange={(val) => {
-                    setZoneFilter(val);
-                    setPage(1);
-                  }}
-                  placeholder="Filter by zone"
-                />
-              </div>
+              <GeoHierarchyFilter
+                levels={["zone", "factory", "cluster"]}
+                values={geoFilters}
+                onChange={(vals) => {
+                  setGeoFilters(vals);
+                  setPage(1);
+                }}
+                selectWidth="w-40"
+              />
               <div className="w-40">
                 <SearchableSelect
                   label=""

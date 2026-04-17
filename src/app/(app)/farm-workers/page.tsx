@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdPerson, MdAdd, MdSearch } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
+import { GeoHierarchyFilter, GeoHierarchyValues } from "@/components/common/GeoHierarchyFilter";
 import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
@@ -15,6 +16,13 @@ import type { Worker } from "@/types/worker";
 export default function WorkersPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [geoFilters, setGeoFilters] = useState<GeoHierarchyValues>({
+    zoneId: "",
+    factoryId: "",
+    clusterId: "",
+    farmId: "",
+    workerId: "",
+  });
   const [page, setPage] = useState(1);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
 
@@ -46,6 +54,17 @@ export default function WorkersPage() {
                 className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-500"
               />
             </div>
+          }
+          filters={
+            <GeoHierarchyFilter
+              levels={["zone", "factory", "cluster"]}
+              values={geoFilters}
+              onChange={(vals) => {
+                setGeoFilters(vals);
+                setPage(1);
+              }}
+              selectWidth="w-40"
+            />
           }
           action={
             <Button

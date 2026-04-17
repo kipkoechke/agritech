@@ -21,6 +21,15 @@ export const getWorkers = async (
   return response.data;
 };
 
+export const getClusterWorkers = async (
+  clusterId: string,
+): Promise<WorkersResponse> => {
+  const response = await axiosInstance.get<WorkersResponse>(
+    `/clusters/${clusterId}/workers`,
+  );
+  return response.data;
+};
+
 export const getWorker = async (id: string): Promise<WorkerResponse> => {
   const response = await axiosInstance.get<WorkerResponse>(`/workers/${id}`);
   return response.data;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { MdGroup, MdHub } from "react-icons/md";
+import { MdGroup, MdHub, MdPublic } from "react-icons/md";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
@@ -38,6 +38,12 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
       icon: MdHub,
       href: "/hris/clusters",
       active: pathname.startsWith("/hris/clusters"),
+    },
+    {
+      name: "Geo Hierarchy",
+      icon: MdPublic,
+      href: "/hris/geo-hierarchy",
+      active: pathname.startsWith("/hris/geo-hierarchy"),
     },
   ];
 

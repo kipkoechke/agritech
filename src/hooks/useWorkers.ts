@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getWorkers,
   getWorker,
+  getClusterWorkers,
   createWorker,
   updateWorker,
   deleteWorker,
@@ -15,6 +16,14 @@ export const useWorkers = (params: WorkersParams = {}) => {
   return useQuery({
     queryKey: ["workers", params],
     queryFn: () => getWorkers(params),
+  });
+};
+
+export const useClusterWorkers = (clusterId: string) => {
+  return useQuery({
+    queryKey: ["cluster-workers", clusterId],
+    queryFn: () => getClusterWorkers(clusterId),
+    enabled: !!clusterId,
   });
 };
 

@@ -4,51 +4,40 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdHub, MdAdd, MdSearch } from "react-icons/md";
 import { FiEdit, FiTrash, FiEye } from "react-icons/fi";
-import { SearchableSelect } from "@/components/common/SearchableSelect";
+import { GeoHierarchyFilter, GeoHierarchyValues } from "@/components/common/GeoHierarchyFilter";
 import Tooltip from "@/components/common/Tooltip";
 import Modal from "@/components/common/Modal";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import Button from "@/components/common/Button";
 import { HRISLayout } from "@/components/hris";
 import { useClusters, useDeleteCluster } from "@/hooks/useCluster";
-import { useZones } from "@/hooks/useZone";
-import { useFactories } from "@/hooks/useFactory";
 import type { Cluster } from "@/types/cluster";
 
 export default function ClustersPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [zoneFilter, setZoneFilter] = useState("");
-  const [factoryFilter, setFactoryFilter] = useState("");
+  const [geoFilters, setGeoFilters] = useState<GeoHierarchyValues>({
+    zoneId: "",
+    factoryId: "",
+    clusterId: "",
+    farmId: "",
+    workerId: "",
+  });
   const [page, setPage] = useState(1);
   const [selectedCluster, setSelectedCluster] = useState<Cluster | null>(null);
 
   const { data, isLoading, error } = useClusters({
     page,
     search: search || undefined,
-    zone_id: zoneFilter || undefined,
-    factory_id: factoryFilter || undefined,
+    zone_id: geoFilters.zoneId || undefined,
+    factory_id: geoFilters.factoryId || undefined,
     sort_by: "name",
     sort_order: "asc",
   });
   const deleteCluster = useDeleteCluster();
-  const { data: zonesData } = useZones();
-  const { data: factoriesData } = useFactories();
 
   const clusters = data?.data || [];
   const pagination = data?.pagination;
-  const zones = zonesData || [];
-  const factories = factoriesData?.data || [];
-
-  const zoneOptions = [
-    { value: "", label: "All Zones" },
-    ...zones.map((z) => ({ value: z.id, label: z.name })),
-  ];
-
-  const factoryOptions = [
-    { value: "", label: "All Factories" },
-    ...factories.map((f) => ({ value: f.id, label: f.name })),
-  ];
 
   return (
     <Modal>
@@ -70,32 +59,15 @@ export default function ClustersPage() {
           </div>
         }
         filters={
-          <>
-            <div className="w-44">
-              <SearchableSelect
-                label=""
-                options={zoneOptions}
-                value={zoneFilter}
-                onChange={(val) => {
-                  setZoneFilter(val);
-                  setPage(1);
-                }}
-                placeholder="Filter by zone"
-              />
-            </div>
-            <div className="w-44">
-              <SearchableSelect
-                label=""
-                options={factoryOptions}
-                value={factoryFilter}
-                onChange={(val) => {
-                  setFactoryFilter(val);
-                  setPage(1);
-                }}
-                placeholder="Filter by factory"
-              />
-            </div>
-          </>
+          <GeoHierarchyFilter
+            levels={["zone", "factory"]}
+            values={geoFilters}
+            onChange={(vals) => {
+              setGeoFilters(vals);
+              setPage(1);
+            }}
+            selectWidth="w-44"
+          />
         }
         action={
           <Button

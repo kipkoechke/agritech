@@ -24,6 +24,15 @@ export const getFarms = async (
   return response.data;
 };
 
+export const getClusterFarms = async (
+  clusterId: string,
+): Promise<FarmsResponse> => {
+  const response = await axiosInstance.get<FarmsResponse>(
+    `/clusters/${clusterId}/farms`,
+  );
+  return response.data;
+};
+
 export const getMineFarms = async (
   params: FarmsParams = {},
 ): Promise<FarmsResponse> => {

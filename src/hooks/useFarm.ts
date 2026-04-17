@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getFarms,
   getMineFarms,
+  getClusterFarms,
   getFarm,
   createFarm,
   updateFarm,
@@ -21,6 +22,14 @@ export const useFarms = (
     queryKey: ["farms", params],
     queryFn: () => getFarms(params),
     enabled: options?.enabled,
+  });
+};
+
+export const useClusterFarms = (clusterId: string) => {
+  return useQuery({
+    queryKey: ["cluster-farms", clusterId],
+    queryFn: () => getClusterFarms(clusterId),
+    enabled: !!clusterId,
   });
 };
 
