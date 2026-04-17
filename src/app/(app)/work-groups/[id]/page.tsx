@@ -28,8 +28,8 @@ import {
 } from "@/hooks/useWorkGroup";
 import { useWorkers, useCreateWorker } from "@/hooks/useWorkers";
 import { useZones } from "@/hooks/useZone";
-import { useFactories } from "@/hooks/useFactory";
-import { useClusters } from "@/hooks/useCluster";
+import { useZoneFactories } from "@/hooks/useFactory";
+import { useFactoryClusters } from "@/hooks/useCluster";
 import type { WorkGroupMember } from "@/types/workGroup";
 
 export default function WorkGroupDetailPage() {
@@ -62,12 +62,8 @@ export default function WorkGroupDetailPage() {
     search: workerSearch,
   });
   const { data: zonesData } = useZones();
-  const { data: factoriesData } = useFactories({
-    zone_id: newWorker.zone_id || undefined,
-  });
-  const { data: clustersData } = useClusters({
-    factory_id: newWorker.factory_id || undefined,
-  });
+  const { data: factoriesData } = useZoneFactories(newWorker.zone_id);
+  const { data: clustersData } = useFactoryClusters(newWorker.factory_id);
 
   const group = groupResponse?.data;
   const members = membersResponse?.data || [];
@@ -110,16 +106,24 @@ export default function WorkGroupDetailPage() {
         cluster_id: newWorker.cluster_id,
       },
       {
-        onSuccess: () => {
-          setNewWorker({
-            name: "",
-            phone: "",
-            pin: "",
-            zone_id: "",
-            factory_id: "",
-            cluster_id: "",
-          });
-          setShowCreateWorker(false);
+        onSuccess: (response) => {
+          const newWorkerId = response.data.id;
+          addMembers.mutate(
+            { workGroupId: id, data: { members: [newWorkerId] } },
+            {
+              onSuccess: () => {
+                setNewWorker({
+                  name: "",
+                  phone: "",
+                  pin: "",
+                  zone_id: "",
+                  factory_id: "",
+                  cluster_id: "",
+                });
+                setShowCreateWorker(false);
+              },
+            },
+          );
         },
       },
     );
@@ -669,6 +673,7 @@ export default function WorkGroupDetailPage() {
                 onClick={handleCreateWorker}
                 disabled={
                   createWorker.isPending ||
+                  addMembers.isPending ||
                   !newWorker.name ||
                   !newWorker.phone ||
                   !newWorker.pin ||
@@ -679,7 +684,11 @@ export default function WorkGroupDetailPage() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 <MdPersonAdd className="w-3.5 h-3.5" />
-                {createWorker.isPending ? "Creating…" : "Create Worker"}
+                {createWorker.isPending
+                  ? "Creating…"
+                  : addMembers.isPending
+                    ? "Adding to group…"
+                    : "Create & Add to Group"}
               </button>
             </div>
           </div>

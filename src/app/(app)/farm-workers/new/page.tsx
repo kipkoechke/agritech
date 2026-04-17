@@ -11,8 +11,8 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateWorker } from "@/hooks/useWorkers";
 import { useZones } from "@/hooks/useZone";
-import { useFactories } from "@/hooks/useFactory";
-import { useClusters } from "@/hooks/useCluster";
+import { useZoneFactories } from "@/hooks/useFactory";
+import { useFactoryClusters } from "@/hooks/useCluster";
 
 interface WorkerFormData {
   name: string;
@@ -21,14 +21,16 @@ interface WorkerFormData {
 
 export default function CreateWorkerPage() {
   const router = useRouter();
+
+  const [pin, setPin] = useState("");
+  const [zoneId, setZoneId] = useState("");
+  const [factoryId, setFactoryId] = useState("");
+  const [clusterId, setClusterId] = useState("");
+
   const createWorker = useCreateWorker();
   const { data: zonesData, isLoading: isLoadingZones } = useZones();
-  const { data: factoriesData, isLoading: isLoadingFactories } = useFactories({
-    per_page: 100,
-  });
-  const { data: clustersData, isLoading: isLoadingClusters } = useClusters({
-    per_page: 100,
-  });
+  const { data: factoriesData, isLoading: isLoadingFactories } = useZoneFactories(zoneId);
+  const { data: clustersData, isLoading: isLoadingClusters } = useFactoryClusters(factoryId);
 
   const zonesList = Array.isArray(zonesData) ? zonesData : [];
 
@@ -39,11 +41,6 @@ export default function CreateWorkerPage() {
   } = useForm<WorkerFormData>({
     defaultValues: { name: "", phone: "" },
   });
-
-  const [pin, setPin] = useState("");
-  const [zoneId, setZoneId] = useState("");
-  const [factoryId, setFactoryId] = useState("");
-  const [clusterId, setClusterId] = useState("");
 
   const zoneOptions = zonesList.map((zone: any) => ({
     value: zone.id,
@@ -122,34 +119,45 @@ export default function CreateWorkerPage() {
               label="Zone"
               options={zoneOptions}
               value={zoneId}
-              onChange={setZoneId}
+              onChange={(val) => {
+                setZoneId(val);
+                setFactoryId("");
+                setClusterId("");
+              }}
               placeholder={isLoadingZones ? "Loading zones..." : "Select Zone"}
               required
             />
 
-            <SearchableSelect
-              label="Factory"
-              options={factoryOptions}
-              value={factoryId}
-              onChange={setFactoryId}
-              placeholder={
-                isLoadingFactories ? "Loading factories..." : "Select Factory"
-              }
-              isLoading={isLoadingFactories}
-              required
-            />
+            {zoneId && (
+              <SearchableSelect
+                label="Factory"
+                options={factoryOptions}
+                value={factoryId}
+                onChange={(val) => {
+                  setFactoryId(val);
+                  setClusterId("");
+                }}
+                placeholder={
+                  isLoadingFactories ? "Loading factories..." : "Select Factory"
+                }
+                isLoading={isLoadingFactories}
+                required
+              />
+            )}
 
-            <SearchableSelect
-              label="Cluster"
-              options={clusterOptions}
-              value={clusterId}
-              onChange={setClusterId}
-              placeholder={
-                isLoadingClusters ? "Loading clusters..." : "Select Cluster"
-              }
-              isLoading={isLoadingClusters}
-              required
-            />
+            {factoryId && (
+              <SearchableSelect
+                label="Cluster"
+                options={clusterOptions}
+                value={clusterId}
+                onChange={setClusterId}
+                placeholder={
+                  isLoadingClusters ? "Loading clusters..." : "Select Cluster"
+                }
+                isLoading={isLoadingClusters}
+                required
+              />
+            )}
 
             <div>
               <label className="text-gray-700 mb-2 flex text-xs sm:text-sm font-semibold">
