@@ -361,17 +361,31 @@ export default function FarmDetailsPage() {
               <table className="min-w-full">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Ref</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Activity</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Scheduled Date</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Bookings</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Created By</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Ref
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Activity
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Scheduled Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Bookings
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Created By
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {farm.activity_schedules.data.map((schedule) => {
-                    const scheduledDate = new Date(schedule.scheduled_date).toLocaleDateString("en-KE", {
+                    const scheduledDate = new Date(
+                      schedule.scheduled_date,
+                    ).toLocaleDateString("en-KE", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -382,28 +396,42 @@ export default function FarmDetailsPage() {
                       cancelled: "bg-red-100 text-red-600",
                       in_progress: "bg-yellow-100 text-yellow-700",
                     };
-                    const statusClass = statusColors[schedule.status] ?? "bg-gray-100 text-gray-600";
+                    const statusClass =
+                      statusColors[schedule.status] ??
+                      "bg-gray-100 text-gray-600";
                     return (
                       <tr key={schedule.id} className="hover:bg-gray-50/50">
                         <td className="px-6 py-3.5">
-                          <span className="text-xs font-mono font-semibold text-primary">{schedule.reference_code}</span>
+                          <span className="text-xs font-mono font-semibold text-primary">
+                            {schedule.reference_code}
+                          </span>
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className="text-sm font-medium text-gray-900">{schedule.activity.name}</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {schedule.activity.name}
+                          </span>
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className="text-sm text-gray-600">{scheduledDate}</span>
+                          <span className="text-sm text-gray-600">
+                            {scheduledDate}
+                          </span>
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusClass}`}>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusClass}`}
+                          >
                             {schedule.status.replace("_", " ")}
                           </span>
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className="text-sm text-gray-600">{schedule.bookings_count}</span>
+                          <span className="text-sm text-gray-600">
+                            {schedule.bookings_count}
+                          </span>
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className="text-sm text-gray-600">{schedule.created_by.name}</span>
+                          <span className="text-sm text-gray-600">
+                            {schedule.created_by.name}
+                          </span>
                         </td>
                       </tr>
                     );

@@ -551,54 +551,24 @@ export default function ScheduleDetailsPage() {
           Stats Bar
           ══════════════════════════════════ */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            {
-              label: "Total Workers",
-              value: bookingsCount,
-              icon: MdPeople,
-            },
-            {
-              label: "Confirmed",
-              value: confirmedCount,
-              icon: MdCheckCircle,
-            },
-            {
-              label: "Worker Signed",
-              value: signedCount,
-              icon: MdCreate,
-            },
-            {
-              label: "With Yield",
-              value: withQuantitiesCount,
-              icon: MdScale,
-            },
-          ].map(({ label, value, icon: Icon }) => (
-            <div
-              key={label}
-              className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Icon className="w-5 h-5 text-primary/70" />
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold text-gray-900 tabular-nums leading-none">
-                  {value}
-                </p>
-                <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">
-                  {label}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {summary && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
             {[
-              { label: "Farm KGs", value: `${summary.total_farm_kgs} kg`, icon: MdScale },
-              { label: "Factory KGs", value: `${summary.total_factory_kgs} kg`, icon: MdScale },
-              { label: "Attended", value: summary.attended, icon: MdCheckCircle },
+              {
+                label: "Farm KGs",
+                value: `${summary.total_farm_kgs} kg`,
+                icon: MdScale,
+              },
+              {
+                label: "Factory KGs",
+                value: `${summary.total_factory_kgs} kg`,
+                icon: MdScale,
+              },
+              {
+                label: "Attended",
+                value: summary.attended,
+                icon: MdCheckCircle,
+              },
               { label: "Absent", value: summary.absent, icon: MdCancel },
             ].map(({ label, value, icon: Icon }) => (
               <div
