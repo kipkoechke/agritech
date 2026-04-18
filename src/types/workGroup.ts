@@ -24,8 +24,6 @@ export interface CreateWorkGroupData {
   description: string;
   active: boolean;
   owner_id: string;
-  farm_id?: string;
-  date?: string;
 }
 
 export interface UpdateWorkGroupData {
@@ -33,8 +31,6 @@ export interface UpdateWorkGroupData {
   description?: string;
   active?: boolean;
   owner_id?: string;
-  farm_id?: string;
-  date?: string;
 }
 
 export interface WorkGroupPagination {

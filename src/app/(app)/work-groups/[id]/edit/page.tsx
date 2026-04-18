@@ -10,7 +10,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useWorkGroup, useUpdateWorkGroup } from "@/hooks/useWorkGroup";
 import { useHrisUsers } from "@/hooks/useHrisUser";
-import { useIsFarmer } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useAuth";
 import type { UpdateWorkGroupData } from "@/types/workGroup";
 
 interface WorkGroupFormData {
@@ -25,9 +25,9 @@ export default function EditWorkGroupPage() {
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const updateWorkGroup = useUpdateWorkGroup();
-  const isFarmer = useIsFarmer();
+  const isAdmin = useIsAdmin();
   const { data: usersData, isLoading: usersLoading } = useHrisUsers(
-    !isFarmer ? {} : (undefined as any),
+    isAdmin ? {} : (undefined as any),
   );
 
   const {
@@ -40,7 +40,6 @@ export default function EditWorkGroupPage() {
   });
 
   const [ownerId, setOwnerId] = useState("");
-  const [active, setActive] = useState(true);
 
   const group = groupResponse?.data;
 
@@ -48,7 +47,6 @@ export default function EditWorkGroupPage() {
     if (group) {
       reset({ name: group.name, description: group.description });
       setOwnerId(group.owner_id || "");
-      setActive(group.active ?? true);
     }
   }, [group, reset]);
 
@@ -63,8 +61,8 @@ export default function EditWorkGroupPage() {
     const payload: UpdateWorkGroupData = {
       name: data.name,
       description: data.description,
-      active,
-      owner_id: !isFarmer ? ownerId || undefined : undefined,
+      active: true,
+      owner_id: isAdmin ? ownerId || undefined : undefined,
     };
 
     updateWorkGroup.mutate(
@@ -129,7 +127,7 @@ export default function EditWorkGroupPage() {
               error={errors.description?.message}
             />
 
-            {!isFarmer && (
+            {isAdmin && (
               <SearchableSelect
                 label="Owner"
                 options={ownerOptions}
@@ -140,21 +138,6 @@ export default function EditWorkGroupPage() {
                 required
               />
             )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <label className="inline-flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={active}
-                  onChange={(e) => setActive(e.target.checked)}
-                  className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
-                />
-                <span className="text-sm text-gray-700">Active</span>
-              </label>
-            </div>
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
               <Button type="secondary" to={`/work-groups/${id}`}>
