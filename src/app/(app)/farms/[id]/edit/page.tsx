@@ -13,6 +13,8 @@ import { useFarm, useUpdateFarm } from "@/hooks/useFarm";
 import { useZones } from "@/hooks/useZone";
 import { useProducts } from "@/hooks/useProduct";
 import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useZoneFactories } from "@/hooks/useFactory";
+import { useFactoryClusters } from "@/hooks/useCluster";
 import type { UpdateFarmData } from "@/types/farm";
 import "leaflet/dist/leaflet.css";
 
@@ -48,6 +50,10 @@ export default function EditFarmPage() {
   const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
     role: "farmer",
   });
+  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
+    role: "supervisor",
+    per_page: 100,
+  });
 
   const farm = farmResponse?.data;
 
@@ -62,13 +68,20 @@ export default function EditFarmPage() {
   const [zoneId, setZoneId] = useState<string | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
+  const [supervisorId, setSupervisorId] = useState<string | null>(null);
+  const [factoryId, setFactoryId] = useState<string | null>(null);
+  const [clusterId, setClusterId] = useState<string | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const zoneValue = zoneId ?? (farm?.zone?.id || "");
   const productValue = productId ?? (farm?.product?.id || "");
   const ownerValue = ownerId ?? (farm?.farmer?.id || "");
+  const supervisorValue = supervisorId ?? (farm?.supervisor?.id || "");
+  const factoryValue = factoryId ?? (farm?.factory?.id || "");
+  const clusterValue = clusterId ?? (farm?.cluster?.id || "");
+
+  const { data: factoriesData, isLoading: factoriesLoading } = useZoneFactories(zoneValue);
+  const { data: clustersData, isLoading: clustersLoading } = useFactoryClusters(factoryValue);
 
   const existingCoords =
     farm?.coordinates?.latitude && farm?.coordinates?.longitude
@@ -96,16 +109,30 @@ export default function EditFarmPage() {
       description: u.phone,
     })) || [];
 
+  const supervisorOptions =
+    supervisorsData?.data?.map((u) => ({
+      value: u.id,
+      label: u.name,
+      description: u.phone,
+    })) || [];
+
+  const factoryOptions =
+    factoriesData?.data?.map((f: any) => ({ value: f.id, label: f.name })) || [];
+
+  const clusterOptions =
+    clustersData?.data?.map((c: any) => ({ value: c.id, label: c.name })) || [];
+
   const onSubmit = (data: FarmFormData) => {
     const payload: UpdateFarmData = {
       name: data.name,
       size: parseFloat(data.size) || undefined,
-      coordinates: mapCoords
-        ? { lat: mapCoords.lat, lng: mapCoords.lng }
-        : undefined,
+      coordinates: mapCoords ? { lat: mapCoords.lat, lng: mapCoords.lng } : undefined,
       zone_id: zoneValue || undefined,
       product_id: productValue || undefined,
       owner_id: ownerValue || undefined,
+      supervisor_id: supervisorValue || undefined,
+      factory_id: factoryValue || undefined,
+      cluster_id: clusterValue || undefined,
     };
     updateFarm.mutate(
       { id, data: payload },
@@ -144,7 +171,7 @@ export default function EditFarmPage() {
 
   return (
     <div className="min-h-screen p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
@@ -165,49 +192,84 @@ export default function EditFarmPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-            <InputField
-              label="Farm Name"
-              placeholder="Enter farm name"
-              register={register("name", { required: "Name is required" })}
-              error={errors.name?.message}
-              required
-            />
+            {/* Row 1: Farm Name | Size */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <InputField
+                label="Farm Name"
+                placeholder="Enter farm name"
+                register={register("name", { required: "Name is required" })}
+                error={errors.name?.message}
+                required
+              />
+              <InputField
+                label="Size (Acres)"
+                type="number"
+                placeholder="Enter farm size"
+                register={register("size", { required: "Size is required" })}
+                error={errors.size?.message}
+                required
+              />
+            </div>
 
-            <InputField
-              label="Size (Acres)"
-              type="number"
-              placeholder="Enter farm size"
-              register={register("size", { required: "Size is required" })}
-              error={errors.size?.message}
-              required
-            />
+            {/* Row 2: Zone | Product */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <SearchableSelect
+                label="Zone"
+                options={zoneOptions}
+                value={zoneValue}
+                onChange={(v) => { setZoneId(v); setFactoryId(""); setClusterId(""); }}
+                placeholder="Select a zone"
+                isLoading={zonesLoading}
+              />
+              <SearchableSelect
+                label="Product"
+                options={productOptions}
+                value={productValue}
+                onChange={setProductId}
+                placeholder="Select a product"
+                isLoading={productsLoading}
+              />
+            </div>
 
-            <SearchableSelect
-              label="Zone"
-              options={zoneOptions}
-              value={zoneValue}
-              onChange={setZoneId}
-              placeholder="Select a zone"
-              isLoading={zonesLoading}
-            />
+            {/* Row 3: Factory | Cluster */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <SearchableSelect
+                label="Factory"
+                options={factoryOptions}
+                value={factoryValue}
+                onChange={(v) => { setFactoryId(v); setClusterId(""); }}
+                placeholder={zoneValue ? "Select a factory" : "Select a zone first"}
+                isLoading={factoriesLoading}
+              />
+              <SearchableSelect
+                label="Cluster"
+                options={clusterOptions}
+                value={clusterValue}
+                onChange={setClusterId}
+                placeholder={factoryValue ? "Select a cluster" : "Select a factory first"}
+                isLoading={clustersLoading}
+              />
+            </div>
 
-            <SearchableSelect
-              label="Product"
-              options={productOptions}
-              value={productValue}
-              onChange={setProductId}
-              placeholder="Select a product"
-              isLoading={productsLoading}
-            />
-
-            <SearchableSelect
-              label="Owner (Farmer)"
-              options={farmerOptions}
-              value={ownerValue}
-              onChange={setOwnerId}
-              placeholder="Select farm owner"
-              isLoading={farmersLoading}
-            />
+            {/* Row 4: Owner | Supervisor */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <SearchableSelect
+                label="Owner (Farmer)"
+                options={farmerOptions}
+                value={ownerValue}
+                onChange={setOwnerId}
+                placeholder="Select farm owner"
+                isLoading={farmersLoading}
+              />
+              <SearchableSelect
+                label="Supervisor"
+                options={supervisorOptions}
+                value={supervisorValue}
+                onChange={setSupervisorId}
+                placeholder="Select supervisor"
+                isLoading={supervisorsLoading}
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

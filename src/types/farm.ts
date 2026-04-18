@@ -47,6 +47,9 @@ export interface CreateFarmData {
   zone_id: string;
   product_id: string;
   owner_id?: string;
+  supervisor_id?: string;
+  factory_id?: string;
+  cluster_id?: string;
 }
 
 export interface UpdateFarmData {
@@ -57,6 +60,8 @@ export interface UpdateFarmData {
   product_id?: string;
   owner_id?: string;
   supervisor_id?: string;
+  factory_id?: string;
+  cluster_id?: string;
 }
 
 export interface FarmPagination {
