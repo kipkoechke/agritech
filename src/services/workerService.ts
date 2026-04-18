@@ -6,7 +6,6 @@ import type {
   WorkerResponse,
 } from "@/types/worker";
 
-
 export interface WorkersParams {
   page?: number;
   per_page?: number;

@@ -63,7 +63,7 @@ export default function WorkGroupDetailPage() {
       ? isPhone
         ? { phone: workerSearch.trim() }
         : { search: workerSearch.trim() }
-      : {}
+      : {},
   );
   const { data: zonesData } = useZones();
   const { data: factoriesData } = useZoneFactories(newWorker.zone_id);
@@ -81,14 +81,6 @@ export default function WorkGroupDetailPage() {
         label: w.name,
         description: w.phone,
       })) || [];
-
-  const handleAddMembers = () => {
-    if (selectedMemberIds.length === 0) return;
-    addMembers.mutate(
-      { workGroupId: id, data: { members: selectedMemberIds } },
-      { onSuccess: () => setSelectedMemberIds([]) },
-    );
-  };
 
   const handleCreateWorker = () => {
     if (
@@ -279,7 +271,6 @@ export default function WorkGroupDetailPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
-                      setSelectedMemberIds([]);
                       setWorkerSearch("");
                       setShowAddExisting(true);
                     }}
