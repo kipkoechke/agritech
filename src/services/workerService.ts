@@ -6,17 +6,24 @@ import type {
   WorkerResponse,
 } from "@/types/worker";
 
+
 export interface WorkersParams {
   page?: number;
   per_page?: number;
   search?: string;
+  phone?: string;
 }
 
 export const getWorkers = async (
   params: WorkersParams = {},
 ): Promise<WorkersResponse> => {
+  // If phone is present, use phone param and remove search
+  const queryParams = { ...params };
+  if (queryParams.phone) {
+    delete queryParams.search;
+  }
   const response = await axiosInstance.get<WorkersResponse>("/workers", {
-    params,
+    params: queryParams,
   });
   return response.data;
 };

@@ -58,9 +58,15 @@ export default function WorkGroupDetailPage() {
   const addMembers = useAddWorkGroupMembers();
   const deleteMember = useDeleteWorkGroupMember();
   const createWorker = useCreateWorker();
-  const { data: workersData, isLoading: workersLoading } = useWorkers({
-    search: workerSearch,
-  });
+  // If the search is a phone number, use phone param, else use search
+  const isPhone = /^\d{10,}$/.test(workerSearch.trim());
+  const { data: workersData, isLoading: workersLoading } = useWorkers(
+    workerSearch.trim()
+      ? isPhone
+        ? { phone: workerSearch.trim() }
+        : { search: workerSearch.trim() }
+      : {}
+  );
   const { data: zonesData } = useZones();
   const { data: factoriesData } = useZoneFactories(newWorker.zone_id);
   const { data: clustersData } = useFactoryClusters(newWorker.factory_id);
