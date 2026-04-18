@@ -56,14 +56,13 @@ export default function WorkGroupDetailPage() {
   const addMembers = useAddWorkGroupMembers();
   const deleteMember = useDeleteWorkGroupMember();
   const createWorker = useCreateWorker();
-  // If the search is a phone number, use phone param, else use search
-  const isPhone = /^\d{10,}$/.test(workerSearch.trim());
+  // Only search when a complete Kenyan phone number is entered
+  // Accepts: 07XXXXXXXX, 01XXXXXXXX (10 digits) or 2547XXXXXXXX, 2541XXXXXXXX (12 digits)
+  const trimmedSearch = workerSearch.trim();
+  const isFullKenyanPhone = /^(\+?254[71]\d{8}|0[71]\d{8})$/.test(trimmedSearch);
   const { data: workersData, isLoading: workersLoading } = useWorkers(
-    workerSearch.trim()
-      ? isPhone
-        ? { phone: workerSearch.trim() }
-        : { search: workerSearch.trim() }
-      : {},
+    isFullKenyanPhone ? { phone: trimmedSearch } : {},
+    isFullKenyanPhone,
   );
   const { data: zonesData } = useZones();
   const { data: factoriesData } = useZoneFactories(newWorker.zone_id);

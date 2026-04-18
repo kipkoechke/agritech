@@ -12,10 +12,14 @@ import type { CreateWorkerData, UpdateWorkerData } from "@/types/worker";
 import toast from "react-hot-toast";
 import { getApiErrorMessage } from "@/utils/getApiError";
 
-export const useWorkers = (params: WorkersParams = {}) => {
+export const useWorkers = (
+  params: WorkersParams = {},
+  enabled = true,
+) => {
   return useQuery({
     queryKey: ["workers", params],
     queryFn: () => getWorkers(params),
+    enabled,
   });
 };
 
