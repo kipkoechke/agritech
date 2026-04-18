@@ -9,6 +9,20 @@ export interface FarmRef {
   code?: string;
 }
 
+export interface ActivityScheduleRef {
+  id: string;
+  reference_code: string;
+  activity: { id: string; name: string };
+  farm: { id: string; name: string; zone?: FarmRef };
+  created_by: { id: string; name: string };
+  scheduled_date: string;
+  status: string;
+  notes: string | null;
+  bookings_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Farm {
   id: string;
   name: string;
@@ -21,6 +35,7 @@ export interface Farm {
   product?: FarmRef;
   farmer?: FarmRef;
   supervisor?: FarmRef;
+  activity_schedules?: { data: ActivityScheduleRef[] };
   created_at: string;
   updated_at: string;
 }

@@ -20,6 +20,7 @@ import {
   MdSupervisorAccount,
   MdFactory,
   MdCategory,
+  MdEvent,
 } from "react-icons/md";
 import { useFarm } from "@/hooks/useFarm";
 import { useIsSupervisor } from "@/hooks/useAuth";
@@ -343,6 +344,75 @@ export default function FarmDetailsPage() {
             )}
           </div>
         </div>
+
+        {/* Activity Schedules Card */}
+        {farm.activity_schedules && farm.activity_schedules.data.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+              <MdEvent className="w-4 h-4 text-primary" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                Activity Schedules
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                {farm.activity_schedules.data.length}
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Ref</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Activity</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Scheduled Date</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Bookings</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Created By</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {farm.activity_schedules.data.map((schedule) => {
+                    const scheduledDate = new Date(schedule.scheduled_date).toLocaleDateString("en-KE", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    });
+                    const statusColors: Record<string, string> = {
+                      scheduled: "bg-blue-100 text-blue-700",
+                      completed: "bg-green-100 text-green-700",
+                      cancelled: "bg-red-100 text-red-600",
+                      in_progress: "bg-yellow-100 text-yellow-700",
+                    };
+                    const statusClass = statusColors[schedule.status] ?? "bg-gray-100 text-gray-600";
+                    return (
+                      <tr key={schedule.id} className="hover:bg-gray-50/50">
+                        <td className="px-6 py-3.5">
+                          <span className="text-xs font-mono font-semibold text-primary">{schedule.reference_code}</span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm font-medium text-gray-900">{schedule.activity.name}</span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm text-gray-600">{scheduledDate}</span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusClass}`}>
+                            {schedule.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm text-gray-600">{schedule.bookings_count}</span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className="text-sm text-gray-600">{schedule.created_by.name}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Timeline Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
