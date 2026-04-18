@@ -46,6 +46,13 @@ export interface BookingsData {
   data: ScheduleBooking[];
 }
 
+export interface BookingsSummary {
+  total_farm_kgs: number;
+  total_factory_kgs: number;
+  attended: number;
+  absent: number;
+}
+
 export interface Schedule {
   id: string;
   reference_code: string;
@@ -58,6 +65,7 @@ export interface Schedule {
   created_at: string;
   updated_at: string;
   bookings_count?: number;
+  bookings_summary?: BookingsSummary;
   bookings?: BookingsData;
 }
 

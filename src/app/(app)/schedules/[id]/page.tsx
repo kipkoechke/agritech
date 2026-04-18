@@ -283,7 +283,7 @@ function WorkerRow({
 
         {/* Action buttons */}
         <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-          {!booking.is_confirmed && (
+          {!booking.is_confirmed ? (
             <button
               onClick={() => confirmMutation.mutate(booking.id)}
               disabled={confirmMutation.isPending}
@@ -293,43 +293,43 @@ function WorkerRow({
               <MdCheck className="w-3 h-3" />
               Confirm
             </button>
-          )}
+          ) : (
+            <>
+              <button
+                onClick={toggleFarmQty}
+                title="Capture farm quantity"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 transition-colors shadow-sm"
+              >
+                <MdScale className="w-3 h-3" />
+                Farm Qty
+              </button>
 
-          <button
-            onClick={toggleFarmQty}
-            disabled={!booking.is_confirmed}
-            title="Capture farm quantity"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-          >
-            <MdScale className="w-3 h-3" />
-            Farm Qty
-          </button>
+              <button
+                onClick={toggleFactoryQty}
+                disabled={booking.farm_qty == null}
+                title="Capture factory quantity"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                <MdScale className="w-3 h-3" />
+                Factory Qty
+              </button>
 
-          <button
-            onClick={toggleFactoryQty}
-            disabled={booking.farm_qty == null}
-            title="Capture factory quantity"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-          >
-            <MdScale className="w-3 h-3" />
-            Factory Qty
-          </button>
-
-          {!booking.worker_signed && (
-            <button
-              onClick={() => signOffMutation.mutate(booking.id)}
-              disabled={
-                !booking.is_confirmed ||
-                booking.farm_qty == null ||
-                booking.factory_qty == null ||
-                signOffMutation.isPending
-              }
-              title="Sign off worker"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-            >
-              <MdCreate className="w-3 h-3" />
-              Sign Off
-            </button>
+              {!booking.worker_signed && (
+                <button
+                  onClick={() => signOffMutation.mutate(booking.id)}
+                  disabled={
+                    booking.farm_qty == null ||
+                    booking.factory_qty == null ||
+                    signOffMutation.isPending
+                  }
+                  title="Sign off worker"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                >
+                  <MdCreate className="w-3 h-3" />
+                  Sign Off
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -478,6 +478,8 @@ export default function ScheduleDetailsPage() {
     minute: "2-digit",
   });
 
+  const summary = schedule.bookings_summary;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ══════════════════════════════════
@@ -590,6 +592,34 @@ export default function ScheduleDetailsPage() {
             </div>
           ))}
         </div>
+
+        {summary && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+            {[
+              { label: "Farm KGs", value: `${summary.total_farm_kgs} kg`, icon: MdScale },
+              { label: "Factory KGs", value: `${summary.total_factory_kgs} kg`, icon: MdScale },
+              { label: "Attended", value: summary.attended, icon: MdCheckCircle },
+              { label: "Absent", value: summary.absent, icon: MdCancel },
+            ].map(({ label, value, icon: Icon }) => (
+              <div
+                key={label}
+                className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-gray-900 tabular-nums leading-none">
+                    {value}
+                  </p>
+                  <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">
+                    {label}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ══════════════════════════════════
