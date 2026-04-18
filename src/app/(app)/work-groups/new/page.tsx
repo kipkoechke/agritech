@@ -83,7 +83,9 @@ export default function NewWorkGroupPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div
+              className={`grid grid-cols-1 ${isAdmin ? "sm:grid-cols-2" : ""} gap-6`}
+            >
               <InputField
                 label="Group Name"
                 placeholder="Enter work group name"
