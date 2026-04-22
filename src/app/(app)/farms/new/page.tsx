@@ -155,6 +155,7 @@ export default function NewFarmPage() {
               <InputField
                 label="Size (Acres)"
                 type="number"
+                step="any"
                 placeholder="Enter farm size in acres"
                 register={register("size", { required: "Size is required" })}
                 error={errors.size?.message}

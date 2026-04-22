@@ -15,6 +15,7 @@ interface InputFieldProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   name?: string;
   icon?: ReactNode;
+  step?: string;
 }
 
 export const InputField = ({
@@ -29,6 +30,7 @@ export const InputField = ({
   onChange,
   name,
   icon,
+  step,
 }: InputFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = type === "password";
@@ -60,6 +62,7 @@ export const InputField = ({
             value={value}
             onChange={onChange}
             name={name}
+            step={step}
             className={`border-gray-300 focus:border-emerald-500 text-gray-900 focus:ring-emerald-500 hover:border-gray-400 w-full rounded-lg placeholder:text-gray-500 border px-4 py-3 text-sm transition-all duration-300 focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${icon ? "pl-10" : ""}`}
           />
         ) : (
@@ -68,6 +71,7 @@ export const InputField = ({
             type={inputType}
             placeholder={placeholder}
             disabled={disabled}
+            step={step}
             className={`border-gray-300 focus:border-emerald-500 text-gray-900 focus:ring-emerald-500 hover:border-gray-400 w-full rounded-lg placeholder:text-gray-500 border px-4 py-3 text-sm transition-all duration-300 focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${icon ? "pl-10" : ""}`}
           />
         )}

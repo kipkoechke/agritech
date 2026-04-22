@@ -17,7 +17,7 @@ export interface Factory {
 
 export interface CreateFactoryData {
   name: string;
-  code: string;
+  code?: string;
   zone_id: string;
   coordinates?: { lat: number; lng: number };
   user_id?: string;

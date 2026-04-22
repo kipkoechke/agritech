@@ -56,15 +56,17 @@ export default function WorkGroupDetailPage() {
   const addMembers = useAddWorkGroupMembers();
   const deleteMember = useDeleteWorkGroupMember();
   const createWorker = useCreateWorker();
-  // Only search when a complete Kenyan phone number is entered
-  // Accepts: 07XXXXXXXX, 01XXXXXXXX (10 digits) or 2547XXXXXXXX, 2541XXXXXXXX (12 digits)
+  // Search when at least 3 characters entered (name or phone)
   const trimmedSearch = workerSearch.trim();
-  const isFullKenyanPhone = /^(\+?254[71]\d{8}|0[71]\d{8})$/.test(
-    trimmedSearch,
-  );
+  const isFullKenyanPhone = /^(\+?254[71]\d{8}|0[71]\d{8})$/.test(trimmedSearch);
+  const canSearch = trimmedSearch.length >= 3;
   const { data: workersData, isLoading: workersLoading } = useWorkers(
-    isFullKenyanPhone ? { phone: trimmedSearch } : {},
-    isFullKenyanPhone,
+    canSearch
+      ? isFullKenyanPhone
+        ? { phone: trimmedSearch }
+        : { search: trimmedSearch }
+      : {},
+    canSearch,
   );
   const { data: zonesData } = useZones();
   const { data: factoriesData } = useZoneFactories(newWorker.zone_id);
@@ -424,7 +426,7 @@ export default function WorkGroupDetailPage() {
                 <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by name or phone…"
+                  placeholder="Search by name or phone (min 3 chars)…"
                   value={workerSearch}
                   onChange={(e) => setWorkerSearch(e.target.value)}
                   autoFocus

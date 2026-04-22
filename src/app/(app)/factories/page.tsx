@@ -23,6 +23,7 @@ export default function FactoriesPage() {
 
   const { data, isLoading, error } = useFactories({
     page,
+    per_page: 15,
     search: search || undefined,
     zone_id: zoneFilter || undefined,
     sort_by: "name",

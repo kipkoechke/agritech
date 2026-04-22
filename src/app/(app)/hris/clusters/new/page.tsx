@@ -14,7 +14,6 @@ import type { CreateClusterData } from "@/types/cluster";
 
 interface ClusterFormData {
   name: string;
-  code: string;
   lat: string;
   lng: string;
 }
@@ -23,14 +22,14 @@ export default function NewClusterPage() {
   const router = useRouter();
   const createCluster = useCreateCluster();
 
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories();
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({ per_page: 100 });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ClusterFormData>({
-    defaultValues: { name: "", code: "", lat: "", lng: "" },
+    defaultValues: { name: "", lat: "", lng: "" },
   });
 
   const [factoryId, setFactoryId] = useState("");
@@ -46,7 +45,6 @@ export default function NewClusterPage() {
     if (!factoryId) return;
     const payload: CreateClusterData = {
       name: data.name,
-      code: data.code,
       factory_id: factoryId,
     };
     if (data.lat && data.lng) {
@@ -91,14 +89,6 @@ export default function NewClusterPage() {
               required
             />
 
-            <InputField
-              label="Code"
-              placeholder="e.g. CLU-001"
-              register={register("code", { required: "Code is required" })}
-              error={errors.code?.message}
-              required
-            />
-
             <SearchableSelect
               label="Factory"
               options={factoryOptions}
@@ -113,12 +103,14 @@ export default function NewClusterPage() {
               <InputField
                 label="Latitude"
                 type="number"
+                step="any"
                 placeholder="e.g. -1.2921"
                 register={register("lat")}
               />
               <InputField
                 label="Longitude"
                 type="number"
+                step="any"
                 placeholder="e.g. 36.8219"
                 register={register("lng")}
               />

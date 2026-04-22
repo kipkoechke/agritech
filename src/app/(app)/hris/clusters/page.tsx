@@ -31,6 +31,7 @@ export default function ClustersPage() {
 
   const { data, isLoading, error } = useClusters({
     page,
+    per_page: 15,
     search: search || undefined,
     zone_id: geoFilters.zoneId || undefined,
     factory_id: geoFilters.factoryId || undefined,

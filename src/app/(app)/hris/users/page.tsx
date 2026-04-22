@@ -28,6 +28,7 @@ export default function HrisUsersPage() {
 
   const { data, isLoading, error } = useHrisUsers({
     page,
+    per_page: 15,
     search: search || undefined,
     role: roleFilter || undefined,
     sort_by: "name",

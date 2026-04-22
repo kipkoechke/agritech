@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -15,8 +16,22 @@ import {
   MdCalendarToday,
   MdUpdate,
   MdDescription,
+  MdScale,
+  MdPayments,
 } from "react-icons/md";
 import { useHrisUser } from "@/hooks/useHrisUser";
+import { useWorkerPaymentSummary } from "@/hooks/useWorkerPaymentSummary";
+
+const PLUCKER_RATE = 9;
+const SUPERVISOR_RATE = 2;
+
+function getDefaultDateRange() {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const toDate = now.toISOString().split("T")[0];
+  const fromDate = firstDay.toISOString().split("T")[0];
+  return { fromDate, toDate };
+}
 
 interface InfoCardProps {
   label: string;
@@ -58,7 +73,18 @@ export default function HrisUserDetailsPage() {
   const id = params.id as string;
   const { data: userResponse, isLoading } = useHrisUser(id);
 
+  const defaults = getDefaultDateRange();
+  const [fromDate, setFromDate] = useState(defaults.fromDate);
+  const [toDate, setToDate] = useState(defaults.toDate);
+
   const user = userResponse?.data;
+
+  const { data: pluckingData, isLoading: pluckingLoading } =
+    useWorkerPaymentSummary(
+      user?.role === "farmer"
+        ? { from_date: fromDate, to_date: toDate, owner_id: id }
+        : {},
+    );
 
   if (isLoading) {
     return (
@@ -212,6 +238,125 @@ export default function HrisUserDetailsPage() {
             />
           </div>
         </div>
+
+        {/* Farmer Plucking Workers Section */}
+        {user.role === "farmer" && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <MdScale className="w-4 h-4 text-primary" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Plucking Workers — Payment Summary
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div>
+                  <label className="block text-[10px] font-medium text-gray-500 mb-0.5">From</label>
+                  <input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium text-gray-500 mb-0.5">To</label>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {pluckingLoading && (
+              <div className="flex justify-center items-center py-8">
+                <div className="w-7 h-7 border-4 border-gray-200 border-t-primary rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!pluckingLoading && (pluckingData?.data ?? []).length === 0 && (
+              <div className="px-6 py-8 text-center">
+                <MdPayments className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">
+                  No plucking records found for the selected period.
+                </p>
+              </div>
+            )}
+
+            {!pluckingLoading && (pluckingData?.data ?? []).length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Worker</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Kgs</th>
+                      <th className="px-6 py-3 text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Rate (KSh/kg)</th>
+                      <th className="px-6 py-3 text-right text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Amount (KSh)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {(pluckingData?.data ?? []).map((item) => {
+                      const isSupervisor = item.worker.role === "supervisor";
+                      const rate = isSupervisor ? SUPERVISOR_RATE : PLUCKER_RATE;
+                      const amount = (item.total_kgs || 0) * rate;
+                      return (
+                        <tr key={item.worker.id} className="hover:bg-gray-50/50">
+                          <td className="px-6 py-3.5">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{item.worker.name}</p>
+                              <p className="text-xs text-gray-400">{item.worker.phone}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isSupervisor ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
+                              {isSupervisor ? "Supervisor" : "Plucker"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3.5 text-sm text-gray-500">
+                            {fromDate} – {toDate}
+                          </td>
+                          <td className="px-6 py-3.5 text-right text-sm text-gray-900">
+                            {(item.total_kgs || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                          </td>
+                          <td className="px-6 py-3.5 text-right text-sm text-gray-500">
+                            {rate}
+                          </td>
+                          <td className="px-6 py-3.5 text-right text-sm font-semibold text-emerald-700">
+                            {amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot className="bg-gray-50/60">
+                    <tr>
+                      <td colSpan={3} className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Totals</td>
+                      <td className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
+                        {(pluckingData?.data ?? [])
+                          .reduce((s, i) => s + (i.total_kgs || 0), 0)
+                          .toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </td>
+                      <td />
+                      <td className="px-6 py-3 text-right text-sm font-semibold text-emerald-700">
+                        {(pluckingData?.data ?? [])
+                          .reduce((s, i) => {
+                            const r = i.worker.role === "supervisor" ? SUPERVISOR_RATE : PLUCKER_RATE;
+                            return s + (i.total_kgs || 0) * r;
+                          }, 0)
+                          .toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ export default function FarmersPage() {
 
   const { data, isLoading, error } = useHrisUsers({
     page,
+    per_page: 15,
     role: "farmer",
     search: search || undefined,
     sort_by: "name",

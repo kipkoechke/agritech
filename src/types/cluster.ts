@@ -20,7 +20,7 @@ export interface Cluster {
 
 export interface CreateClusterData {
   name: string;
-  code: string;
+  code?: string;
   factory_id: string;
   coordinates?: { lat: number; lng: number };
 }

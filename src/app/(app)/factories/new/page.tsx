@@ -15,7 +15,6 @@ import type { CreateFactoryData } from "@/types/factory";
 
 interface FactoryFormData {
   name: string;
-  code: string;
   lat: string;
   lng: string;
 }
@@ -34,7 +33,7 @@ export default function NewFactoryPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FactoryFormData>({
-    defaultValues: { name: "", code: "", lat: "", lng: "" },
+    defaultValues: { name: "", lat: "", lng: "" },
   });
 
   const [zoneId, setZoneId] = useState("");
@@ -53,7 +52,6 @@ export default function NewFactoryPage() {
     if (!zoneId) return;
     const payload: CreateFactoryData = {
       name: data.name,
-      code: data.code,
       zone_id: zoneId,
     };
     if (data.lat && data.lng) {
@@ -103,14 +101,6 @@ export default function NewFactoryPage() {
               required
             />
 
-            <InputField
-              label="Code"
-              placeholder="e.g. FAC-001"
-              register={register("code", { required: "Code is required" })}
-              error={errors.code?.message}
-              required
-            />
-
             <SearchableSelect
               label="Zone"
               options={zoneOptions}
@@ -134,12 +124,14 @@ export default function NewFactoryPage() {
               <InputField
                 label="Latitude"
                 type="number"
+                step="any"
                 placeholder="e.g. -1.2921"
                 register={register("lat")}
               />
               <InputField
                 label="Longitude"
                 type="number"
+                step="any"
                 placeholder="e.g. 36.8219"
                 register={register("lng")}
               />
