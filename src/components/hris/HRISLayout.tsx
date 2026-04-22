@@ -155,8 +155,8 @@ const HRISLayout: React.FC<HRISLayoutProps> = ({
           />
         </div>
 
-        {/* Content - Non-scrollable container, children handle their own scrolling */}
-        <div className="flex-1 px-3 md:px-6 pb-20 md:pb-6 overflow-hidden min-h-0 flex flex-col">
+        {/* Content - Scrollable */}
+        <div className="flex-1 px-3 md:px-6 pb-20 md:pb-6 overflow-y-auto min-h-0 flex flex-col">
           {children}
         </div>
       </div>

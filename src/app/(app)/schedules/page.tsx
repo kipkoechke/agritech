@@ -811,14 +811,14 @@ export default function SchedulesPage() {
                         <button
                           onClick={() => setPage((p) => Math.max(1, p - 1))}
                           disabled={pagination.current_page <= 1}
-                          className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                          className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                         >
                           ← Prev
                         </button>
                         <button
                           onClick={() => setPage((p) => p + 1)}
                           disabled={!pagination.next_page}
-                          className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                          className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-200 rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                         >
                           Next →
                         </button>
