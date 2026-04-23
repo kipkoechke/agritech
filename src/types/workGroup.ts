@@ -6,6 +6,8 @@ export interface WorkGroup {
   active: boolean | null;
   members: number;
   owner_id: string;
+  plucker_rate?: number;
+  supervisor_rate?: number;
   owner?: {
     id: string;
     name: string;
@@ -24,6 +26,8 @@ export interface CreateWorkGroupData {
   description: string;
   active: boolean;
   owner_id: string;
+  plucker_rate?: number;
+  supervisor_rate?: number;
 }
 
 export interface UpdateWorkGroupData {
@@ -31,6 +35,8 @@ export interface UpdateWorkGroupData {
   description?: string;
   active?: boolean;
   owner_id?: string;
+  plucker_rate?: number;
+  supervisor_rate?: number;
 }
 
 export interface WorkGroupPagination {

@@ -256,6 +256,26 @@ export default function WorkGroupDetailPage() {
                     </span>
                   </div>
                 </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                    Plucker Rate
+                  </span>
+                  <span className="text-sm font-medium text-gray-800">
+                    {group.plucker_rate != null
+                      ? `KES ${group.plucker_rate}/Kg`
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                    Supervisor Rate
+                  </span>
+                  <span className="text-sm font-medium text-gray-800">
+                    {group.supervisor_rate != null
+                      ? `KES ${group.supervisor_rate}/Kg`
+                      : "—"}
+                  </span>
+                </div>
               </div>
             </div>
 

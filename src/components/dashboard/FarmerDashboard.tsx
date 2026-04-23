@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { FiChevronDown, FiChevronUp, FiFilter } from "react-icons/fi";
+import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
 const HA_TO_ACRES = 2.47105;
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
@@ -28,6 +29,7 @@ export default function FarmerDashboard() {
   const [toDate, setToDate] = useState(formatDate(today));
   const [farmId, setFarmId] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
 
   const params = useMemo(
     () => ({
@@ -49,7 +51,8 @@ export default function FarmerDashboard() {
       (charts?.worker_payments ?? []).map((wp) => ({
         name: wp.worker.name,
         value: wp.total_kgs,
-        jobs: wp.jobs,
+        jobs: wp.jobs.length,
+        total_amount: wp.total_amount,
       })),
     [charts],
   );
@@ -208,6 +211,12 @@ export default function FarmerDashboard() {
                 <span className="text-gray-600">Jobs:</span>
                 <span className="font-bold text-gray-900">{item.jobs}</span>
               </div>
+              <div className="text-sm flex justify-between gap-6">
+                <span className="text-gray-600">Total Pay:</span>
+                <span className="font-bold text-gray-900">
+                  KES {(item.total_amount ?? 0).toLocaleString()}
+                </span>
+              </div>
             </>
           )}
         />
@@ -300,6 +309,174 @@ export default function FarmerDashboard() {
               />
             </LineChart>
           </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Worker Payment Breakdown */}
+      <div className="bg-white rounded-xl shadow p-4">
+        <h3 className="text-sm font-bold text-gray-800 mb-3">
+          Worker Payment Breakdown
+        </h3>
+        {loading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-12 bg-gray-100 animate-pulse rounded" />
+            ))}
+          </div>
+        ) : !charts?.worker_payments?.length ? (
+          <p className="text-sm text-gray-400 text-center py-12">
+            No worker payment data available for this period
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {charts.worker_payments.map((wp) => {
+              const isExpanded = expandedWorker === wp.worker.id;
+              return (
+                <div
+                  key={wp.worker.id}
+                  className="border border-gray-100 rounded-lg overflow-hidden"
+                >
+                  {/* Worker header row */}
+                  <button
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                    onClick={() =>
+                      setExpandedWorker(isExpanded ? null : wp.worker.id)
+                    }
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-bold text-emerald-700">
+                          {wp.worker.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {wp.worker.name}
+                        </p>
+                        <p className="text-[11px] text-gray-400">
+                          {wp.worker.phone}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6 shrink-0 ml-4">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                          Total Kgs
+                        </p>
+                        <p className="text-sm font-bold text-gray-700">
+                          {wp.total_kgs.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                          Total Pay
+                        </p>
+                        <p className="text-sm font-bold text-emerald-600">
+                          KES {wp.total_amount.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                          Days
+                        </p>
+                        <p className="text-sm font-bold text-gray-700">
+                          {wp.jobs.length}
+                        </p>
+                      </div>
+                      {isExpanded ? (
+                        <MdExpandLess className="w-5 h-5 text-gray-400 shrink-0" />
+                      ) : (
+                        <MdExpandMore className="w-5 h-5 text-gray-400 shrink-0" />
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Expanded job breakdown */}
+                  {isExpanded && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="bg-gray-50 border-t border-gray-100">
+                            <th className="text-left px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Date
+                            </th>
+                            <th className="text-left px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Role
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Kgs
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Rate
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Amount
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {wp.jobs.map((job, idx) => (
+                            <tr
+                              key={idx}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-4 py-2 text-gray-700">
+                                {new Date(job.date).toLocaleDateString(
+                                  "en-KE",
+                                  {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
+                              </td>
+                              <td className="px-4 py-2">
+                                <span
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                    job.role === "supervisor"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-emerald-100 text-emerald-700"
+                                  }`}
+                                >
+                                  {job.role}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-700 font-medium">
+                                {job.kgs.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-500">
+                                KES {job.rate}
+                              </td>
+                              <td className="px-4 py-2 text-right font-semibold text-gray-800">
+                                KES {job.amount.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="bg-gray-50 border-t border-gray-200">
+                            <td
+                              colSpan={2}
+                              className="px-4 py-2 text-xs font-bold text-gray-600 uppercase tracking-wide"
+                            >
+                              Totals
+                            </td>
+                            <td className="px-4 py-2 text-right text-xs font-bold text-gray-800">
+                              {wp.total_kgs.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-2" />
+                            <td className="px-4 py-2 text-right text-xs font-bold text-emerald-600">
+                              KES {wp.total_amount.toLocaleString()}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

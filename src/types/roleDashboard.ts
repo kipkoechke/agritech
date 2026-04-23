@@ -152,14 +152,23 @@ export interface FarmerWorkGroup {
   active: boolean | null;
 }
 
+export interface WorkerJobDetail {
+  date: string;
+  kgs: number;
+  rate: number;
+  role: string;
+  amount: number;
+}
+
 export interface WorkerPaymentChart {
   worker: {
     id: string;
     name: string;
     phone: string;
   };
+  jobs: WorkerJobDetail[];
   total_kgs: number;
-  jobs: number;
+  total_amount: number;
 }
 
 export interface DailyProduction {

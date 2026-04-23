@@ -17,6 +17,8 @@ import type { CreateWorkGroupData } from "@/types/workGroup";
 interface WorkGroupFormData {
   name: string;
   description: string;
+  plucker_rate: number;
+  supervisor_rate: number;
 }
 
 export default function NewWorkGroupPage() {
@@ -33,7 +35,7 @@ export default function NewWorkGroupPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<WorkGroupFormData>({
-    defaultValues: { name: "", description: "" },
+    defaultValues: { name: "", description: "", plucker_rate: 0, supervisor_rate: 0 },
   });
 
   const [ownerId, setOwnerId] = useState("");
@@ -51,6 +53,8 @@ export default function NewWorkGroupPage() {
       description: data.description,
       active: true,
       owner_id: isAdmin ? ownerId : user?.id || "",
+      plucker_rate: data.plucker_rate,
+      supervisor_rate: data.supervisor_rate,
     };
 
     createWorkGroup.mutate(payload, {
@@ -113,6 +117,33 @@ export default function NewWorkGroupPage() {
               register={register("description")}
               rows={3}
             />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <InputField
+                label="Plucker Rate (per Kg)"
+                type="number"
+                placeholder="e.g. 9"
+                step="0.01"
+                register={register("plucker_rate", {
+                  required: "Plucker rate is required",
+                  min: { value: 0, message: "Rate must be 0 or more" },
+                })}
+                error={errors.plucker_rate?.message}
+                required
+              />
+              <InputField
+                label="Supervisor Rate (per Kg)"
+                type="number"
+                placeholder="e.g. 2"
+                step="0.01"
+                register={register("supervisor_rate", {
+                  required: "Supervisor rate is required",
+                  min: { value: 0, message: "Rate must be 0 or more" },
+                })}
+                error={errors.supervisor_rate?.message}
+                required
+              />
+            </div>
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
               <Button type="secondary" to="/work-groups">
