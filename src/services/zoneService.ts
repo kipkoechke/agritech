@@ -1,5 +1,11 @@
 import axiosInstance from "@/lib/axios";
-import type { Zone } from "@/types/zone";
+import type { Zone, ZonesResponse } from "@/types/zone";
+
+export interface ZonesParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+}
 
 export const getZones = async (): Promise<Zone[]> => {
   const response = await axiosInstance.get<Zone[] | { data: Zone[] }>("/zones");
@@ -7,6 +13,13 @@ export const getZones = async (): Promise<Zone[]> => {
     return response.data;
   }
   return response.data.data || [];
+};
+
+export const getZonesPaginated = async (
+  params: ZonesParams = {},
+): Promise<ZonesResponse> => {
+  const response = await axiosInstance.get<ZonesResponse>("/zones", { params });
+  return response.data;
 };
 
 const getZone = async (id: string): Promise<Zone> => {

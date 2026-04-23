@@ -16,6 +16,9 @@ import {
 } from "recharts";
 import { FiChevronDown, FiChevronUp, FiFilter } from "react-icons/fi";
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
+import { useWorkGroups } from "@/hooks/useWorkGroup";
+import { useWorkers } from "@/hooks/useWorkers";
+import { useHrisUsers } from "@/hooks/useHrisUser";
 
 const HA_TO_ACRES = 2.47105;
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
@@ -28,6 +31,9 @@ export default function FarmerDashboard() {
   const [fromDate, setFromDate] = useState(formatDate(thirtyDaysAgo));
   const [toDate, setToDate] = useState(formatDate(today));
   const [farmId, setFarmId] = useState("");
+  const [workGroupId, setWorkGroupId] = useState("");
+  const [workerId, setWorkerId] = useState("");
+  const [supervisorId, setSupervisorId] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
 
@@ -36,15 +42,25 @@ export default function FarmerDashboard() {
       from_date: fromDate || undefined,
       to_date: toDate || undefined,
       farm_id: farmId || undefined,
+      work_group_id: workGroupId || undefined,
+      worker_id: workerId || undefined,
+      supervisor_id: supervisorId || undefined,
     }),
-    [fromDate, toDate, farmId],
+    [fromDate, toDate, farmId, workGroupId, workerId, supervisorId],
   );
 
   const { data, isLoading: loading, isError } = useFarmerDashboard(params);
 
   const summary = data?.summary;
   const farms = data?.farms ?? [];
+  const workGroups = data?.work_groups ?? [];
   const charts = data?.charts;
+
+  const { data: workersData } = useWorkers({ per_page: 100 });
+  const { data: supervisorsData } = useHrisUsers({ role: "supervisor", per_page: 100 } as any);
+
+  const workerOptions = workersData?.data ?? [];
+  const supervisorOptions = supervisorsData?.data ?? [];
 
   const workerRankingData = useMemo(
     () =>
@@ -102,7 +118,7 @@ export default function FarmerDashboard() {
           </span>
         </button>
         {showFilters && (
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Farm</label>
               <select
@@ -114,6 +130,51 @@ export default function FarmerDashboard() {
                 {farms.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Work Group</label>
+              <select
+                value={workGroupId}
+                onChange={(e) => setWorkGroupId(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              >
+                <option value="">All Work Groups</option>
+                {workGroups.map((wg) => (
+                  <option key={wg.id} value={wg.id}>
+                    {wg.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Worker</label>
+              <select
+                value={workerId}
+                onChange={(e) => setWorkerId(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              >
+                <option value="">All Workers</option>
+                {workerOptions.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Supervisor</label>
+              <select
+                value={supervisorId}
+                onChange={(e) => setSupervisorId(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              >
+                <option value="">All Supervisors</option>
+                {supervisorOptions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
                   </option>
                 ))}
               </select>

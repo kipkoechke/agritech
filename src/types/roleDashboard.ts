@@ -233,6 +233,8 @@ export interface FarmerDashboardParams {
   to_date?: string;
   farm_id?: string;
   work_group_id?: string;
+  worker_id?: string;
+  supervisor_id?: string;
 }
 
 // Supervisor Dashboard Types

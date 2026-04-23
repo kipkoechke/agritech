@@ -23,6 +23,7 @@ import { HRISLayout } from "@/components/hris";
 import Tooltip from "@/components/common/Tooltip";
 import {
   useZones,
+  useZonesPaginated,
   useCreateZone,
   useUpdateZone,
   useDeleteZone,
@@ -154,14 +155,17 @@ function ZonesTab({
   search: string;
   onEditZone: (zone: Zone) => void;
 }) {
-  const { data: zonesData, isLoading } = useZones();
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useZonesPaginated({
+    page,
+    per_page: 10,
+    search: search || undefined,
+  });
   const deleteZone = useDeleteZone();
   const [deleteTarget, setDeleteTarget] = useState<Zone | null>(null);
 
-  const zones: Zone[] = Array.isArray(zonesData) ? zonesData : [];
-  const filtered = zones.filter((z) =>
-    z.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const zones = data?.data ?? [];
+  const pagination = data?.pagination;
 
   return (
     <div className="space-y-4">
@@ -171,7 +175,7 @@ function ZonesTab({
         </div>
       )}
 
-      {!isLoading && filtered.length === 0 && (
+      {!isLoading && zones.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <MdPublic className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -181,7 +185,7 @@ function ZonesTab({
         </div>
       )}
 
-      {filtered.length > 0 && (
+      {zones.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
@@ -190,13 +194,19 @@ function ZonesTab({
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Factories
+                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filtered.map((zone) => (
+                {zones.map((zone) => (
                   <tr
                     key={zone.id}
                     className="hover:bg-gray-50 transition-colors"
@@ -208,6 +218,23 @@ function ZonesTab({
                           {zone.name}
                         </span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          zone.is_active !== false
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {zone.is_active !== false ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 text-sm text-gray-700">
+                        <MdFactory className="w-4 h-4 text-gray-400" />
+                        {zone.factories ?? 0}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -234,6 +261,43 @@ function ZonesTab({
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {pagination && pagination.total_pages > 1 && (
+            <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                Showing {(pagination.current_page - 1) * pagination.per_page + 1}–
+                {Math.min(
+                  pagination.current_page * pagination.per_page,
+                  pagination.total_items,
+                )}{" "}
+                of {pagination.total_items}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={pagination.current_page === pagination.first_page}
+                  className="px-3 py-1 text-xs rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1 text-xs text-gray-700 font-medium">
+                  {pagination.current_page} / {pagination.total_pages}
+                </span>
+                <button
+                  onClick={() =>
+                    setPage((p) => Math.min(pagination.total_pages, p + 1))
+                  }
+                  disabled={
+                    pagination.current_page === pagination.last_page
+                  }
+                  className="px-3 py-1 text-xs rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

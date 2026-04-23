@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getZones,
+  getZonesPaginated,
   createZone,
   updateZone,
   deleteZone,
+  ZonesParams,
 } from "@/services/zoneService";
 import type { Zone } from "@/types/zone";
 import toast from "react-hot-toast";
@@ -15,6 +17,13 @@ export const useZones = () => {
       const response = await getZones();
       return response;
     },
+  });
+};
+
+export const useZonesPaginated = (params: ZonesParams = {}) => {
+  return useQuery({
+    queryKey: ["zones", "paginated", params],
+    queryFn: () => getZonesPaginated(params),
   });
 };
 
