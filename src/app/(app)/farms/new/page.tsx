@@ -47,12 +47,15 @@ export default function NewFarmPage() {
 
   const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: productsData, isLoading: productsLoading } = useProducts();
+  const [farmerSearch, setFarmerSearch] = useState("");
+  const [supervisorSearch, setSupervisorSearch] = useState("");
+
   const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
     role: "farmer",
-    per_page: 100,
+    search: farmerSearch || undefined,
   });
   const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers(
-    { role: "supervisor", per_page: 100 },
+    { role: "supervisor", search: supervisorSearch || undefined },
   );
 
   const {
@@ -215,6 +218,7 @@ export default function NewFarmPage() {
                   onChange={setOwnerId}
                   placeholder="Select farm owner"
                   isLoading={farmersLoading}
+                  onSearchChange={setFarmerSearch}
                 />
               )}
               <SearchableSelect
@@ -224,6 +228,7 @@ export default function NewFarmPage() {
                 onChange={setSupervisorId}
                 placeholder="Select supervisor"
                 isLoading={supervisorsLoading}
+                onSearchChange={setSupervisorSearch}
               />
             </div>
 

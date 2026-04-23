@@ -34,7 +34,9 @@ export default function WorkerPaymentsPage() {
   const [roleFilter, setRoleFilter] = useState("");
   const [supervisorFilter, setSupervisorFilter] = useState("");
 
-  const { data: supervisorsData } = useHrisUsers({ role: "supervisor", per_page: 100 });
+  const [supervisorSearch, setSupervisorSearch] = useState("");
+
+  const { data: supervisorsData } = useHrisUsers({ role: "supervisor", search: supervisorSearch || undefined });
 
   const { data, isLoading, error } = useWorkerPaymentSummary({
     from_date: fromDate,
@@ -146,6 +148,7 @@ export default function WorkerPaymentsPage() {
             value={supervisorFilter}
             onChange={setSupervisorFilter}
             placeholder="All Supervisors"
+            onSearchChange={setSupervisorSearch}
           />
         </div>
       </div>

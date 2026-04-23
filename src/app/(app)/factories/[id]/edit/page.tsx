@@ -29,9 +29,12 @@ export default function EditFactoryPage() {
   const updateFactory = useUpdateFactory();
   const factory = factoryResponse?.data;
 
+  const [adminSearch, setAdminSearch] = useState("");
+
   const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: usersData, isLoading: usersLoading } = useHrisUsers({
     role: "admin",
+    search: adminSearch || undefined,
   });
 
   const {
@@ -159,6 +162,7 @@ export default function EditFactoryPage() {
               onChange={setUserId}
               placeholder="Select admin user"
               isLoading={usersLoading}
+              onSearchChange={setAdminSearch}
             />
 
             <div className="grid grid-cols-2 gap-4">

@@ -43,7 +43,9 @@ export default function EditClusterPage() {
   const updateCluster = useUpdateCluster();
   const cluster = clusterResponse?.data;
 
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories();
+  const [factorySearch, setFactorySearch] = useState("");
+
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({ search: factorySearch || undefined });
 
   const {
     register,
@@ -167,6 +169,7 @@ export default function EditClusterPage() {
               onChange={setFactoryId}
               placeholder="Select factory"
               isLoading={factoriesLoading}
+              onSearchChange={setFactorySearch}
               required
             />
 

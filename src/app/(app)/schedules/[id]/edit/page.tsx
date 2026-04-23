@@ -27,9 +27,12 @@ export default function EditSchedulePage() {
   const updateSchedule = useUpdateSchedule();
   const schedule = scheduleResponse?.data;
 
-  const { data: farmsData, isLoading: farmsLoading } = useFarms();
+  const [farmSearch, setFarmSearch] = useState("");
+  const [activitySearch, setActivitySearch] = useState("");
+
+  const { data: farmsData, isLoading: farmsLoading } = useFarms({ search: farmSearch || undefined });
   const { data: activitiesData, isLoading: activitiesLoading } =
-    useActivities();
+    useActivities({ search: activitySearch || undefined });
 
   const {
     register,
@@ -126,6 +129,7 @@ export default function EditSchedulePage() {
               onChange={setFarmId}
               placeholder="Select farm"
               isLoading={farmsLoading}
+              onSearchChange={setFarmSearch}
               required
             />
 
@@ -136,6 +140,7 @@ export default function EditSchedulePage() {
               onChange={setActivityId}
               placeholder="Select activity"
               isLoading={activitiesLoading}
+              onSearchChange={setActivitySearch}
               required
             />
 

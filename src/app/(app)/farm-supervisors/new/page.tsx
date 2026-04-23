@@ -22,8 +22,9 @@ interface SupervisorFormData {
 export default function NewSupervisorPage() {
   const router = useRouter();
   const createUser = useCreateHrisUser();
+  const [farmSearch, setFarmSearch] = useState("");
   const { data: farmsData, isLoading: farmsLoading } = useFarms({
-    per_page: 100,
+    search: farmSearch || undefined,
   });
 
   const [farmId, setFarmId] = useState("");
@@ -133,6 +134,7 @@ export default function NewSupervisorPage() {
               onChange={setFarmId}
               placeholder="Select farm to assign supervisor"
               isLoading={farmsLoading}
+              onSearchChange={setFarmSearch}
               required
             />
 

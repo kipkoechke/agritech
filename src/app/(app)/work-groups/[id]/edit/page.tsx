@@ -28,8 +28,10 @@ export default function EditWorkGroupPage() {
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const updateWorkGroup = useUpdateWorkGroup();
   const isAdmin = useIsAdmin();
+  const [ownerSearch, setOwnerSearch] = useState("");
+
   const { data: usersData, isLoading: usersLoading } = useHrisUsers(
-    isAdmin ? {} : (undefined as any),
+    isAdmin ? { search: ownerSearch || undefined } : (undefined as any),
   );
 
   const {
@@ -171,6 +173,7 @@ export default function EditWorkGroupPage() {
                 onChange={setOwnerId}
                 placeholder="Select owner"
                 isLoading={usersLoading}
+                onSearchChange={setOwnerSearch}
                 required
               />
             )}

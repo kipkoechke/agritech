@@ -47,12 +47,16 @@ export default function EditFarmPage() {
   const updateFarm = useUpdateFarm();
   const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: productsData, isLoading: productsLoading } = useProducts();
+  const [farmerSearch, setFarmerSearch] = useState("");
+  const [supervisorSearch, setSupervisorSearch] = useState("");
+
   const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
     role: "farmer",
+    search: farmerSearch || undefined,
   });
   const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
     role: "supervisor",
-    per_page: 100,
+    search: supervisorSearch || undefined,
   });
 
   const farm = farmResponse?.data;
@@ -260,6 +264,7 @@ export default function EditFarmPage() {
                 onChange={setOwnerId}
                 placeholder="Select farm owner"
                 isLoading={farmersLoading}
+                onSearchChange={setFarmerSearch}
               />
               <SearchableSelect
                 label="Supervisor"
@@ -268,6 +273,7 @@ export default function EditFarmPage() {
                 onChange={setSupervisorId}
                 placeholder="Select supervisor"
                 isLoading={supervisorsLoading}
+                onSearchChange={setSupervisorSearch}
               />
             </div>
 

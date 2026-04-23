@@ -70,9 +70,12 @@ export default function FarmsPage() {
   const deleteFarm = useDeleteFarm();
   const assignSupervisor = useAssignSupervisor();
 
+  const [supervisorSearch, setSupervisorSearch] = useState("");
+
   const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers(
     {
       role: "supervisor",
+      search: supervisorSearch || undefined,
     },
   );
   const supervisorOptions =
@@ -369,6 +372,7 @@ export default function FarmsPage() {
               onChange={setSupervisorId}
               isLoading={supervisorsLoading}
               placeholder="Select supervisor"
+              onSearchChange={setSupervisorSearch}
               required
             />
             <div className="flex justify-end gap-2 pt-2">

@@ -23,11 +23,16 @@ export default function NewSchedulePage() {
   const router = useRouter();
   const createSchedule = useCreateSchedule();
 
-  const { data: farmsData, isLoading: farmsLoading } = useFarms();
+  const [farmSearch, setFarmSearch] = useState("");
+  const [workGroupSearch, setWorkGroupSearch] = useState("");
+  const [activitySearch, setActivitySearch] = useState("");
+
+  const { data: farmsData, isLoading: farmsLoading } = useFarms({ search: farmSearch || undefined });
   const { data: activitiesData, isLoading: activitiesLoading } =
-    useActivities();
+    useActivities({ search: activitySearch || undefined });
   const { data: workGroupsData, isLoading: workGroupsLoading } = useWorkGroups({
     active: true,
+    search: workGroupSearch || undefined,
   });
 
   const {
@@ -109,6 +114,7 @@ export default function NewSchedulePage() {
                 onChange={setFarmId}
                 placeholder="Select farm"
                 isLoading={farmsLoading}
+                onSearchChange={setFarmSearch}
                 required
               />
 
@@ -120,6 +126,7 @@ export default function NewSchedulePage() {
                 onChangeMulti={setWorkGroupIds}
                 placeholder="Select work groups"
                 isLoading={workGroupsLoading}
+                onSearchChange={setWorkGroupSearch}
                 required
                 error={
                   submitAttempted && workGroupIds.length === 0
@@ -138,6 +145,7 @@ export default function NewSchedulePage() {
                 onChange={setActivityId}
                 placeholder="Select activity"
                 isLoading={activitiesLoading}
+                onSearchChange={setActivitySearch}
                 required
               />
 

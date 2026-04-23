@@ -37,7 +37,9 @@ export default function NewClusterPage() {
   const router = useRouter();
   const createCluster = useCreateCluster();
 
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({ per_page: 100 });
+  const [factorySearch, setFactorySearch] = useState("");
+
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({ search: factorySearch || undefined });
 
   const {
     register,
@@ -118,6 +120,7 @@ export default function NewClusterPage() {
               onChange={setFactoryId}
               placeholder="Select factory"
               isLoading={factoriesLoading}
+              onSearchChange={setFactorySearch}
               required
             />
 
