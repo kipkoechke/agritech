@@ -214,7 +214,7 @@ export default function FarmDetailsPage() {
             />
             <InfoCard
               label="Size"
-              value={`${(size * 2.47105).toFixed(2)} Acres`}
+              value={`${size} Acres`}
               icon={MdScale}
               accent
             />
