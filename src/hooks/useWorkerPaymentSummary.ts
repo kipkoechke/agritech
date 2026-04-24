@@ -8,6 +8,5 @@ export const useWorkerPaymentSummary = (
   return useQuery({
     queryKey: ["worker-payment-summary", params],
     queryFn: () => getWorkerPaymentSummary(params),
-    enabled: !!params.from_date && !!params.to_date,
   });
 };

@@ -108,6 +108,12 @@ export default function WorkGroupsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Members
                   </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Plucker Rate (KSh/kg)
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Supervisor Rate (KSh/kg)
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
@@ -136,6 +142,16 @@ export default function WorkGroupsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         {group.members}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm text-gray-900">
+                        {group.plucker_rate ? `${group.plucker_rate}` : "—"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm text-gray-900">
+                        {group.supervisor_rate ? `${group.supervisor_rate}` : "—"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

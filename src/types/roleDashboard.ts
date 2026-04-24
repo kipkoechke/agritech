@@ -109,6 +109,7 @@ export interface AdminDashboardParams {
   supervisor_id?: string;
   farmer_id?: string;
   farm_id?: string;
+  worker_id?: string;
 }
 
 // Farmer Dashboard Types
@@ -150,14 +151,15 @@ export interface FarmerWorkGroup {
   name: string;
   members: number;
   active: boolean | null;
+  plucker_rate?: number;
+  supervisor_rate?: number;
 }
 
 export interface WorkerJobDetail {
   date: string;
   kgs: number;
-  rate: number;
   role: string;
-  amount: number;
+  work_group_id?: string;
 }
 
 export interface WorkerPaymentChart {
@@ -166,9 +168,50 @@ export interface WorkerPaymentChart {
     name: string;
     phone: string;
   };
+  work_group?: {
+    id: string;
+    name: string;
+    plucker_rate?: number;
+    supervisor_rate?: number;
+  };
   jobs: WorkerJobDetail[];
   total_kgs: number;
-  total_amount: number;
+}
+
+export interface ScheduleProductionWorker {
+  booking: {
+    id: string;
+  };
+  worker: {
+    id: string;
+    name: string;
+  };
+  farm_qty: number;
+  factory_qty: number;
+  kgs_to_pay: number;
+  rate: number;
+  amount: number;
+}
+
+export interface ScheduleProduction {
+  schedule: {
+    id: string;
+    code: string;
+  };
+  scheduled_date: string;
+  farm: {
+    id: string;
+    name: string;
+  };
+  supervisor: {
+    id: string;
+    name: string;
+  };
+  bookings: ScheduleProductionWorker[];
+  total_farm_kgs: number;
+  total_factory_kgs: number;
+  total_workers_amount: number;
+  supervisor_amount: number;
 }
 
 export interface DailyProduction {
@@ -218,6 +261,7 @@ export interface FarmerDashboardCharts {
   daily_production: DailyProduction[];
   farm_performance: FarmPerformance[];
   activity_breakdown: ActivityBreakdown[];
+  schedule_production: ScheduleProduction[];
 }
 
 export interface FarmerDashboardResponse {
@@ -361,4 +405,7 @@ export interface SupervisorDashboardParams {
   from_date?: string;
   to_date?: string;
   farm_id?: string;
+  zone_id?: string;
+  farmer_id?: string;
+  status?: "completed" | "pending";
 }

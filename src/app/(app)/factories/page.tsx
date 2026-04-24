@@ -129,9 +129,6 @@ export default function FactoriesPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Admin
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Coordinates
-                      </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
@@ -162,13 +159,6 @@ export default function FactoriesPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-500">
                             {factory.admin?.name || "—"}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
-                            {factory.coordinates
-                              ? `${factory.coordinates[0]}, ${factory.coordinates[1]}`
-                              : "—"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">

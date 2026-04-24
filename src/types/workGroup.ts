@@ -12,6 +12,11 @@ export interface WorkGroup {
     id: string;
     name: string;
   };
+  cluster?: {
+    id: string;
+    name: string;
+    code?: string;
+  };
   farm?: {
     id: string;
     name: string;
@@ -28,6 +33,7 @@ export interface CreateWorkGroupData {
   owner_id: string;
   plucker_rate?: number;
   supervisor_rate?: number;
+  cluster_id?: string;
 }
 
 export interface UpdateWorkGroupData {
@@ -37,6 +43,7 @@ export interface UpdateWorkGroupData {
   owner_id?: string;
   plucker_rate?: number;
   supervisor_rate?: number;
+  cluster_id?: string;
 }
 
 export interface WorkGroupPagination {

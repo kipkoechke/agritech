@@ -11,6 +11,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateWorkGroup } from "@/hooks/useWorkGroup";
 import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useClusters } from "@/hooks/useCluster";
 import { useAuth, useIsAdmin } from "@/hooks/useAuth";
 import type { CreateWorkGroupData } from "@/types/workGroup";
 
@@ -41,6 +42,9 @@ export default function NewWorkGroupPage() {
   });
 
   const [ownerId, setOwnerId] = useState("");
+  const [clusterId, setClusterId] = useState("");
+
+  const { data: clustersData, isLoading: clustersLoading } = useClusters({ per_page: 100 });
 
   const ownerOptions =
     usersData?.data?.map((u) => ({
@@ -57,6 +61,7 @@ export default function NewWorkGroupPage() {
       owner_id: isAdmin ? ownerId : user?.id || "",
       plucker_rate: data.plucker_rate,
       supervisor_rate: data.supervisor_rate,
+      cluster_id: clusterId || undefined,
     };
 
     createWorkGroup.mutate(payload, {
@@ -89,15 +94,25 @@ export default function NewWorkGroupPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-            <div
-              className={`grid grid-cols-1 ${isAdmin ? "sm:grid-cols-2" : ""} gap-6`}
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <InputField
                 label="Group Name"
                 placeholder="Enter work group name"
                 register={register("name", { required: "Name is required" })}
                 error={errors.name?.message}
                 required
+              />
+
+              <SearchableSelect
+                label="Cluster"
+                options={(clustersData?.data ?? []).map((c) => ({
+                  value: c.id,
+                  label: c.name,
+                }))}
+                value={clusterId}
+                onChange={setClusterId}
+                placeholder="Select cluster"
+                isLoading={clustersLoading}
               />
 
               {isAdmin && (

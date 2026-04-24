@@ -1,8 +1,12 @@
-﻿// components/dashboard/FarmerDashboard.tsx
+// components/dashboard/FarmerDashboard.tsx
 "use client";
 
 import { useState, useMemo } from "react";
 import { useFarmerDashboard } from "@/hooks/useRoleDashboard";
+import type {
+  WorkerPaymentChart,
+  WorkerJobDetail,
+} from "@/types/roleDashboard";
 import StatCard from "@/components/common/StatCard";
 import RankingChart from "@/components/common/RankingChart";
 import {
@@ -14,7 +18,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { FiChevronDown, FiChevronUp, FiFilter } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiFilter, FiCalendar } from "react-icons/fi";
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
 import { useWorkGroups } from "@/hooks/useWorkGroup";
 import { useWorkers } from "@/hooks/useWorkers";
@@ -22,6 +26,8 @@ import { useHrisUsers } from "@/hooks/useHrisUser";
 
 const HA_TO_ACRES = 2.47105;
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
+const WORKER_RATE = 9;
+const SUPERVISOR_RATE = 2;
 
 export default function FarmerDashboard() {
   const today = new Date();
@@ -36,6 +42,8 @@ export default function FarmerDashboard() {
   const [supervisorId, setSupervisorId] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
+  const [expandedScheduleId, setExpandedScheduleId] = useState<string | null>(null);
+  const [showPaymentTab, setShowPaymentTab] = useState(false);
 
   const params = useMemo(
     () => ({
@@ -56,11 +64,29 @@ export default function FarmerDashboard() {
   const workGroups = data?.work_groups ?? [];
   const charts = data?.charts;
 
-  const { data: workersData } = useWorkers({ per_page: 100 });
-  const { data: supervisorsData } = useHrisUsers({ role: "supervisor", per_page: 100 } as any);
+  const workGroupRatesMap = useMemo(() => {
+    const map: Record<string, { plucker_rate: number; supervisor_rate: number }> = {};
+    workGroups.forEach((wg) => {
+      if (wg.plucker_rate !== undefined || wg.supervisor_rate !== undefined) {
+        map[wg.id] = {
+          plucker_rate: wg.plucker_rate ?? 0,
+          supervisor_rate: wg.supervisor_rate ?? 0,
+        };
+      }
+    });
+    return map;
+  }, [workGroups]);
 
-  const workerOptions = workersData?.data ?? [];
-  const supervisorOptions = supervisorsData?.data ?? [];
+  const getWorkerTotalPay = (wp: WorkerPaymentChart) => {
+    const wgId = wp.work_group?.id ?? "";
+    const rate = wp.work_group?.plucker_rate ?? workGroupRatesMap[wgId]?.plucker_rate ?? WORKER_RATE;
+    return wp.jobs.reduce((sum, job) => sum + (job.kgs * rate), 0);
+  };
+
+  const getJobRate = (wp: WorkerPaymentChart) => {
+    const wgId = wp.work_group?.id ?? "";
+    return wp.work_group?.plucker_rate ?? workGroupRatesMap[wgId]?.plucker_rate ?? WORKER_RATE;
+  };
 
   const workerRankingData = useMemo(
     () =>
@@ -68,9 +94,9 @@ export default function FarmerDashboard() {
         name: wp.worker.name,
         value: wp.total_kgs,
         jobs: wp.jobs.length,
-        total_amount: wp.total_amount,
+        total_amount: getWorkerTotalPay(wp),
       })),
-    [charts],
+    [charts, workGroupRatesMap],
   );
 
   const farmRankingData = useMemo(
@@ -83,6 +109,12 @@ export default function FarmerDashboard() {
       })),
     [charts],
   );
+
+  const { data: workersData } = useWorkers({ per_page: 100 });
+  const { data: supervisorsData } = useHrisUsers({ role: "supervisor", per_page: 100 } as any);
+
+  const workerOptions = workersData?.data ?? [];
+  const supervisorOptions = supervisorsData?.data ?? [];
 
   const SkeletonBox = ({ h = 16 }: { h?: number }) => (
     <div
@@ -373,7 +405,6 @@ export default function FarmerDashboard() {
         )}
       </div>
 
-      {/* Worker Payment Breakdown */}
       <div className="bg-white rounded-xl shadow p-4">
         <h3 className="text-sm font-bold text-gray-800 mb-3">
           Worker Payment Breakdown
@@ -433,7 +464,7 @@ export default function FarmerDashboard() {
                           Total Pay
                         </p>
                         <p className="text-sm font-bold text-emerald-600">
-                          KES {wp.total_amount.toLocaleString()}
+                          KES {getWorkerTotalPay(wp).toLocaleString()}
                         </p>
                       </div>
                       <div className="text-right hidden sm:block">
@@ -506,10 +537,10 @@ export default function FarmerDashboard() {
                                 {job.kgs.toLocaleString()}
                               </td>
                               <td className="px-4 py-2 text-right text-gray-500">
-                                KES {job.rate}
+                                KES {getJobRate(wp)}
                               </td>
                               <td className="px-4 py-2 text-right font-semibold text-gray-800">
-                                KES {job.amount.toLocaleString()}
+                                KES {(job.kgs * getJobRate(wp)).toLocaleString()}
                               </td>
                             </tr>
                           ))}
@@ -527,7 +558,7 @@ export default function FarmerDashboard() {
                             </td>
                             <td className="px-4 py-2" />
                             <td className="px-4 py-2 text-right text-xs font-bold text-emerald-600">
-                              KES {wp.total_amount.toLocaleString()}
+                              KES {getWorkerTotalPay(wp).toLocaleString()}
                             </td>
                           </tr>
                         </tfoot>
@@ -540,6 +571,214 @@ export default function FarmerDashboard() {
           </div>
         )}
       </div>
+
+      {/* Schedule Production Section */}
+      {showPaymentTab && charts?.schedule_production && charts.schedule_production.length > 0 && (
+        <div className="bg-white rounded-xl shadow p-4">
+          <h3 className="text-sm font-bold text-gray-800 mb-3">
+            Work Schedules & Payments
+          </h3>
+          <div className="space-y-2">
+            {charts.schedule_production.map((schedule) => {
+              const isExpanded = expandedScheduleId === schedule.schedule.id;
+              return (
+                <div
+                  key={schedule.schedule.id}
+                  className="border border-gray-100 rounded-lg overflow-hidden"
+                >
+                  <button
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                    onClick={() =>
+                      setExpandedScheduleId(
+                        isExpanded ? null : schedule.schedule.id,
+                      )
+                    }
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <FiCalendar className="w-4 h-4 text-blue-700" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {schedule.schedule.code} - {schedule.farm.name}
+                        </p>
+                        <p className="text-[11px] text-gray-400">
+                          {schedule.supervisor.name} •{" "}
+                          {new Date(
+                            schedule.scheduled_date,
+                          ).toLocaleDateString("en-KE", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6 shrink-0 ml-4">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                          Workers
+                        </p>
+                        <p className="text-sm font-bold text-gray-700">
+                          {schedule.bookings.length}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                          Workers Pay
+                        </p>
+                        <p className="text-sm font-bold text-emerald-600">
+                          KES{" "}
+                          {schedule.total_workers_amount.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                          Supervisor
+                        </p>
+                        <p className="text-sm font-bold text-blue-600">
+                          KES {schedule.supervisor_amount.toLocaleString()}
+                        </p>
+                      </div>
+                      {isExpanded ? (
+                        <MdExpandLess className="w-5 h-5 text-gray-400 shrink-0" />
+                      ) : (
+                        <MdExpandMore className="w-5 h-5 text-gray-400 shrink-0" />
+                      )}
+                    </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="bg-gray-50 border-t border-gray-100">
+                            <th className="text-left px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Worker
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Farm Kgs
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Factory Kgs
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Kgs to Pay
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Rate
+                            </th>
+                            <th className="text-right px-4 py-2 font-semibold text-gray-500 uppercase tracking-wide">
+                              Amount
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {schedule.bookings.map((booking) => (
+                            <tr
+                              key={booking.booking.id}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-4 py-2 text-gray-700 font-medium">
+                                {booking.worker.name}
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-600">
+                                {booking.farm_qty.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-600">
+                                {booking.factory_qty.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-700 font-semibold">
+                                {booking.kgs_to_pay.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 text-right text-gray-500">
+                                KES {booking.rate}
+                              </td>
+                              <td className="px-4 py-2 text-right font-semibold text-emerald-600">
+                                KES {booking.amount.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="bg-gray-50 border-t border-gray-200">
+                            <td
+                              colSpan={1}
+                              className="px-4 py-2 text-xs font-bold text-gray-600 uppercase tracking-wide"
+                            >
+                              Totals
+                            </td>
+                            <td className="px-4 py-2 text-right text-xs font-bold text-gray-800">
+                              {schedule.total_farm_kgs.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-2 text-right text-xs font-bold text-gray-800">
+                              {schedule.total_factory_kgs.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-2 text-right text-xs font-bold text-gray-800">
+                              {Math.min(
+                                schedule.total_farm_kgs,
+                                schedule.total_factory_kgs,
+                              ).toLocaleString()}
+                            </td>
+                            <td className="px-4 py-2" />
+                            <td className="px-4 py-2 text-right text-xs font-bold text-emerald-600">
+                              KES{" "}
+                              {schedule.total_workers_amount.toLocaleString()}
+                            </td>
+                          </tr>
+                          <tr className="bg-blue-50 border-t border-gray-200">
+                            <td
+                              colSpan={5}
+                              className="px-4 py-2 text-xs font-bold text-blue-800 uppercase tracking-wide"
+                            >
+                              Supervisor Payment (Total Kgs × KES{" "}
+                              {SUPERVISOR_RATE})
+                            </td>
+                            <td className="px-4 py-2 text-right text-xs font-bold text-blue-600">
+                              KES {schedule.supervisor_amount.toLocaleString()}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Payment Activation Tab */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                Process worker and supervisor payments
+              </p>
+              <button
+                className="px-4 py-2 bg-gray-400 text-white text-sm font-medium rounded-lg cursor-not-allowed opacity-50"
+                disabled
+              >
+                Activate Payments (Coming Soon)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle Tab for Payment View */}
+      {charts?.schedule_production && charts.schedule_production.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-2">
+          <button
+            className={`w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              showPaymentTab
+                ? "bg-primary-600 text-white"
+                : "text-gray-600 hover:bg-gray-50"
+            }`}
+            onClick={() => setShowPaymentTab(!showPaymentTab)}
+          >
+            {showPaymentTab ? "← Back to Overview" : "View Schedules & Payments →"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

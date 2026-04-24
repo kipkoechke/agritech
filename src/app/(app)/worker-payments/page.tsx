@@ -43,23 +43,16 @@ export default function WorkerPaymentsPage() {
     to_date: toDate,
     role: roleFilter || undefined,
     supervisor_id: supervisorFilter || undefined,
+    search: search || undefined,
   });
 
   const summaries = data?.data || [];
   const summary = data?.summary;
 
-  const filtered = search
-    ? summaries.filter(
-        (s) =>
-          s.worker?.name?.toLowerCase().includes(search.toLowerCase()) ||
-          s.worker?.phone?.includes(search),
-      )
-    : summaries;
-
   const totalKgs =
     summary?.total_kgs ??
-    filtered.reduce((sum, s) => sum + (s.total_kgs || 0), 0);
-  const totalJobs = filtered.reduce((sum, s) => sum + (s.total_jobs || 0), 0);
+    summaries.reduce((sum, s) => sum + (s.total_kgs || 0), 0);
+  const totalJobs = summaries.reduce((sum, s) => sum + (s.total_jobs || 0), 0);
 
   const supervisorOptions = [
     { value: "", label: "All Supervisors" },
@@ -157,9 +150,9 @@ export default function WorkerPaymentsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-xs text-gray-500">Total Workers</p>
-          <p className="text-lg font-semibold text-gray-900">
-            {summary?.total_workers ?? filtered.length}
-          </p>
+<p className="text-lg font-semibold text-gray-900">
+              {summary?.total_workers ?? summaries.length}
+            </p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-xs text-gray-500">Total Kgs</p>
@@ -187,7 +180,7 @@ export default function WorkerPaymentsPage() {
         </div>
       )}
 
-      {!isLoading && filtered.length === 0 && (
+      {!isLoading && summaries.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <MdPayments className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -199,7 +192,7 @@ export default function WorkerPaymentsPage() {
         </div>
       )}
 
-      {filtered.length > 0 && (
+      {summaries.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -229,7 +222,7 @@ export default function WorkerPaymentsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filtered.map((item) => {
+                {summaries.map((item) => {
                   const isSupervisor = item.worker.role === "supervisor";
                   const rate = isSupervisor ? SUPERVISOR_RATE : PLUCKER_RATE;
                   const amount = (item.total_kgs || 0) * rate;
@@ -296,7 +289,7 @@ export default function WorkerPaymentsPage() {
                   </td>
                   <td />
                   <td className="px-6 py-3 text-right text-sm font-semibold text-emerald-700">
-                    {filtered
+                    {summaries
                       .reduce((sum, item) => {
                         const isSupervisor = item.worker.role === "supervisor";
                         const rate = isSupervisor ? SUPERVISOR_RATE : PLUCKER_RATE;

@@ -17,9 +17,11 @@ import {
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useRoleDashboard";
 import { useZones } from "@/hooks/useZone";
-import { useZoneFactories } from "@/hooks/useFactory";
+import { useFactories } from "@/hooks/useFactory";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useFarms } from "@/hooks/useFarm";
+import { useWorkers } from "@/hooks/useWorkers";
+import { SearchableSelect } from "@/components/common/SearchableSelect";
 import StatCard from "@/components/common/StatCard";
 import RankingChart from "@/components/common/RankingChart";
 
@@ -58,26 +60,63 @@ export default function AdminDashboard() {
   const [supervisorId, setSupervisorId] = useState("");
   const [farmerId, setFarmerId] = useState("");
   const [farmId, setFarmId] = useState("");
+  const [workerId, setWorkerId] = useState("");
 
   // Filter data sources
   const { data: zonesData } = useZones();
-  const { data: zoneFactoriesData, isLoading: factoriesLoading } =
-    useZoneFactories(zoneId);
-  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers(
-    {
-      role: "supervisor",
-      per_page: 200,
-    },
-  );
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
+    zone_id: zoneId,
+    per_page: 200,
+  });
+  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
+    role: "supervisor",
+    per_page: 200,
+  });
   const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
     role: "farmer",
     supervisor_id: supervisorId || undefined,
+    per_page: 200,
+  });
+  const { data: workersData, isLoading: workersLoading } = useWorkers({
     per_page: 200,
   });
   const { data: farmsData, isLoading: farmsLoading } = useFarms(
     { owner_id: farmerId, per_page: 200 },
     { enabled: !!farmerId },
   );
+
+  const zoneOptions = [
+    { value: "", label: "All Zones" },
+    ...(zonesData || []).map((z) => ({ value: z.id, label: z.name })),
+  ];
+
+  const factoryOptions = [
+    { value: "", label: "All Factories" },
+    ...(factoriesData?.data ?? []).map((f) => ({
+      value: f.id,
+      label: `${f.name} (${f.code})`,
+    })),
+  ];
+
+  const supervisorOptions = [
+    { value: "", label: "All Supervisors" },
+    ...(supervisorsData?.data ?? []).map((s) => ({ value: s.id, label: s.name })),
+  ];
+
+  const farmerOptions = [
+    { value: "", label: "All Farmers" },
+    ...(farmersData?.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+  ];
+
+  const farmOptions = [
+    { value: "", label: "All Farms" },
+    ...(farmsData?.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+  ];
+
+  const workerOptions = [
+    { value: "", label: "All Workers" },
+    ...(workersData?.data ?? []).map((w) => ({ value: w.id, label: w.name })),
+  ];
 
   const params = useMemo(
     () => ({
@@ -88,8 +127,9 @@ export default function AdminDashboard() {
       supervisor_id: supervisorId || undefined,
       farmer_id: farmerId || undefined,
       farm_id: farmId || undefined,
+      worker_id: workerId || undefined,
     }),
-    [fromDate, toDate, zoneId, factoryId, supervisorId, farmerId, farmId],
+    [fromDate, toDate, zoneId, factoryId, supervisorId, farmerId, farmId, workerId],
   );
 
   const { data, isLoading, isError } = useAdminDashboard(params);
@@ -103,6 +143,7 @@ export default function AdminDashboard() {
     supervisorId,
     farmerId,
     farmId,
+    workerId,
   ].filter(Boolean).length;
 
   // Prepare ranking data
@@ -206,127 +247,83 @@ export default function AdminDashboard() {
         {showFilters && (
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Zone */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Zone</label>
-              <select
-                value={zoneId}
-                onChange={(e) => {
-                  setZoneId(e.target.value);
-                  setFactoryId("");
-                  setSupervisorId("");
-                  setFarmerId("");
-                  setFarmId("");
-                }}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              >
-                <option value="">All Zones</option>
-                {(Array.isArray(zonesData) ? zonesData : []).map((z) => (
-                  <option key={z.id} value={z.id}>
-                    {z.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              label="Zone"
+              options={zoneOptions}
+              value={zoneId}
+              onChange={(val) => {
+                setZoneId(val);
+                setFactoryId("");
+                setSupervisorId("");
+                setFarmerId("");
+                setFarmId("");
+              }}
+              placeholder="All Zones"
+            />
 
-            {/* Factory — only when zone selected */}
-            {zoneId && (
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Factory
-                </label>
-                <select
-                  value={factoryId}
-                  onChange={(e) => {
-                    setFactoryId(e.target.value);
-                    setSupervisorId("");
-                    setFarmerId("");
-                    setFarmId("");
-                  }}
-                  className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                >
-                  <option value="">
-                    {factoriesLoading ? "Loading..." : "All Factories"}
-                  </option>
-                  {(zoneFactoriesData?.data ?? []).map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name} ({f.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Factory */}
+            <SearchableSelect
+              label="Factory"
+              options={factoryOptions}
+              value={factoryId}
+              onChange={(val) => {
+                setFactoryId(val);
+                setSupervisorId("");
+                setFarmerId("");
+                setFarmId("");
+              }}
+              placeholder="All Factories"
+              isLoading={factoriesLoading}
+            />
 
             {/* Supervisor */}
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">
-                Supervisor
-              </label>
-              <select
-                value={supervisorId}
-                onChange={(e) => {
-                  setSupervisorId(e.target.value);
-                  setFarmerId("");
-                  setFarmId("");
-                }}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              >
-                <option value="">
-                  {supervisorsLoading ? "Loading..." : "All Supervisors"}
-                </option>
-                {(supervisorsData?.data ?? []).map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              label="Supervisor"
+              options={supervisorOptions}
+              value={supervisorId}
+              onChange={(val) => {
+                setSupervisorId(val);
+                setFarmerId("");
+                setFarmId("");
+              }}
+              placeholder="All Supervisors"
+              isLoading={supervisorsLoading}
+            />
 
-            {/* Farmer — only when supervisor selected */}
-            {supervisorId && (
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Farmer
-                </label>
-                <select
-                  value={farmerId}
-                  onChange={(e) => {
-                    setFarmerId(e.target.value);
-                    setFarmId("");
-                  }}
-                  className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                >
-                  <option value="">
-                    {farmersLoading ? "Loading..." : "All Farmers"}
-                  </option>
-                  {(farmersData?.data ?? []).map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Farmer */}
+            <SearchableSelect
+              label="Farmer"
+              options={farmerOptions}
+              value={farmerId}
+              onChange={(val) => {
+                setFarmerId(val);
+                setFarmId("");
+              }}
+              placeholder="All Farmers"
+              isLoading={farmersLoading}
+              disabled={!supervisorId}
+            />
 
-            {/* Farm — only when farmer selected */}
-            {farmerId && (
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Farm</label>
-                <select
-                  value={farmId}
-                  onChange={(e) => setFarmId(e.target.value)}
-                  className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                >
-                  <option value="">
-                    {farmsLoading ? "Loading..." : "All Farms"}
-                  </option>
-                  {(farmsData?.data ?? []).map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Farm */}
+            <SearchableSelect
+              label="Farm"
+              options={farmOptions}
+              value={farmId}
+              onChange={setFarmId}
+              placeholder="All Farms"
+              isLoading={farmsLoading}
+              disabled={!farmerId}
+            />
+
+            {/* Worker */}
+            <SearchableSelect
+              label="Worker"
+              options={workerOptions}
+              value={workerId}
+              onChange={setWorkerId}
+              placeholder="All Workers"
+              isLoading={workersLoading}
+            />
 
             {/* From Date */}
             <div>
@@ -337,7 +334,7 @@ export default function AdminDashboard() {
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 h-[42px]"
               />
             </div>
 
@@ -350,7 +347,7 @@ export default function AdminDashboard() {
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 h-[42px]"
               />
             </div>
 
@@ -364,6 +361,7 @@ export default function AdminDashboard() {
                     setSupervisorId("");
                     setFarmerId("");
                     setFarmId("");
+                    setWorkerId("");
                   }}
                   className="text-xs text-red-500 hover:text-red-700 underline"
                 >

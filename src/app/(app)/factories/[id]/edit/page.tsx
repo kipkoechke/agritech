@@ -16,8 +16,6 @@ import type { UpdateFactoryData } from "@/types/factory";
 interface FactoryFormData {
   name: string;
   code: string;
-  lat: string;
-  lng: string;
 }
 
 export default function EditFactoryPage() {
@@ -46,8 +44,6 @@ export default function EditFactoryPage() {
       ? {
           name: factory.name,
           code: factory.code,
-          lat: factory.coordinates ? String(factory.coordinates[0]) : "",
-          lng: factory.coordinates ? String(factory.coordinates[1]) : "",
         }
       : undefined,
   });
@@ -73,12 +69,6 @@ export default function EditFactoryPage() {
       code: data.code,
       zone_id: zoneValue,
     };
-    if (data.lat && data.lng) {
-      payload.coordinates = {
-        lat: parseFloat(data.lat),
-        lng: parseFloat(data.lng),
-      };
-    }
     if (userValue) {
       payload.user_id = userValue;
     }
@@ -164,21 +154,6 @@ export default function EditFactoryPage() {
               isLoading={usersLoading}
               onSearchChange={setAdminSearch}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="Latitude"
-                type="number"
-                placeholder="e.g. -1.2921"
-                register={register("lat")}
-              />
-              <InputField
-                label="Longitude"
-                type="number"
-                placeholder="e.g. 36.8219"
-                register={register("lng")}
-              />
-            </div>
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
               <Button type="secondary" to={`/factories/${id}`}>
