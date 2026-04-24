@@ -3,8 +3,12 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSupervisorDashboard } from "@/hooks/useRoleDashboard";
+import { useZones } from "@/hooks/useZone";
+import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useFarms } from "@/hooks/useFarm";
 import StatCard from "@/components/common/StatCard";
 import RankingChart from "@/components/common/RankingChart";
+import { SearchableSelect } from "@/components/common/SearchableSelect";
 import {
   LineChart,
   Line,
@@ -26,26 +30,69 @@ export default function SupervisorDashboard() {
   const [fromDate, setFromDate] = useState(formatDate(thirtyDaysAgo));
   const [toDate, setToDate] = useState(formatDate(today));
   const [farmId, setFarmId] = useState("");
+  const [zoneId, setZoneId] = useState("");
+  const [ownerId, setOwnerId] = useState("");
+  const [status, setStatus] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const router = useRouter();
+
+  const { data: zonesData, isLoading: zonesLoading } = useZones();
+  const { data: ownersData, isLoading: ownersLoading } = useHrisUsers({
+    role: "farmer",
+    per_page: 200,
+  });
+  const { data: farmsData, isLoading: farmsLoading } = useFarms(
+    { owner_id: ownerId, zone_id: zoneId, per_page: 200 },
+    { enabled: !!ownerId || !!zoneId },
+  );
+
+  const zoneOptions = [
+    { value: "", label: "All Zones" },
+    ...(zonesData || []).map((z) => ({ value: z.id, label: z.name })),
+  ];
+
+  const ownerOptions = [
+    { value: "", label: "All Owners" },
+    ...(ownersData?.data ?? []).map((o) => ({ value: o.id, label: o.name })),
+  ];
+
+  const farmOptions = [
+    { value: "", label: "All Farms" },
+    ...(farmsData?.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+  ];
+
+  const statusOptions = [
+    { value: "", label: "All Status" },
+    { value: "completed", label: "Completed" },
+    { value: "pending", label: "Pending" },
+  ];
 
   const params = useMemo(
     () => ({
       from_date: fromDate || undefined,
       to_date: toDate || undefined,
       farm_id: farmId || undefined,
+      zone_id: zoneId || undefined,
+      owner_id: ownerId || undefined,
+      status: status || undefined,
     }),
-    [fromDate, toDate, farmId],
+    [fromDate, toDate, farmId, zoneId, ownerId, status],
   );
 
   const { data, isLoading: loading, isError } = useSupervisorDashboard(params);
 
   const summary = data?.summary;
-  const assignedFarms = data?.assigned_farms ?? [];
   const upcomingSchedules = data?.upcoming_schedules ?? [];
   const tasks = data?.tasks;
   const charts = data?.charts;
+
+  const activeFilterCount = [
+    zoneId,
+    ownerId,
+    farmId,
+    status,
+  ].filter(Boolean).length;
 
   const workerRankingData = useMemo(
     () =>
@@ -82,6 +129,11 @@ export default function SupervisorDashboard() {
         >
           <FiFilter className="text-gray-400" />
           Filters
+          {activeFilterCount > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">
+              {activeFilterCount} active
+            </span>
+          )}
           <span className="ml-auto">
             {showFilters ? (
               <FiChevronUp className="text-gray-400" />
@@ -91,22 +143,51 @@ export default function SupervisorDashboard() {
           </span>
         </button>
         {showFilters && (
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Farm</label>
-              <select
-                value={farmId}
-                onChange={(e) => setFarmId(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="">All Farms</option>
-                {assignedFarms.map((af) => (
-                  <option key={af.farm.id} value={af.farm.id}>
-                    {af.farm.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <SearchableSelect
+              label="Zone"
+              options={zoneOptions}
+              value={zoneId}
+              onChange={(val) => {
+                setZoneId(val);
+                setOwnerId("");
+                setFarmId("");
+              }}
+              placeholder="All Zones"
+              isLoading={zonesLoading}
+            />
+
+            <SearchableSelect
+              label="Owner"
+              options={ownerOptions}
+              value={ownerId}
+              onChange={(val) => {
+                setOwnerId(val);
+                setFarmId("");
+              }}
+              placeholder="All Owners"
+              isLoading={ownersLoading}
+              disabled={!zoneId}
+            />
+
+            <SearchableSelect
+              label="Farm"
+              options={farmOptions}
+              value={farmId}
+              onChange={setFarmId}
+              placeholder="All Farms"
+              isLoading={farmsLoading}
+              disabled={!ownerId && !zoneId}
+            />
+
+            <SearchableSelect
+              label="Status"
+              options={statusOptions}
+              value={status}
+              onChange={setStatus}
+              placeholder="All Status"
+            />
+
             <div>
               <label className="block text-xs text-gray-500 mb-1">
                 From Date
@@ -115,7 +196,7 @@ export default function SupervisorDashboard() {
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 h-[42px]"
               />
             </div>
             <div>
@@ -126,9 +207,25 @@ export default function SupervisorDashboard() {
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 h-[42px]"
               />
             </div>
+
+            {activeFilterCount > 0 && (
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setZoneId("");
+                    setOwnerId("");
+                    setFarmId("");
+                    setStatus("");
+                  }}
+                  className="text-xs text-red-500 hover:text-red-700 underline"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
