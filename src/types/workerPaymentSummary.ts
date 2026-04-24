@@ -15,6 +15,7 @@ export interface WorkerPaymentSummaryParams {
   role?: string;
   supervisor_id?: string;
   owner_id?: string;
+  search?: string;
 }
 
 export interface WorkerPaymentSummaryResponse {

@@ -405,7 +405,6 @@ export default function FarmerDashboard() {
         )}
       </div>
 
-      Worker Payment Breakdown
       <div className="bg-white rounded-xl shadow p-4">
         <h3 className="text-sm font-bold text-gray-800 mb-3">
           Worker Payment Breakdown
