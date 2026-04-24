@@ -406,6 +406,6 @@ export interface SupervisorDashboardParams {
   to_date?: string;
   farm_id?: string;
   zone_id?: string;
-  owner_id?: string;
+  farmer_id?: string;
   status?: "completed" | "pending";
 }

@@ -4,11 +4,12 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSupervisorDashboard } from "@/hooks/useRoleDashboard";
 import { useZones } from "@/hooks/useZone";
-import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useFarms } from "@/hooks/useFarm";
+import { SearchableSelect } from "@/components/common/SearchableSelect";
 import StatCard from "@/components/common/StatCard";
 import RankingChart from "@/components/common/RankingChart";
-import { SearchableSelect } from "@/components/common/SearchableSelect";
+import type { SupervisorDashboardParams } from "@/types/roleDashboard";
+import { FiChevronDown, FiChevronUp, FiFilter } from "react-icons/fi";
 import {
   LineChart,
   Line,
@@ -18,7 +19,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { FiChevronDown, FiChevronUp, FiFilter } from "react-icons/fi";
 
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
@@ -31,20 +31,16 @@ export default function SupervisorDashboard() {
   const [toDate, setToDate] = useState(formatDate(today));
   const [farmId, setFarmId] = useState("");
   const [zoneId, setZoneId] = useState("");
-  const [ownerId, setOwnerId] = useState("");
+  const [farmerId, setFarmerId] = useState("");
   const [status, setStatus] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const router = useRouter();
 
   const { data: zonesData, isLoading: zonesLoading } = useZones();
-  const { data: ownersData, isLoading: ownersLoading } = useHrisUsers({
-    role: "farmer",
-    per_page: 200,
-  });
   const { data: farmsData, isLoading: farmsLoading } = useFarms(
-    { owner_id: ownerId, zone_id: zoneId, per_page: 200 },
-    { enabled: !!ownerId || !!zoneId },
+    { zone_id: zoneId, owner_id: farmerId, per_page: 200 },
+    { enabled: !!zoneId },
   );
 
   const zoneOptions = [
@@ -52,9 +48,19 @@ export default function SupervisorDashboard() {
     ...(zonesData || []).map((z) => ({ value: z.id, label: z.name })),
   ];
 
-  const ownerOptions = [
-    { value: "", label: "All Owners" },
-    ...(ownersData?.data ?? []).map((o) => ({ value: o.id, label: o.name })),
+  // Extract unique farmers from farms filtered by zone
+  const farmerMap = new Map<string, string>();
+  (farmsData?.data ?? []).forEach((f) => {
+    if (f.farmer?.id && f.farmer?.name) {
+      farmerMap.set(f.farmer.id, f.farmer.name);
+    }
+  });
+  const farmerOptions = [
+    { value: "", label: "All Farmers" },
+    ...Array.from(farmerMap.entries()).map(([id, name]) => ({
+      value: id,
+      label: name,
+    })),
   ];
 
   const farmOptions = [
@@ -68,17 +74,14 @@ export default function SupervisorDashboard() {
     { value: "pending", label: "Pending" },
   ];
 
-  const params = useMemo(
-    () => ({
-      from_date: fromDate || undefined,
-      to_date: toDate || undefined,
-      farm_id: farmId || undefined,
-      zone_id: zoneId || undefined,
-      owner_id: ownerId || undefined,
-      status: status || undefined,
-    }),
-    [fromDate, toDate, farmId, zoneId, ownerId, status],
-  );
+  const params: SupervisorDashboardParams = {
+    from_date: fromDate || undefined,
+    to_date: toDate || undefined,
+    farm_id: farmId || undefined,
+    zone_id: zoneId || undefined,
+    farmer_id: farmerId || undefined,
+    status: (status as "completed" | "pending") || undefined,
+  };
 
   const { data, isLoading: loading, isError } = useSupervisorDashboard(params);
 
@@ -89,7 +92,7 @@ export default function SupervisorDashboard() {
 
   const activeFilterCount = [
     zoneId,
-    ownerId,
+    farmerId,
     farmId,
     status,
   ].filter(Boolean).length;
@@ -150,7 +153,7 @@ export default function SupervisorDashboard() {
               value={zoneId}
               onChange={(val) => {
                 setZoneId(val);
-                setOwnerId("");
+                setFarmerId("");
                 setFarmId("");
               }}
               placeholder="All Zones"
@@ -158,15 +161,14 @@ export default function SupervisorDashboard() {
             />
 
             <SearchableSelect
-              label="Owner"
-              options={ownerOptions}
-              value={ownerId}
+              label="Farmer"
+              options={farmerOptions}
+              value={farmerId}
               onChange={(val) => {
-                setOwnerId(val);
+                setFarmerId(val);
                 setFarmId("");
               }}
-              placeholder="All Owners"
-              isLoading={ownersLoading}
+              placeholder="All Farmers"
               disabled={!zoneId}
             />
 
@@ -177,7 +179,7 @@ export default function SupervisorDashboard() {
               onChange={setFarmId}
               placeholder="All Farms"
               isLoading={farmsLoading}
-              disabled={!ownerId && !zoneId}
+              disabled={!farmerId}
             />
 
             <SearchableSelect
@@ -216,7 +218,7 @@ export default function SupervisorDashboard() {
                 <button
                   onClick={() => {
                     setZoneId("");
-                    setOwnerId("");
+                    setFarmerId("");
                     setFarmId("");
                     setStatus("");
                   }}
