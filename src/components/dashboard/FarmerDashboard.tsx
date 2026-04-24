@@ -78,9 +78,14 @@ export default function FarmerDashboard() {
   }, [workGroups]);
 
   const getWorkerTotalPay = (wp: WorkerPaymentChart) => {
-    const wg = wp.work_group;
-    const rate = wg?.plucker_rate ?? 0;
+    const wgId = wp.work_group?.id ?? "";
+    const rate = wp.work_group?.plucker_rate ?? workGroupRatesMap[wgId]?.plucker_rate ?? WORKER_RATE;
     return wp.jobs.reduce((sum, job) => sum + (job.kgs * rate), 0);
+  };
+
+  const getJobRate = (wp: WorkerPaymentChart) => {
+    const wgId = wp.work_group?.id ?? "";
+    return wp.work_group?.plucker_rate ?? workGroupRatesMap[wgId]?.plucker_rate ?? WORKER_RATE;
   };
 
   const workerRankingData = useMemo(
@@ -400,7 +405,7 @@ export default function FarmerDashboard() {
         )}
       </div>
 
-      {/* Worker Payment Breakdown */}
+      Worker Payment Breakdown
       <div className="bg-white rounded-xl shadow p-4">
         <h3 className="text-sm font-bold text-gray-800 mb-3">
           Worker Payment Breakdown
@@ -533,10 +538,10 @@ export default function FarmerDashboard() {
                                 {job.kgs.toLocaleString()}
                               </td>
                               <td className="px-4 py-2 text-right text-gray-500">
-                                KES {wp.work_group?.plucker_rate ?? 0}
+                                KES {getJobRate(wp)}
                               </td>
                               <td className="px-4 py-2 text-right font-semibold text-gray-800">
-                                KES {(job.kgs * (wp.work_group?.plucker_rate ?? 0)).toLocaleString()}
+                                KES {(job.kgs * getJobRate(wp)).toLocaleString()}
                               </td>
                             </tr>
                           ))}

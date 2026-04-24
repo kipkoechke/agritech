@@ -167,11 +167,11 @@ export interface WorkerPaymentChart {
     name: string;
     phone: string;
   };
-  work_group: {
+  work_group?: {
     id: string;
     name: string;
-    plucker_rate: number;
-    supervisor_rate: number;
+    plucker_rate?: number;
+    supervisor_rate?: number;
   };
   jobs: WorkerJobDetail[];
   total_kgs: number;
