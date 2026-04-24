@@ -26,9 +26,7 @@ import {
   useDeleteWorkGroupMember,
 } from "@/hooks/useWorkGroup";
 import { useWorkers, useCreateWorker } from "@/hooks/useWorkers";
-import { useZones } from "@/hooks/useZone";
-import { useZoneFactories } from "@/hooks/useFactory";
-import { useFactoryClusters } from "@/hooks/useCluster";
+import { useClusters } from "@/hooks/useCluster";
 import type { WorkGroupMember } from "@/types/workGroup";
 
 export default function WorkGroupDetailPage() {
@@ -45,9 +43,6 @@ export default function WorkGroupDetailPage() {
     name: "",
     phone: "",
     pin: "",
-    zone_id: "",
-    factory_id: "",
-    cluster_id: "",
   });
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
@@ -68,9 +63,6 @@ export default function WorkGroupDetailPage() {
       : {},
     canSearch,
   );
-  const { data: zonesData } = useZones();
-  const { data: factoriesData } = useZoneFactories(newWorker.zone_id);
-  const { data: clustersData } = useFactoryClusters(newWorker.factory_id);
 
   const group = groupResponse?.data;
   const members = membersResponse?.data || [];
@@ -86,23 +78,13 @@ export default function WorkGroupDetailPage() {
       })) || [];
 
   const handleCreateWorker = () => {
-    if (
-      !newWorker.name ||
-      !newWorker.phone ||
-      !newWorker.pin ||
-      !newWorker.zone_id ||
-      !newWorker.factory_id ||
-      !newWorker.cluster_id
-    )
-      return;
+    if (!newWorker.name || !newWorker.phone || !newWorker.pin) return;
     createWorker.mutate(
       {
         name: newWorker.name,
         phone: newWorker.phone,
         pin: newWorker.pin,
-        zone_id: newWorker.zone_id,
-        factory_id: newWorker.factory_id,
-        cluster_id: newWorker.cluster_id,
+        cluster_id: group?.cluster?.id,
       },
       {
         onSuccess: (response) => {
@@ -115,9 +97,6 @@ export default function WorkGroupDetailPage() {
                   name: "",
                   phone: "",
                   pin: "",
-                  zone_id: "",
-                  factory_id: "",
-                  cluster_id: "",
                 });
                 setShowCreateWorker(false);
               },
@@ -219,6 +198,14 @@ export default function WorkGroupDetailPage() {
                       {group.name}
                     </span>
                   </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                    Cluster
+                  </span>
+                  <span className="text-sm font-medium text-gray-800">
+                    {group.cluster?.name || "—"}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
@@ -551,7 +538,7 @@ export default function WorkGroupDetailPage() {
                 ×
               </button>
             </div>
-            <div className="px-6 py-5 grid grid-cols-2 gap-4">
+            <div className="px-6 py-5 space-y-4">
               <InputField
                 label="Full Name"
                 placeholder="e.g. Jane Muthoni"
@@ -561,7 +548,7 @@ export default function WorkGroupDetailPage() {
                 }
                 required
               />
-              <InputField
+<InputField
                 label="Phone"
                 placeholder="e.g. 0712345678"
                 value={newWorker.phone}
@@ -575,69 +562,12 @@ export default function WorkGroupDetailPage() {
                 type="password"
                 placeholder="4-digit PIN"
                 value={newWorker.pin}
-                onChange={(e) =>
-                  setNewWorker((s) => ({ ...s, pin: e.target.value }))
-                }
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                  setNewWorker((s) => ({ ...s, pin: val }));
+                }}
                 required
               />
-              <SearchableSelect
-                label="Zone"
-                options={(zonesData ?? []).map(
-                  (z: { id: string; name: string }) => ({
-                    value: z.id,
-                    label: z.name,
-                  }),
-                )}
-                value={newWorker.zone_id}
-                onChange={(val) =>
-                  setNewWorker((s) => ({
-                    ...s,
-                    zone_id: val,
-                    factory_id: "",
-                    cluster_id: "",
-                  }))
-                }
-                placeholder="Select zone"
-                required
-              />
-              {newWorker.zone_id && (
-                <SearchableSelect
-                  label="Factory"
-                  options={(factoriesData?.data ?? []).map(
-                    (f: { id: string; name: string }) => ({
-                      value: f.id,
-                      label: f.name,
-                    }),
-                  )}
-                  value={newWorker.factory_id}
-                  onChange={(val) =>
-                    setNewWorker((s) => ({
-                      ...s,
-                      factory_id: val,
-                      cluster_id: "",
-                    }))
-                  }
-                  placeholder="Select factory"
-                  required
-                />
-              )}
-              {newWorker.factory_id && (
-                <SearchableSelect
-                  label="Cluster"
-                  options={(clustersData?.data ?? []).map(
-                    (c: { id: string; name: string }) => ({
-                      value: c.id,
-                      label: c.name,
-                    }),
-                  )}
-                  value={newWorker.cluster_id}
-                  onChange={(val) =>
-                    setNewWorker((s) => ({ ...s, cluster_id: val }))
-                  }
-                  placeholder="Select cluster"
-                  required
-                />
-              )}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
               <button
@@ -655,10 +585,7 @@ export default function WorkGroupDetailPage() {
                   addMembers.isPending ||
                   !newWorker.name ||
                   !newWorker.phone ||
-                  !newWorker.pin ||
-                  !newWorker.zone_id ||
-                  !newWorker.factory_id ||
-                  !newWorker.cluster_id
+                  !newWorker.pin
                 }
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >

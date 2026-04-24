@@ -10,6 +10,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useWorkGroup, useUpdateWorkGroup } from "@/hooks/useWorkGroup";
 import { useHrisUsers } from "@/hooks/useHrisUser";
+import { useClusters } from "@/hooks/useCluster";
 import { useIsAdmin } from "@/hooks/useAuth";
 import type { UpdateWorkGroupData } from "@/types/workGroup";
 
@@ -42,6 +43,9 @@ export default function EditWorkGroupPage() {
   });
 
   const [ownerId, setOwnerId] = useState("");
+  const [clusterId, setClusterId] = useState("");
+
+  const { data: clustersData, isLoading: clustersLoading } = useClusters({ per_page: 100 });
 
   const group = groupResponse?.data;
 
@@ -54,6 +58,7 @@ export default function EditWorkGroupPage() {
         supervisor_rate: group.supervisor_rate ?? 0,
       });
       setOwnerId(group.owner_id || "");
+      setClusterId(group.cluster?.id || "");
     }
   }, [group, reset]);
 
@@ -72,6 +77,7 @@ export default function EditWorkGroupPage() {
       owner_id: isAdmin ? ownerId || undefined : undefined,
       plucker_rate: data.plucker_rate,
       supervisor_rate: data.supervisor_rate,
+      cluster_id: clusterId || undefined,
     };
 
     updateWorkGroup.mutate(
@@ -162,6 +168,18 @@ export default function EditWorkGroupPage() {
                 required
               />
             </div>
+
+            <SearchableSelect
+              label="Cluster"
+              options={(clustersData?.data ?? []).map((c) => ({
+                value: c.id,
+                label: c.name,
+              }))}
+              value={clusterId}
+              onChange={setClusterId}
+              placeholder="Select cluster"
+              isLoading={clustersLoading}
+            />
 
             {isAdmin && (
               <SearchableSelect
