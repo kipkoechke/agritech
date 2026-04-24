@@ -17,7 +17,7 @@ import {
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useRoleDashboard";
 import { useZones } from "@/hooks/useZone";
-import { useZoneFactories } from "@/hooks/useFactory";
+import { useFactories } from "@/hooks/useFactory";
 import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useFarms } from "@/hooks/useFarm";
 import { useWorkers } from "@/hooks/useWorkers";
@@ -64,14 +64,17 @@ export default function AdminDashboard() {
 
   // Filter data sources
   const { data: zonesData } = useZones();
-  const { data: zoneFactoriesData, isLoading: factoriesLoading } =
-    useZoneFactories(zoneId);
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
+    zone_id: zoneId,
+    per_page: 200,
+  });
   const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
     role: "supervisor",
     per_page: 200,
   });
   const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
     role: "farmer",
+    supervisor_id: supervisorId || undefined,
     per_page: 200,
   });
   const { data: workersData, isLoading: workersLoading } = useWorkers({
@@ -89,7 +92,7 @@ export default function AdminDashboard() {
 
   const factoryOptions = [
     { value: "", label: "All Factories" },
-    ...(zoneFactoriesData?.data ?? []).map((f) => ({
+    ...(factoriesData?.data ?? []).map((f) => ({
       value: f.id,
       label: `${f.name} (${f.code})`,
     })),
@@ -298,6 +301,7 @@ export default function AdminDashboard() {
               }}
               placeholder="All Farmers"
               isLoading={farmersLoading}
+              disabled={!supervisorId}
             />
 
             {/* Farm */}
@@ -308,6 +312,7 @@ export default function AdminDashboard() {
               onChange={setFarmId}
               placeholder="All Farms"
               isLoading={farmsLoading}
+              disabled={!farmerId}
             />
 
             {/* Worker */}
@@ -329,7 +334,7 @@ export default function AdminDashboard() {
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 h-[42px]"
               />
             </div>
 
@@ -342,7 +347,7 @@ export default function AdminDashboard() {
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 h-[42px]"
               />
             </div>
 
