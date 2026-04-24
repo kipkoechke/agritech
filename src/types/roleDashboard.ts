@@ -109,6 +109,7 @@ export interface AdminDashboardParams {
   supervisor_id?: string;
   farmer_id?: string;
   farm_id?: string;
+  worker_id?: string;
 }
 
 // Farmer Dashboard Types

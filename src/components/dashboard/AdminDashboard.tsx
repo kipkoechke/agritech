@@ -58,6 +58,7 @@ export default function AdminDashboard() {
   const [supervisorId, setSupervisorId] = useState("");
   const [farmerId, setFarmerId] = useState("");
   const [farmId, setFarmId] = useState("");
+  const [workerId, setWorkerId] = useState("");
 
   // Filter data sources
   const { data: zonesData } = useZones();
@@ -74,6 +75,10 @@ export default function AdminDashboard() {
     supervisor_id: supervisorId || undefined,
     per_page: 200,
   });
+  const { data: workersData, isLoading: workersLoading } = useHrisUsers({
+    role: "worker",
+    per_page: 200,
+  });
   const { data: farmsData, isLoading: farmsLoading } = useFarms(
     { owner_id: farmerId, per_page: 200 },
     { enabled: !!farmerId },
@@ -88,8 +93,9 @@ export default function AdminDashboard() {
       supervisor_id: supervisorId || undefined,
       farmer_id: farmerId || undefined,
       farm_id: farmId || undefined,
+      worker_id: workerId || undefined,
     }),
-    [fromDate, toDate, zoneId, factoryId, supervisorId, farmerId, farmId],
+    [fromDate, toDate, zoneId, factoryId, supervisorId, farmerId, farmId, workerId],
   );
 
   const { data, isLoading, isError } = useAdminDashboard(params);
@@ -103,6 +109,7 @@ export default function AdminDashboard() {
     supervisorId,
     farmerId,
     farmId,
+    workerId,
   ].filter(Boolean).length;
 
   // Prepare ranking data
@@ -328,6 +335,25 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* Worker */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Worker</label>
+              <select
+                value={workerId}
+                onChange={(e) => setWorkerId(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="">
+                  {workersLoading ? "Loading..." : "All Workers"}
+                </option>
+                {(workersData?.data ?? []).map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* From Date */}
             <div>
               <label className="block text-xs text-gray-500 mb-1">
@@ -364,6 +390,7 @@ export default function AdminDashboard() {
                     setSupervisorId("");
                     setFarmerId("");
                     setFarmId("");
+                    setWorkerId("");
                   }}
                   className="text-xs text-red-500 hover:text-red-700 underline"
                 >
