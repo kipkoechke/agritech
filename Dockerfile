@@ -7,7 +7,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.29.1 --activate
 
 # Disable Next.js telemetry during build (now pnpm is available)
-RUN pnpm exec next telemetry disable
+RUN npx next telemetry disable
 
 # Copy package files first (leverage layer caching)
 COPY package*.json pnpm-lock.yaml ./
