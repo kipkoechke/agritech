@@ -1,0 +1,96 @@
+name: Deploy to Hostup Podman
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      # Login to GitHub Container Registry
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.AGTECH_PAT_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # Build & push Docker image
+      - name: Build and push Docker image
+        run: |
+          # Ensure the image name is lowercase
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/agtech-app-container"
+          IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+          
+          # Tag with both commit SHA AND latest
+          COMMIT_TAG=${{ github.sha }}
+          
+          echo "Using IMAGE_NAME: $IMAGE_NAME"
+          echo "Commit tag: $COMMIT_TAG"
+          
+          # Build the image with multiple tags
+          docker build \
+            --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }} \
+            --build-arg NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }} \
+            --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \
+            -t $IMAGE_NAME:$COMMIT_TAG -t $IMAGE_NAME:latest .
+          
+          # Push both tags
+          docker push $IMAGE_NAME:$COMMIT_TAG
+          docker push $IMAGE_NAME:latest
+
+      # Setup SSH
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTUP_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOSTUP_SERVER_IP }} >> ~/.ssh/known_hosts
+
+
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -T ${{ secrets.HOSTUP_SERVER_USER }}@${{ secrets.HOSTUP_SERVER_IP }} "
+            set -e
+
+            IMAGE_NAME=\"ghcr.io/digital-path-technologies/agtech-app-container\"
+            IMAGE_NAME=\$(echo \$IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+            IMAGE_TAG=\"latest\"
+
+            echo \"Using IMAGE_NAME: \$IMAGE_NAME and IMAGE_TAG: \$IMAGE_TAG\"
+
+            echo \"Logging into GHCR...\"
+            echo \"${{ secrets.PAT_TOKEN }}\" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo \"Pulling new image...\"
+            docker pull \$IMAGE_NAME:\$IMAGE_TAG
+
+            echo \"Replacing container...\"
+            docker stop agtech-app-container || true
+            docker rm agtech-app-container || true
+
+            echo \"Starting new container...\"
+            docker run -d \\
+              --name agtech-app-container \\
+              -p 3003:3000 \\
+              --restart unless-stopped \\
+              --memory=1gb \\
+              --memory-swap=1gb \\
+              --cpus=\"0.5\" \\
+              -e NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }} \\
+              -e NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }} \\
+              -e CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \\
+              -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \\
+              -e NEXT_PUBLIC_API_BASE_URL=${{ secrets.AGTECH_API_URL }} \
+              \$IMAGE_NAME:\$IMAGE_TAG
+
+            echo \"Cleanup old images...\"
+            docker image prune -f --filter \"until=48h\"
+
+            echo \"Deployment complete\"
+            docker ps --filter name=agtech-app-container
+          "
