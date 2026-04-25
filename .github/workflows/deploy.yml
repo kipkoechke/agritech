@@ -63,7 +63,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -T ${{ secrets.HOSTUP_SERVER_USER }}@${{ secrets.HOSTUP_SERVER_IP }} "
             set -e
 
-            IMAGE_NAME=\"ghcr.io/digital-path-technologies/agtech-app-container\"
+            IMAGE_NAME=\"ghcr.io/digital-path-technologies-ltd/agtech-app-container\"
             IMAGE_NAME=\$(echo \$IMAGE_NAME | tr '[:upper:]' '[:lower:]')
             IMAGE_TAG=\"latest\"
 
