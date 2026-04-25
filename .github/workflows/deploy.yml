@@ -29,6 +29,9 @@ jobs:
       # Build & push image with podman
       - name: Build and push Podman image
         run: |
+          # Disable Next.js telemetry
+          npx next telemetry disable
+          
           # Ensure the image name is lowercase
           IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/agtech-app-container"
           IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
@@ -82,42 +85,122 @@ jobs:
             echo \"Pulling new image with podman...\"
             podman pull \$IMAGE_NAME:\$IMAGE_TAG
 
-            echo \"Replacing container with podman...\"
-            podman stop agtech-app-container || true
-            podman rm agtech-app-container || true
+            echo \"Stopping and removing existing container...\"
+            podman stop agtech-app-container 2>/dev/null || true
+            podman rm agtech-app-container 2>/dev/null || true
 
-            # Create podman systemd user directory if not exists
-            mkdir -p ~/.config/systemd/user
+            # Create Quadlet directory
+            mkdir -p ~/.config/containers/systemd
 
-            echo \"Starting new container with podman...\"
-            podman run -d \\
-              --name agtech-app-container \\
-              -p 3003:3000 \\
-              --restart unless-stopped \\
-              --memory=1gb \\
-              --cpus=0.5 \\
-              --label \"io.containers.autoupdate=registry\" \\
-              -e NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }} \\
-              -e NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }} \\
-              -e CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \\
-              -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \\
-              -e NEXT_PUBLIC_API_BASE_URL=${{ secrets.AGTECH_API_URL }} \\
-              \$IMAGE_NAME:\$IMAGE_TAG
+            echo \"Creating Quadlet for auto-start...\"
+            cat > ~/.config/containers/systemd/agtech-app-container.container << 'EOF'
+  [Unit]
+  Description=Agtech Frontend Container
+  After=local-fs.target network-online.target
+  Wants=network-online.target
+  
+  [Container]
+# Container configuration
+  Image=%IMAGE_NAME%:%IMAGE_TAG%
+  ContainerName=agtech-app-container
+  PublishPort=3003:3000
+  
+  # Resource limits
+  Memory=1g
+  CPUQuota=50%
+  
+  # Pull always updates
+  Pull=newer
+  
+  # Environment variables
+  Environment=NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+  Environment=NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }}
+  Environment=CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+  Environment=NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+  Environment=NEXT_PUBLIC_API_BASE_URL=${{ secrets.AGTECH_API_URL }}
+  
+  # Labels
+  Label=io.containers.autoupdate=registry
+  
+  [Service]
+# Service configuration
+  Restart=always
+  TimeoutStartSec=0
+  RestartSec=10
+  
+  # Ensure container stops cleanly
+  KillMode=mixed
+  KillSignal=SIGINT
+  
+  [Install]
+# Install as user service
+  WantedBy=default.target
+  EOF
+  
+  # Replace placeholders in the Quadlet file
+  sed -i "s|%IMAGE_NAME%|\$IMAGE_NAME|g" ~/.config/containers/systemd/agtech-app-container.container
+  sed -i "s|%IMAGE_TAG%|\$IMAGE_TAG|g" ~/.config/containers/systemd/agtech-app-container.container
+  
+  # Reload systemd and start the service
+  echo \"Starting container as systemd service...\"
+  systemctl --user daemon-reload
+  systemctl --user stop agtech-app-container.service 2>/dev/null || true
+  systemctl --user disable agtech-app-container.service 2>/dev/null || true
+  systemctl --user enable --now agtech-app-container.service
+  
+  # Wait for container to be ready with health check
+  echo \"Waiting for container to be healthy...\"
+  MAX_RETRIES=30
+  RETRY_COUNT=0
+  HEALTHY=false
+  
+  while [ \$RETRY_COUNT -lt \$MAX_RETRIES ]; do
+  if curl -s -f http://localhost:3003/api/health > /dev/null 2>&1; then
+  HEALTHY=true
+  echo \"✓ Container is healthy!\"
+  HEALTH_RESPONSE=\$(curl -s http://localhost:3003/api/health)
+echo \"Health check response: \$HEALTH_RESPONSE\"
+  break
+  fi
+  RETRY_COUNT=\$((RETRY_COUNT+1))
+  echo \"Waiting for container to be ready... (\$RETRY_COUNT/\$MAX_RETRIES)\"
+  sleep 2
+  done
+  
+  if [ \"\$HEALTHY\" = false ]; then
+  echo \"⚠️ Health check failed after \$MAX_RETRIES attempts\"
+  echo \"Last 50 lines of container logs:\"
+  podman logs --tail 50 agtech-app-container
+  # Don't fail the deployment, just warn
+  fi
+  
+  # Enable lingering for deploy user (to keep user services running after logout)
+  sudo loginctl enable-linger ${{ secrets.HOSTUP_SERVER_USER }}
+  
+  # Enable auto-update timer
+  echo \"Enabling auto-updates...\"
+  systemctl --user enable --now podman-auto-update.timer
+  
+  # Verify service status
+  echo \"Service status:\"
+  systemctl --user status agtech-app-container.service --no-pager
+  
+  echo \"Container logs:\"
+  podman logs --tail 50 agtech-app-container
+  
+  echo \"Cleaning up old images...\"
+  podman image prune -f
+  
+  echo \"Deployment complete\"
+  echo \"\"
+  echo \"=== Running Containers ===\"
+  podman ps --filter name=agtech-app-container
+  echo \"\"
+  echo \"=== Container Health ===\"
+podman inspect agtech-app-container --format 'Status: {{.State.Status}} | Started: {{.State.StartedAt}}'
 
-            # Generate systemd service for auto-start
-            echo \"Creating systemd service for container...\"
-            podman generate systemd --name agtech-app-container --files --new
-            mv container-agtech-app-container.service ~/.config/systemd/user/
-            systemctl --user daemon-reload
-            systemctl --user enable container-agtech-app-container.service
-            systemctl --user start container-agtech-app-container.service
-          
-            # Enable lingering for deploy user (to keep user services running after logout)
-            sudo loginctl enable-linger ${{ secrets.HOSTUP_SERVER_USER }}
-
-            echo \"Cleaning up old images...\"
-            podman image prune -f
-
-            echo \"Deployment complete\"
-            podman ps --filter name=agtech-app-container
-          "
+# Final health verification
+  echo \"\"
+  echo \"=== Final Health Check ===\"
+  curl -s http://localhost:3003/api/health | jq . 2>/dev/null || curl -s http://localhost:3003/api/health
+  "
