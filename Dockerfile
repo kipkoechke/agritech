@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Disable Next.js telemetry during build
-RUN npx next telemetry disable
+RUN pnpm exec next telemetry disable
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@10.29.1 --activate

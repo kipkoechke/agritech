@@ -44,6 +44,7 @@ jobs:
             --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }} \
             --build-arg NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }} \
             --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=${{ secrets.AGTECH_API_URL }} \
             -t $IMAGE_NAME:$COMMIT_TAG -t $IMAGE_NAME:latest .
           
           # Push both tags with podman
