@@ -1,14 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import {
-  MdExpandMore,
-  MdSearch,
-  MdClose,
-  MdPersonAdd,
-  MdCheck,
-} from "react-icons/md";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { MdExpandMore, MdSearch, MdClose } from "react-icons/md";
 
 interface Option {
   value: string;
@@ -26,9 +19,8 @@ interface SearchableSelectProps {
   placeholder?: string;
   searchPlaceholder?: string;
   required?: boolean;
-  onSearchChange?: (search: string) => void;
   isLoading?: boolean;
-  showSearchHint?: boolean;
+  onSearchChange?: (search: string) => void;
   onCreateNew?: (search: string) => void;
   createNewLabel?: string;
   multiSelect?: boolean;
@@ -46,9 +38,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   placeholder = "Select...",
   searchPlaceholder = "Search...",
   required = false,
-  onSearchChange,
   isLoading = false,
-  showSearchHint = false,
+  onSearchChange,
   onCreateNew,
   createNewLabel = "Add New",
   multiSelect = false,
@@ -57,37 +48,19 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Outside click: close if click is outside both trigger and dropdown portal
+  // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("click", handleClick, true);
-    return () => document.removeEventListener("click", handleClick, true);
-  }, []);
-
-  // Calculate portal position when opening
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPos({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      });
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
 
@@ -98,27 +71,22 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     }
   }, [isOpen]);
 
-  // Notify parent of search changes (for backend search)
-  // Only trigger search when dropdown is open
-  useEffect(() => {
-    if (onSearchChange && isOpen) {
-      onSearchChange(searchQuery);
+  // Handle search input change with debounce for backend search
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+    if (onSearchChange) {
+      // Debounce the search call
+      const timeoutId = setTimeout(() => {
+        onSearchChange(query);
+      }, 300);
+      return () => clearTimeout(timeoutId);
     }
-  }, [searchQuery, onSearchChange, isOpen]);
+  }, [onSearchChange]);
 
-  // Reset search when dropdown closes
-  useEffect(() => {
-    if (!isOpen && onSearchChange) {
-      setSearchQuery("");
-    }
-  }, [isOpen, onSearchChange]);
-
-  // Filter options based on search query (client-side or backend)
-  const filteredOptions = onSearchChange
-    ? options // Backend search: use options as-is
-    : options.filter((option) =>
-        option?.label?.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+  // Filter options locally if no onSearchChange prop
+  const filteredOptions = options.filter((option) =>
+    option?.label?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   // Get selected option label
   const selectedOption = options.find((opt) => opt?.value === value);
@@ -152,19 +120,14 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       <label className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-      {showSearchHint && (
-        <p className="mb-1 text-xs text-gray-500">
-          Start typing to search all customers. The list below shows only a few.
-        </p>
-      )}
+      
       {/* Select Button */}
       <button
-        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full px-3 py-3 border rounded-lg text-left
+          w-full px-3 py-2.5 border rounded-lg text-left bg-white
           focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
           disabled:bg-gray-100 disabled:cursor-not-allowed
           ${error ? "border-red-500" : "border-gray-300"}
@@ -172,7 +135,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         `}
       >
         <div className="flex items-center justify-between gap-2">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             {multiSelect ? (
               values.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
@@ -233,119 +196,71 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </p>
       )}
 
-      {/* Dropdown via portal — escapes overflow:hidden on parent modals */}
-      {isOpen && createPortal(
-        <div
-          ref={dropdownRef}
-          style={{
-            position: "fixed",
-            top: dropdownPos.top,
-            left: dropdownPos.left,
-            width: dropdownPos.width,
-          }}
-          className="z-9999 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
-        >
+      {/* Inline Dropdown - Simple absolute positioning */}
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
           {/* Search Input */}
-          <div className="p-2 border-b border-gray-200 bg-white">
+          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
             <div className="relative">
               <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-900 placeholder:text-gray-500"
+                className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
 
           {/* Options List */}
-          <div className="max-h-48 overflow-y-auto">
-            {isLoading ? (
-              <div className="px-3 py-4 text-center text-gray-500 text-sm flex items-center justify-center gap-2">
-                <svg
-                  className="animate-spin h-4 w-4 text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Loading...
-              </div>
-            ) : filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <button
-                  key={option?.value || Math.random()}
-                  type="button"
-                  onClick={() => handleSelect(option.value)}
-                  className={`
-                    w-full text-left px-3 py-2.5 hover:bg-blue-50 transition-colors text-sm font-semibold flex items-center gap-2
-                    ${
-                      (
-                        multiSelect
-                          ? values.includes(option.value)
-                          : value === option.value
-                      )
-                        ? "bg-blue-100 text-blue-900"
-                        : "text-gray-900"
-                    }
-                  `}
-                >
-                  {multiSelect && (
-                    <span className="w-4 h-4 shrink-0 flex items-center justify-center">
-                      {values.includes(option.value) && (
-                        <MdCheck className="w-4 h-4 text-emerald-600" />
-                      )}
-                    </span>
-                  )}
-                  {option?.label || option?.value || "Unknown"}
-                </button>
-              ))
-            ) : (
-              <div className="px-3 py-3 text-center text-sm">
-                {onSearchChange && !searchQuery ? (
-                  <span className="text-gray-500">
-                    Start typing to search...
+          {isLoading ? (
+            <div className="px-3 py-4 text-center text-gray-500 text-sm">
+              Loading...
+            </div>
+          ) : filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => (
+              <button
+                key={option?.value || Math.random()}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={`
+                  w-full text-left px-3 py-2.5 hover:bg-emerald-50 transition-colors text-sm
+                  ${
+                    (multiSelect ? values.includes(option.value) : value === option.value)
+                      ? "bg-emerald-100 text-emerald-900 font-semibold"
+                      : "text-gray-900"
+                  }
+                `}
+              >
+                {option?.label || option?.value || "Unknown"}
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-3 text-center text-sm">
+              {onCreateNew && searchQuery ? (
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-gray-400 text-xs">
+                    No results for "{searchQuery}"
                   </span>
-                ) : onCreateNew && searchQuery ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-gray-400 text-xs">
-                      No results for &ldquo;{searchQuery}&rdquo;
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onCreateNew(searchQuery);
-                        setIsOpen(false);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors"
-                    >
-                      <MdPersonAdd className="w-3.5 h-3.5" />
-                      {createNewLabel}
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-gray-500">No results found</span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>,
-        document.body
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onCreateNew(searchQuery);
+                      setIsOpen(false);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    {createNewLabel}
+                  </button>
+                </div>
+              ) : (
+                <span className="text-gray-500">No results found</span>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Error Message */}

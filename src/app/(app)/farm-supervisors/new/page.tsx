@@ -79,52 +79,56 @@ export default function NewSupervisorPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-            <InputField
-              label="Name"
-              placeholder="Full name"
-              register={register("name", { required: "Name is required" })}
-              error={errors.name?.message}
-              required
-            />
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="Name"
+                placeholder="Full name"
+                register={register("name", { required: "Name is required" })}
+                error={errors.name?.message}
+                required
+              />
 
-            <InputField
-              label="Email"
-              type="email"
-              placeholder="supervisor@example.com"
-              register={register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Invalid email address",
-                },
-              })}
-              error={errors.email?.message}
-              required
-            />
+              <InputField
+                label="Email"
+                type="email"
+                placeholder="supervisor@example.com"
+                register={register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Invalid email address",
+                  },
+                })}
+                error={errors.email?.message}
+                required
+              />
+            </div>
 
-            <InputField
-              label="Password"
-              type="password"
-              placeholder="Enter password"
-              register={register("password", {
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              })}
-              error={errors.password?.message}
-              required
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="Phone"
+                placeholder="e.g. 0700000000"
+                register={register("phone", { required: "Phone is required" })}
+                error={errors.phone?.message}
+                required
+              />
 
-            <InputField
-              label="Phone"
-              placeholder="e.g. 0700000000"
-              register={register("phone", { required: "Phone is required" })}
-              error={errors.phone?.message}
-              required
-            />
+              <InputField
+                label="Password"
+                type="password"
+                placeholder="Enter password"
+                register={register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                })}
+                error={errors.password?.message}
+                required
+              />
+            </div>
 
             <SearchableSelect
               label="Assign to Farm"

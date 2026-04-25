@@ -4,7 +4,7 @@ import { getAuthToken, clearAuthData } from "./auth";
 const axiosInstance = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://dreamagritech.dreamguys.africa/api/v1",
+    " https://agtech-api.comingsoon.co.ke/api/v1",
   timeout: 10000,
   responseType: "json",
 });

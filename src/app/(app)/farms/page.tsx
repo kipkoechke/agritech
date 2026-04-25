@@ -50,7 +50,6 @@ export default function FarmsPage() {
   const isSupervisor = useIsSupervisor();
   const farmsParams = {
     page,
-    zone_id: geoFilters.zoneId || undefined,
     product_id: productFilter || undefined,
   };
   const {
@@ -107,7 +106,7 @@ export default function FarmsPage() {
           filters={
             <>
               <GeoHierarchyFilter
-                levels={["zone", "factory", "cluster"]}
+                levels={["factory", "cluster"]}
                 values={geoFilters}
                 onChange={(vals) => {
                   setGeoFilters(vals);
@@ -186,9 +185,6 @@ export default function FarmsPage() {
                       Size (Acres)
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Zone
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
                     </th>
                     {!isFarmer && !isSupervisor && (
@@ -226,11 +222,6 @@ export default function FarmsPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
                           {(parseFloat(farm.size) * 2.471).toFixed(2)} Acres
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {farm.zone?.name || "—"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
