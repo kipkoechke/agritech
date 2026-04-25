@@ -18,7 +18,19 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build app
+# 🔑 IMPORTANT: Build-time environment variables for Next.js
+# These get embedded into the JavaScript bundle at build time
+ARG NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+ARG NEXT_PUBLIC_CLOUDINARY_API_KEY
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+ARG NEXT_PUBLIC_API_BASE_URL
+
+ENV NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+ENV NEXT_PUBLIC_CLOUDINARY_API_KEY=$NEXT_PUBLIC_CLOUDINARY_API_KEY
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
+# Build app (NEXT_PUBLIC_* vars are embedded at this stage)
 RUN pnpm build
 
 # Stage 2: Production image
@@ -39,6 +51,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/pnpm-lock.yaml ./
 # Install only production dependencies
 RUN corepack enable && corepack prepare pnpm@10.29.1 --activate
 RUN pnpm install --prod --frozen-lockfile
+
+# Note: NEXT_PUBLIC_* variables don't need to be set here since they're already
+# baked into the static build during Stage 1
 
 # Switch to non-root user
 USER nextjs
