@@ -106,8 +106,8 @@ export default function NewFarmPage() {
   }
 
   const { data: clustersData, isLoading: clustersLoading } = useFactoryClusters(factoryId);
-  const { data: allFactoriesData, isLoading: allFactoriesLoading } = useFactories({ 
-    per_page: 500,
+const { data: allFactoriesData, isLoading: allFactoriesLoading } = useFactories({ 
+    per_page: 5000,
     search: factorySearch || undefined,
   });
 

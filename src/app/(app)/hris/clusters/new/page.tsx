@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import { MdArrowBack, MdHub } from "react-icons/md";
 import { InputField } from "@/components/common/InputField";
@@ -12,22 +11,52 @@ import Button from "@/components/common/Button";
 import { useCreateCluster } from "@/hooks/useCluster";
 import { useFactories } from "@/hooks/useFactory";
 import type { CreateClusterData } from "@/types/cluster";
-import "leaflet/dist/leaflet.css";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false },
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false },
-);
+function SimpleMap({
+  onSelect,
+}: {
+  onSelect: (coords: { lat: number; lng: number }) => void;
+}) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
 
-import { useMapEvents } from "react-leaflet";
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    const initMap = async () => {
+      const L = (await import("leaflet")).default;
+      await import("leaflet/dist/leaflet.css");
+
+      if (mapRef.current && !mapInstanceRef.current) {
+        const map = L.map(mapRef.current).setView([-0.3, 35.3], 7);
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap",
+          maxZoom: 19,
+        }).addTo(map);
+
+        map.on("click", (e: any) => {
+          onSelect({ lat: e.latlng.lat, lng: e.latlng.lng });
+        });
+
+        mapInstanceRef.current = map;
+      }
+    };
+
+    initMap();
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [onSelect]);
+
+  return (
+    <div ref={mapRef} className="h-72 w-full border border-gray-300 rounded-lg overflow-hidden" />
+  );
+}
 
 interface ClusterFormData {
   name: string;
@@ -36,8 +65,6 @@ interface ClusterFormData {
 export default function NewClusterPage() {
   const router = useRouter();
   const createCluster = useCreateCluster();
-
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({ per_page: 100 });
 
   const {
     register,
@@ -48,23 +75,18 @@ export default function NewClusterPage() {
   });
 
   const [factoryId, setFactoryId] = useState("");
+  const [factorySearch, setFactorySearch] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const factories = factoriesData?.data || [];
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
+    per_page: 5000,
+    search: factorySearch || undefined,
+  });
 
-  const factoryOptions = factories.map((f) => ({
+  const factoryOptions = factoriesData?.data?.map((f: any) => ({
     value: f.id,
     label: f.name,
-  }));
-
-  function LocationMarker() {
-    useMapEvents({
-      click(e) {
-        setCoords(e.latlng);
-      },
-    });
-    return coords ? <Marker position={coords} /> : null;
-  }
+  })) || [];
 
   const onSubmit = (data: ClusterFormData) => {
     if (!factoryId) return;
@@ -103,23 +125,30 @@ export default function NewClusterPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-            <InputField
-              label="Name"
-              placeholder="Cluster name"
-              register={register("name", { required: "Name is required" })}
-              error={errors.name?.message}
-              required
-            />
-
-            <SearchableSelect
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div className="flex flex-col h-full">
+    <InputField
+      label="Name"
+      placeholder="Cluster name"
+      register={register("name", { required: "Name is required" })}
+      error={errors.name?.message}
+      required
+    />
+  </div>
+  <div className="flex flex-col h-full">
+<SearchableSelect
               label="Factory"
               options={factoryOptions}
               value={factoryId}
               onChange={setFactoryId}
-              placeholder="Select factory"
+              placeholder="Search and select a factory"
               isLoading={factoriesLoading}
+              onSearchChange={setFactorySearch}
+              searchPlaceholder="Search factories..."
               required
             />
+  </div>
+</div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -144,16 +173,8 @@ export default function NewClusterPage() {
                   No location set — click on the map to pick a point
                 </p>
               )}
-              <div className="h-75 rounded-lg overflow-hidden border border-gray-200">
-                <MapContainer
-                  center={coords ? [coords.lat, coords.lng] : [-0.3, 35.3]}
-                  zoom={coords ? 13 : 7}
-                  style={{ height: "100%", width: "100%" }}
-                  scrollWheelZoom={true}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationMarker />
-                </MapContainer>
+              <div className="h-72 rounded-lg overflow-hidden border border-gray-200">
+                <SimpleMap onSelect={setCoords} />
               </div>
             </div>
 

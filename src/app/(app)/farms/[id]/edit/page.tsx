@@ -123,7 +123,7 @@ export default function EditFarmPage() {
 
   const { data: clustersData, isLoading: clustersLoading } = useFactoryClusters(factoryValue);
   const { data: allFactoriesData, isLoading: allFactoriesLoading } = useFactories({
-    per_page: 500,
+    per_page: 5000,
     search: factorySearch || undefined,
   });
 
