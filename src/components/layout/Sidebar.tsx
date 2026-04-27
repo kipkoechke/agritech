@@ -4,13 +4,11 @@ import {
   MdDashboard,
   MdLogout,
   MdClose,
-  MdMap,
   MdPerson,
   MdGroup,
-  MdGroupWork,
   MdSchedule,
   MdPayments,
-  MdSupervisorAccount,
+  MdAssignment,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -74,25 +72,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         roles: ["admin"],
       },
       {
-        name: isAdmin ? "Farms" : "My Farms",
-        icon: MdMap,
-        href: "/farms",
-        active: pathname.startsWith("/farms"),
+        name: "Registration",
+        icon: MdAssignment,
+        href: "/registration",
+        active: pathname === "/registration",
         roles: ["admin", "farmer", "supervisor"],
-      },
-      {
-        name: "My Work Groups",
-        icon: MdGroupWork,
-        href: "/work-groups",
-        active: pathname.startsWith("/work-groups"),
-        roles: ["farmer", "supervisor"],
-      },
-      {
-        name: "My Supervisors",
-        icon: MdSupervisorAccount,
-        href: "/farm-supervisors",
-        active: pathname.startsWith("/farm-supervisors"),
-        roles: ["farmer"],
       },
       {
         name: "HRIS",
@@ -104,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
     ];
 
     const role = user?.role;
-    return allMenuItems.filter((item) => role && item.roles.includes(role));
+    return allMenuItems.filter((item) => item.roles && role && item.roles.includes(role));
   }, [pathname, user]);
 
   const handleLogout = () => {
@@ -173,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
           {menuItems.map((item) => (
             <li key={`${item.href}-${item.name}`}>
               <Link
-                href={item.href}
+                href={item.href || "/dashboard"}
                 onClick={handleLinkClick}
                 title={isCollapsed ? item.name : undefined}
                 className={`group flex items-center rounded-lg transition-all duration-200 ${isCollapsed ? "justify-center px-0 py-1.5" : "gap-2 px-2 py-1.5"} ${

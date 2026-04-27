@@ -24,9 +24,9 @@ import {
   MdPhone,
   MdCheck,
   MdCreate,
+  MdSave,
   MdViewList,
   MdTableView,
-  MdSave,
 } from "react-icons/md";
 import { useSchedule, useCancelSchedule } from "@/hooks/useSchedule";
 import {
@@ -70,40 +70,217 @@ const InfoTile = ({ icon: Icon, label, value, className = "" }: { icon: any; lab
   </div>
 );
 
-// WorkerRow component
-const WorkerRow = ({ booking, confirmMutation, farmQtyMutation, factoryQtyMutation, signOffMutation }: { booking: ScheduleBooking; confirmMutation: any; farmQtyMutation: any; factoryQtyMutation: any; signOffMutation: any }) => (
-  <div className="px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
-    <div className="flex items-start gap-4">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900">{booking.worker?.name || "—"}</p>
-        <p className="text-xs text-gray-500">{booking.worker?.phone || "—"}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <button onClick={() => confirmMutation.mutate(booking.id)} className="px-2 py-1 text-xs font-bold rounded bg-blue-100 text-blue-800 hover:bg-blue-200">Confirm</button>
-        <button onClick={() => signOffMutation.mutate(booking.id)} className="px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-800 hover:bg-green-200">Sign Off</button>
+// WorkerRow component - Only for Confirm Bookings tab
+const WorkerRow = ({ booking, confirmMutation }: { booking: ScheduleBooking; confirmMutation: any }) => {
+  return (
+    <div className="px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+      <div className="flex items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900">{booking.worker?.name || "—"}</p>
+          <p className="text-xs text-gray-500">{booking.worker?.phone || "—"}</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {!booking.is_confirmed ? (
+            <button
+              onClick={() => confirmMutation.mutate(booking.id)}
+              disabled={confirmMutation.isPending}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-600 text-white border border-emerald-700 hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm"
+            >
+              <MdCheck className="w-3 h-3" /> Confirm
+            </button>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <MdCheckCircle className="w-3 h-3" /> Confirmed
+            </span>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-// BatchWorkersTable component
-const BatchWorkersTable = ({ bookings, farmQtyMutation, factoryQtyMutation, onSaveComplete, confirmPct, signedPct, yieldPct, confirmedCount, signedCount, totalWorkers }: any) => (
-  <div className="px-5 py-4">
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-600">Confirmed: {confirmPct}%</span>
-        <span className="text-xs text-gray-500">{confirmedCount}/{totalWorkers}</span>
+// BatchWorkersTable component - For Record Farm Kgs tab
+interface BatchChanges {
+  farm_qty: Record<string, number | null>;
+  factory_qty: Record<string, number | null>;
+}
+
+const BatchWorkersTable = ({ bookings, farmQtyMutation, factoryQtyMutation, signOffMutation, onSaveComplete, confirmPct, signedPct, yieldPct, confirmedCount, signedCount, totalWorkers }: any) => {
+  const [changes, setChanges] = useState<BatchChanges>({
+    farm_qty: {},
+    factory_qty: {},
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleFarmChange = (bookingId: string, value: string) => {
+    const num = value === "" ? null : parseFloat(value);
+    setChanges((prev) => ({
+      ...prev,
+      farm_qty: { ...prev.farm_qty, [bookingId]: isNaN(num as number) ? null : num },
+    }));
+  };
+
+  const handleFactoryChange = (bookingId: string, value: string) => {
+    const num = value === "" ? null : parseFloat(value);
+    setChanges((prev) => ({
+      ...prev,
+      factory_qty: { ...prev.factory_qty, [bookingId]: isNaN(num as number) ? null : num },
+    }));
+  };
+
+  const handleSignOff = async (bookingId: string) => {
+    try {
+      await signOffMutation.mutateAsync(bookingId);
+      onSaveComplete();
+    } catch (err) {
+      console.error("Failed to sign off:", err);
+    }
+  };
+
+  const saveAll = async () => {
+    const farmUpdates = Object.entries(changes.farm_qty).filter(([, qty]) => qty !== null && qty !== undefined);
+    const factoryUpdates = Object.entries(changes.factory_qty).filter(([, qty]) => qty !== null && qty !== undefined);
+    if (farmUpdates.length === 0 && factoryUpdates.length === 0) return;
+
+    setIsSaving(true);
+    const errors: string[] = [];
+
+    for (const [bookingId, qty] of farmUpdates) {
+      try {
+        await farmQtyMutation.mutateAsync({ id: bookingId, farm_qty: qty! });
+      } catch (err: any) {
+        errors.push(`Farm qty for booking ${bookingId}: ${err.message}`);
+      }
+    }
+    for (const [bookingId, qty] of factoryUpdates) {
+      try {
+        await factoryQtyMutation.mutateAsync({ id: bookingId, factory_qty: qty! });
+      } catch (err: any) {
+        errors.push(`Factory qty for booking ${bookingId}: ${err.message}`);
+      }
+    }
+
+    setIsSaving(false);
+    if (errors.length > 0) {
+      alert(`Some updates failed:\n${errors.join("\n")}`);
+    } else {
+      alert("All quantities saved successfully!");
+      setChanges({ farm_qty: {}, factory_qty: {} });
+      onSaveComplete();
+    }
+  };
+
+  return (
+    <div>
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-6 flex-wrap">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-gray-600">Confirmed: {confirmPct}%</span>
+            <span className="text-xs text-gray-500">{confirmedCount}/{totalWorkers}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-gray-600">Signed: {signedPct}%</span>
+            <span className="text-xs text-gray-500">{signedCount}/{totalWorkers}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-gray-600">With Yield: {yieldPct}%</span>
+          </div>
+        </div>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-600">Signed: {signedPct}%</span>
-        <span className="text-xs text-gray-500">{signedCount}/{totalWorkers}</span>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Worker</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Farm Kg</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Factory Kg</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {bookings.map((booking: ScheduleBooking) => {
+              const worker = booking.worker;
+              const currentFarm = changes.farm_qty[booking.id] ?? booking.farm_qty ?? "";
+              const currentFactory = changes.factory_qty[booking.id] ?? booking.factory_qty ?? "";
+              return (
+                <tr key={booking.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className="text-sm font-medium text-gray-900">{worker?.name || "—"}</span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{worker?.phone || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex gap-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${booking.is_confirmed ? "bg-emerald-100 text-emerald-800" : "bg-gray-100 text-gray-400"}`}>
+                        {booking.is_confirmed ? "Confirmed" : "Pending"}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${booking.worker_signed ? "bg-primary/10 text-primary" : "bg-gray-100 text-gray-400"}`}>
+                        {booking.worker_signed ? "Signed" : "Unsigned"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={currentFarm === null ? "" : currentFarm}
+                      onChange={(e) => handleFarmChange(booking.id, e.target.value)}
+                      disabled={!booking.is_confirmed}
+                      className="w-28 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:text-gray-400"
+                      placeholder="kg"
+                    />
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={currentFactory === null ? "" : currentFactory}
+                      onChange={(e) => handleFactoryChange(booking.id, e.target.value)}
+                      disabled={!booking.is_confirmed}
+                      className="w-28 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:text-gray-400"
+                      placeholder="kg"
+                    />
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {!booking.worker_signed && booking.is_confirmed ? (
+                      <button
+                        onClick={() => handleSignOff(booking.id)}
+                        disabled={signOffMutation.isPending || booking.farm_qty == null}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                      >
+                        <MdCreate className="w-3 h-3" /> Sign Off
+                      </button>
+                    ) : booking.worker_signed ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                        <MdCheckCircle className="w-3 h-3" /> Signed
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-600">With Yield: {yieldPct}%</span>
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end">
+        <button
+          onClick={saveAll}
+          disabled={isSaving || (Object.keys(changes.farm_qty).length === 0 && Object.keys(changes.factory_qty).length === 0)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 shadow-sm"
+        >
+          {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <MdSave className="w-4 h-4" />}
+          {isSaving ? "Saving..." : "Save All Changes"}
+        </button>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function ScheduleDetailsPage() {
   const params = useParams();
@@ -226,10 +403,10 @@ export default function ScheduleDetailsPage() {
 
         {/* Main Two-Column Layout */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
-            {/* Left Card: Schedule Details */}
-            <div className="lg:col-span-2 flex flex-col">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+            {/* Left Card: Schedule Details - Fixed minimum width */}
+            <div className="lg:w-72 xl:w-80 shrink-0">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
                 <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2 shrink-0">
                   <MdCalendarToday className="w-4 h-4 text-primary" />
                   <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-600">Schedule Details</h2>
@@ -261,8 +438,8 @@ export default function ScheduleDetailsPage() {
               </div>
             </div>
 
-            {/* Right Card: Booked Workers with Mode Toggle */}
-            <div className="lg:col-span-3 flex flex-col">
+            {/* Right Card: Booked Workers with Mode Toggle - Takes remaining space */}
+            <div className="flex-1 min-w-0">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
                 <div className="px-5 py-3.5 border-b border-gray-100 shrink-0">
                   <div className="flex items-center gap-4 flex-wrap">
@@ -280,7 +457,7 @@ export default function ScheduleDetailsPage() {
                           mode === "individual" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
                         }`}
                       >
-                        <MdViewList className="w-3.5 h-3.5" /> Individual
+                        <MdViewList className="w-3.5 h-3.5" /> Confirm Bookings
                       </button>
                       <button
                         onClick={() => setMode("batch")}
@@ -288,7 +465,7 @@ export default function ScheduleDetailsPage() {
                           mode === "batch" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
                         }`}
                       >
-                        <MdTableView className="w-3.5 h-3.5" /> Batch Table
+                        <MdTableView className="w-3.5 h-3.5" /> Record Farm Kgs
                       </button>
                     </div>
                   </div>
@@ -308,9 +485,6 @@ export default function ScheduleDetailsPage() {
                         key={booking.id}
                         booking={booking}
                         confirmMutation={confirmMutation}
-                        farmQtyMutation={farmQtyMutation}
-                        factoryQtyMutation={factoryQtyMutation}
-                        signOffMutation={signOffMutation}
                       />
                     ))}
                   </div>
@@ -319,6 +493,7 @@ export default function ScheduleDetailsPage() {
                     bookings={bookings}
                     farmQtyMutation={farmQtyMutation}
                     factoryQtyMutation={factoryQtyMutation}
+                    signOffMutation={signOffMutation}
                     onSaveComplete={() => refetch()}
                     confirmPct={confirmPct}
                     signedPct={signedPct}

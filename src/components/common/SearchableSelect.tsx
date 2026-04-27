@@ -48,8 +48,11 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dropdownPosition, setDropdownPosition] = useState<"below" | "above">("below");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -71,11 +74,27 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     }
   }, [isOpen]);
 
+  // Calculate dropdown position when opening
+  useEffect(() => {
+    if (!isOpen || !buttonRef.current) return;
+
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    const DROPDOWN_ESTIMATED_HEIGHT = 280; // approximate max height + padding
+
+    if (spaceBelow < DROPDOWN_ESTIMATED_HEIGHT && spaceAbove > DROPDOWN_ESTIMATED_HEIGHT) {
+      setDropdownPosition("above");
+    } else {
+      setDropdownPosition("below");
+    }
+  }, [isOpen]);
+
   // Handle search input change with debounce for backend search
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
     if (onSearchChange) {
-      // Debounce the search call
       const timeoutId = setTimeout(() => {
         onSearchChange(query);
       }, 300);
@@ -123,6 +142,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       
       {/* Select Button */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -196,9 +216,17 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </p>
       )}
 
-      {/* Inline Dropdown - Simple absolute positioning */}
+      {/* Dropdown - Positioned dynamically */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+        <div
+          ref={dropdownRef}
+          className={`absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-y-auto ${
+            dropdownPosition === "below"
+              ? "top-full mt-1"
+              : "bottom-full mb-1"
+          }`}
+          style={{ maxHeight: "16rem" }}
+        >
           {/* Search Input */}
           <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
             <div className="relative">

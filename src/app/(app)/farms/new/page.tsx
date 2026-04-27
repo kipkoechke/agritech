@@ -4,15 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { MdAgriculture, MdArrowBack, MdAdd } from "react-icons/md";
+import { MdAgriculture, MdArrowBack } from "react-icons/md";
 import { InputField } from "@/components/common/InputField";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateFarm } from "@/hooks/useFarm";
 import { useAuth, useIsAdmin } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useProduct";
-import { useHrisUsers, useCreateHrisUser } from "@/hooks/useHrisUser";
-import { useFactoryClusters, useCreateCluster, useClusters } from "@/hooks/useCluster";
+import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useFactories } from "@/hooks/useFactory";
 import type { CreateFarmData } from "@/types/farm";
 
@@ -61,23 +60,9 @@ interface FarmFormData {
   size: string;
 }
 
-interface NewSupervisorData {
-  name: string;
-  phone: string;
-  email: string;
-  password: string;
-}
-
-interface NewClusterData {
-  name: string;
-  code: string;
-}
-
 export default function NewFarmPage() {
   const router = useRouter();
   const createFarm = useCreateFarm();
-  const createSupervisor = useCreateHrisUser();
-  const createCluster = useCreateCluster();
   const isAdmin = useIsAdmin();
   const { user } = useAuth();
 
@@ -86,13 +71,6 @@ export default function NewFarmPage() {
     role: "farmer",
     per_page: 100,
   });
-  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
-    role: "supervisor",
-    per_page: 500,
-  });
-  const { data: clustersData, isLoading: clustersLoading } = useClusters({
-    per_page: 500,
-  } as any);
 
   const {
     register,
@@ -105,18 +83,8 @@ export default function NewFarmPage() {
   const [productId, setProductId] = useState("");
   const [ownerId, setOwnerId] = useState("");
   const [factoryId, setFactoryId] = useState("");
-  const [clusterId, setClusterId] = useState("");
   const [factorySearch, setFactorySearch] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-
-  // Supervisor mode: 'select' | 'new'
-  const [supervisorMode, setSupervisorMode] = useState<"select" | "new">("select");
-  const [supervisorId, setSupervisorId] = useState("");
-  const [newSupervisor, setNewSupervisor] = useState<NewSupervisorData>({ name: "", phone: "", email: "", password: "" });
-
-  // Cluster mode: 'select' | 'new'
-  const [clusterMode, setClusterMode] = useState<"select" | "new">("select");
-  const [newCluster, setNewCluster] = useState<NewClusterData>({ name: "", code: "" });
 
   const { data: allFactoriesData, isLoading: allFactoriesLoading } = useFactories({ 
     per_page: 5000,
@@ -129,59 +97,16 @@ export default function NewFarmPage() {
   const farmerOptions =
     farmersData?.data?.map((u) => ({ value: u.id, label: u.name, description: u.phone })) || [];
 
-  const supervisorOptions =
-    supervisorsData?.data?.map((u) => ({ value: u.id, label: u.name, description: u.phone })) || [];
-
-  const clusterOptions =
-    clustersData?.data?.map((c: any) => ({ value: c.id, label: c.name, description: c.code })) || [];
-
   const factoryOptions = allFactoriesData?.data?.map((f: any) => ({ value: f.id, label: f.name })) || [];
 
   const onFormSubmit = async (data: FarmFormData) => {
-    let finalSupervisorId = supervisorId;
-    let finalClusterId = clusterId;
-
-    // Create new supervisor if needed
-    if (supervisorMode === "new" && newSupervisor.name && newSupervisor.phone && newSupervisor.password) {
-      try {
-        const supRes = await createSupervisor.mutateAsync({
-          name: newSupervisor.name,
-          phone: newSupervisor.phone,
-          email: newSupervisor.email || undefined,
-          password: newSupervisor.password,
-          role: "supervisor",
-        } as any);
-        finalSupervisorId = supRes.data.id;
-      } catch (err) {
-        console.error("Failed to create supervisor:", err);
-        return;
-      }
-    }
-
-    // Create new cluster if needed
-    if (clusterMode === "new" && newCluster.name) {
-      try {
-        const cRes = await createCluster.mutateAsync({
-          name: newCluster.name,
-          code: newCluster.code || undefined,
-          factory_id: factoryId,
-        } as any);
-        finalClusterId = cRes.data.id;
-      } catch (err) {
-        console.error("Failed to create cluster:", err);
-        return;
-      }
-    }
-
     const payload: CreateFarmData = {
       name: data.name,
       size: parseFloat(data.size) || 0,
       coordinates: coords || { lat: 0, lng: 0 },
       product_id: productId,
       owner_id: isAdmin ? ownerId || undefined : user?.id,
-      supervisor_id: finalSupervisorId || undefined,
       factory_id: factoryId || undefined,
-      cluster_id: finalClusterId || undefined,
     };
 
     createFarm.mutate(payload, {
@@ -238,7 +163,7 @@ export default function NewFarmPage() {
                 label="Factory"
                 options={factoryOptions}
                 value={factoryId}
-                onChange={(v) => { setFactoryId(v); setClusterId(""); }}
+                onChange={setFactoryId}
                 placeholder="Search and select a factory"
                 isLoading={allFactoriesLoading}
                 onSearchChange={setFactorySearch}
@@ -256,153 +181,17 @@ export default function NewFarmPage() {
               />
             </div>
 
-            {/* Row 3: Cluster (Work Group) */}
-            <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700">Work Group</label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setClusterMode("select")}
-                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                      clusterMode === "select"
-                        ? "bg-primary text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    Select Existing
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClusterMode("new")}
-                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                      clusterMode === "new"
-                        ? "bg-primary text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    <MdAdd className="w-3 h-3 inline mr-1" />
-                    Register New
-                  </button>
-                </div>
-              </div>
-
-              {clusterMode === "select" ? (
-                <SearchableSelect
-                  label=""
-                  options={clusterOptions}
-                  value={clusterId}
-                  onChange={setClusterId}
-                  placeholder={factoryId ? "Select a work group" : "Select a factory first"}
-                  isLoading={clustersLoading}
-                />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="Work Group Name"
-                    placeholder="Enter work group name"
-                    value={newCluster.name}
-                    onChange={(e) => setNewCluster({ ...newCluster, name: e.target.value })}
-                    required
-                  />
-                  <InputField
-                    label="Code (Optional)"
-                    placeholder="e.g. WG-001"
-                    value={newCluster.code}
-                    onChange={(e) => setNewCluster({ ...newCluster, code: e.target.value })}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Row 4: Owner | Supervisor */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {isAdmin && (
-                <SearchableSelect
-                  label="Owner (Farmer)"
-                  options={farmerOptions}
-                  value={ownerId}
-                  onChange={setOwnerId}
-                  placeholder="Select farm owner"
-                  isLoading={farmersLoading}
-                />
-              )}
-
-              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-700">Supervisor</label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSupervisorMode("select")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                        supervisorMode === "select"
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
-                    >
-                      Select Existing
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSupervisorMode("new")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                        supervisorMode === "new"
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
-                    >
-                      <MdAdd className="w-3 h-3 inline mr-1" />
-                      Register New
-                    </button>
-                  </div>
-                </div>
-
-                {supervisorMode === "select" ? (
-                  <SearchableSelect
-                    label=""
-                    options={supervisorOptions}
-                    value={supervisorId}
-                    onChange={setSupervisorId}
-                    placeholder="Select supervisor"
-                    isLoading={supervisorsLoading}
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="Supervisor Name"
-                      placeholder="Enter name"
-                      value={newSupervisor.name}
-                      onChange={(e) => setNewSupervisor({ ...newSupervisor, name: e.target.value })}
-                      required
-                    />
-                    <InputField
-                      label="Phone"
-                      placeholder="e.g. +254700000000"
-                      value={newSupervisor.phone}
-                      onChange={(e) => setNewSupervisor({ ...newSupervisor, phone: e.target.value })}
-                      required
-                    />
-                    <InputField
-                      label="Password"
-                      type="password"
-                      placeholder="Enter password"
-                      value={newSupervisor.password}
-                      onChange={(e) => setNewSupervisor({ ...newSupervisor, password: e.target.value })}
-                      required
-                    />
-                    <div className="sm:col-span-2">
-                      <InputField
-                        label="Email (Optional)"
-                        placeholder="email@example.com"
-                        value={newSupervisor.email}
-                        onChange={(e) => setNewSupervisor({ ...newSupervisor, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Row 3: Owner */}
+            {isAdmin && (
+              <SearchableSelect
+                label="Owner (Farmer)"
+                options={farmerOptions}
+                value={ownerId}
+                onChange={setOwnerId}
+                placeholder="Select farm owner"
+                isLoading={farmersLoading}
+              />
+            )}
 
             {/* Map */}
             <div className="relative z-0">
@@ -437,7 +226,7 @@ export default function NewFarmPage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={createFarm.isPending || createSupervisor.isPending || createCluster.isPending}
+                disabled={createFarm.isPending}
               >
                 {createFarm.isPending ? "Creating..." : "Create Farm"}
               </Button>
