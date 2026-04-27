@@ -186,7 +186,7 @@ export default function AdminDashboard() {
   const workerRankingData = useMemo(
     () =>
       (charts?.top_10_workers ?? []).map((w) => ({
-        name: w.worker.name,
+        name: w.worker?.name || "—",
         value: w.total_kgs,
         jobs: w.jobs,
         avg: w.avg_kgs_per_job,

@@ -91,7 +91,7 @@ export default function FarmerDashboard() {
   const workerRankingData = useMemo(
     () =>
       (charts?.worker_payments ?? []).map((wp) => ({
-        name: wp.worker.name,
+        name: wp.worker?.name || "—",
         value: wp.total_kgs,
         jobs: wp.jobs.length,
         total_amount: getWorkerTotalPay(wp),
@@ -102,10 +102,10 @@ export default function FarmerDashboard() {
   const farmRankingData = useMemo(
     () =>
       (charts?.farm_performance ?? []).map((fp) => ({
-        name: fp.farm.name,
+        name: fp.farm?.name || "—",
         value: fp.total_kgs,
         size: (fp.size * HA_TO_ACRES).toFixed(1),
-        zone: fp.farm.zone,
+        zone: fp.farm?.zone,
       })),
     [charts],
   );
@@ -438,15 +438,15 @@ export default function FarmerDashboard() {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                         <span className="text-xs font-bold text-emerald-700">
-                          {wp.worker.name.charAt(0).toUpperCase()}
+                          {(wp.worker?.name || "?").charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">
-                          {wp.worker.name}
+                          {wp.worker?.name || "—"}
                         </p>
                         <p className="text-[11px] text-gray-400">
-                          {wp.worker.phone}
+                          {wp.worker?.phone || "—"}
                         </p>
                       </div>
                     </div>
@@ -600,10 +600,10 @@ export default function FarmerDashboard() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">
-                          {schedule.schedule.code} - {schedule.farm.name}
+                          {schedule.schedule?.code || "—"} - {schedule.farm?.name || "—"}
                         </p>
                         <p className="text-[11px] text-gray-400">
-                          {schedule.supervisor.name} •{" "}
+                          {schedule.supervisor?.name || "—"} •{" "}
                           {new Date(
                             schedule.scheduled_date,
                           ).toLocaleDateString("en-KE", {
@@ -680,7 +680,7 @@ export default function FarmerDashboard() {
                               className="hover:bg-gray-50 transition-colors"
                             >
                               <td className="px-4 py-2 text-gray-700 font-medium">
-                                {booking.worker.name}
+                                {booking.worker?.name || "—"}
                               </td>
                               <td className="px-4 py-2 text-right text-gray-600">
                                 {booking.farm_qty.toLocaleString()}

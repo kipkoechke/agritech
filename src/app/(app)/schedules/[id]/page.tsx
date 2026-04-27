@@ -1,3 +1,4 @@
+// app/schedules/[id]/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -35,472 +36,75 @@ import {
   useWorkerSignOff,
 } from "@/hooks/useBooking";
 import type { ScheduleBooking } from "@/types/schedule";
+import ErrorBoundary from "@/components/common/ErrorBoundary"; // <-- import
 
 /* ── helpers & styles ── */
-const STATUS_STYLES: Record<string, string> = {
-  scheduled: "bg-amber-100 text-amber-700",
-  approved: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100   text-red-600",
+
+const STATUS_STYLES = {
+  active: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+  completed: 'bg-blue-100 text-blue-800',
+  pending: 'bg-yellow-100 text-yellow-800',
 };
 
-function statusLabel(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
-
-function InfoTile({
-  icon: Icon,
-  label,
-  value,
-  className = "",
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
-      <div className="flex items-center gap-1.5">
-        <Icon className="w-3.5 h-3.5 text-primary/60" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-          {label}
-        </span>
-      </div>
-      <div className="text-sm font-semibold text-gray-800 leading-snug">
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ on, label, onClass }: { on: boolean; label: string; onClass: string }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-colors ${
-        on ? onClass : "border border-gray-200 bg-gray-50 text-gray-400"
-      }`}
-    >
-      {on ? <MdCheckCircle className="w-3 h-3" /> : <MdRadioButtonUnchecked className="w-3 h-3 opacity-40" />}
-      {label}
-    </span>
-  );
-}
-
-function MiniRing({ value, color, trackColor, label }: { value: number; color: string; trackColor: string; label: string }) {
-  const r = 12;
-  const circumference = 2 * Math.PI * r;
-  const offset = circumference - (value / 100) * circumference;
-  return (
-    <div className="flex items-center gap-1.5">
-      <svg className="w-8 h-8 -rotate-90 shrink-0" viewBox="0 0 30 30">
-        <circle cx="15" cy="15" r={r} fill="none" strokeWidth="3" stroke={trackColor} />
-        <circle
-          cx="15"
-          cy="15"
-          r={r}
-          fill="none"
-          strokeWidth="3"
-          stroke={color}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.5s ease" }}
-        />
-      </svg>
-      <div className="leading-tight">
-        <p className="text-xs font-bold text-gray-800 tabular-nums">{value}%</p>
-        <p className="text-[9px] text-gray-400 uppercase tracking-wide">{label}</p>
-      </div>
-    </div>
-  );
-}
-
-/* ── Individual Worker Row (unchanged) ── */
-type RowState = {
-  showFarmQty: boolean;
-  showFactoryQty: boolean;
-  farmQtyInput: string;
-  factoryQtyInput: string;
+const statusLabel = (status: string) => {
+  switch (status) {
+    case 'active': return 'Active';
+    case 'cancelled': return 'Cancelled';
+    case 'completed': return 'Completed';
+    case 'pending': return 'Pending';
+    default: return status.charAt(0).toUpperCase() + status.slice(1);
+  }
 };
 
-function WorkerRow({
-  booking,
-  confirmMutation,
-  farmQtyMutation,
-  factoryQtyMutation,
-  signOffMutation,
-}: {
-  booking: ScheduleBooking;
-  confirmMutation: ReturnType<typeof useConfirmAttendance>;
-  farmQtyMutation: ReturnType<typeof useCaptureFarmQuantity>;
-  factoryQtyMutation: ReturnType<typeof useCaptureFactoryQuantity>;
-  signOffMutation: ReturnType<typeof useWorkerSignOff>;
-}) {
-  const worker = booking.worker;
-  const [state, setState] = useState<RowState>({
-    showFarmQty: false,
-    showFactoryQty: false,
-    farmQtyInput: booking.farm_qty != null ? String(booking.farm_qty) : "",
-    factoryQtyInput: booking.factory_qty != null ? String(booking.factory_qty) : "",
-  });
-
-  const toggleFarmQty = () => setState((s) => ({ ...s, showFarmQty: !s.showFarmQty }));
-  const toggleFactoryQty = () => setState((s) => ({ ...s, showFactoryQty: !s.showFactoryQty }));
-
-  const submitFarmQty = () => {
-    const num = parseFloat(state.farmQtyInput);
-    if (!isNaN(num) && num >= 0) {
-      farmQtyMutation.mutate(
-        { id: booking.id, farm_qty: num },
-        { onSuccess: () => setState((s) => ({ ...s, showFarmQty: false })) }
-      );
-    }
-  };
-
-  const submitFactoryQty = () => {
-    const num = parseFloat(state.factoryQtyInput);
-    if (!isNaN(num) && num >= 0) {
-      factoryQtyMutation.mutate(
-        { id: booking.id, factory_qty: num },
-        { onSuccess: () => setState((s) => ({ ...s, showFactoryQty: false })) }
-      );
-    }
-  };
-
-  return (
-    <div className="px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center shrink-0">
-          <span className="text-xs font-extrabold text-emerald-800 tracking-tight">
-            {initials(worker?.name ?? "?")}
-          </span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-gray-900 truncate leading-tight">{worker?.name ?? "—"}</p>
-          {worker?.phone && (
-            <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5 font-medium">
-              <MdPhone className="w-3 h-3 text-gray-400" />
-              {worker.phone}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <StatusBadge
-            on={booking.is_confirmed}
-            label="Confirmed"
-            onClass="border border-emerald-300 bg-emerald-100 text-emerald-800"
-          />
-          <StatusBadge
-            on={booking.worker_signed}
-            label="Signed"
-            onClass="border border-primary/30 bg-primary/10 text-primary"
-          />
-        </div>
-      </div>
-      <div className="mt-2.5 ml-12 flex items-center gap-3 flex-wrap">
-        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/20 rounded-md">
-          <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Farm</span>
-          <span className="text-xs font-bold text-gray-800 tabular-nums">
-            {booking.farm_qty != null ? `${Number(booking.farm_qty).toFixed(2)} kg` : <span className="text-gray-400 font-normal">—</span>}
-          </span>
-        </div>
-        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 border border-primary/20 rounded-md">
-          <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Factory</span>
-          <span className="text-xs font-bold text-gray-800 tabular-nums">
-            {booking.factory_qty != null ? `${Number(booking.factory_qty).toFixed(2)} kg` : <span className="text-gray-400 font-normal">—</span>}
-          </span>
-        </div>
-        <div className="flex-1" />
-        <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-          {!booking.is_confirmed ? (
-            <button
-              onClick={() => confirmMutation.mutate(booking.id)}
-              disabled={confirmMutation.isPending}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-600 text-white border border-emerald-700 hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm"
-            >
-              <MdCheck className="w-3 h-3" /> Confirm
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={toggleFarmQty}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 transition-colors shadow-sm"
-              >
-                <MdScale className="w-3 h-3" /> Farm Qty
-              </button>
-              <button
-                onClick={toggleFactoryQty}
-                disabled={booking.farm_qty == null}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-              >
-                <MdScale className="w-3 h-3" /> Factory Qty
-              </button>
-              {!booking.worker_signed && (
-                <button
-                  onClick={() => signOffMutation.mutate(booking.id)}
-                  disabled={booking.farm_qty == null || booking.factory_qty == null || signOffMutation.isPending}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-primary text-white border border-primary/80 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-                >
-                  <MdCreate className="w-3 h-3" /> Sign Off
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      {state.showFarmQty && (
-        <div className="mt-2 ml-12 flex items-center gap-2">
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={state.farmQtyInput}
-            onChange={(e) => setState((s) => ({ ...s, farmQtyInput: e.target.value }))}
-            placeholder="Enter kg"
-            autoFocus
-            className="w-32 px-3 py-1.5 text-sm font-medium bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-          />
-          <button onClick={submitFarmQty} disabled={farmQtyMutation.isPending} className="px-3 py-1.5 text-xs font-bold bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 shadow-sm">
-            {farmQtyMutation.isPending ? "Saving…" : "Save"}
-          </button>
-          <button onClick={toggleFarmQty} className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
-            Cancel
-          </button>
-        </div>
-      )}
-      {state.showFactoryQty && (
-        <div className="mt-2 ml-12 flex items-center gap-2">
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={state.factoryQtyInput}
-            onChange={(e) => setState((s) => ({ ...s, factoryQtyInput: e.target.value }))}
-            placeholder="Enter kg"
-            autoFocus
-            className="w-32 px-3 py-1.5 text-sm font-medium bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-          />
-          <button onClick={submitFactoryQty} disabled={factoryQtyMutation.isPending} className="px-3 py-1.5 text-xs font-bold bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 shadow-sm">
-            {factoryQtyMutation.isPending ? "Saving…" : "Save"}
-          </button>
-          <button onClick={toggleFactoryQty} className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
-            Cancel
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Batch Mode Table with Indicators at the top ── */
-interface BatchChanges {
-  farm_qty: Record<string, number | null>;
-  factory_qty: Record<string, number | null>;
-}
-
-function BatchWorkersTable({
-  bookings,
-  farmQtyMutation,
-  factoryQtyMutation,
-  onSaveComplete,
-  confirmPct,
-  signedPct,
-  yieldPct,
-  confirmedCount,
-  signedCount,
-  totalWorkers,
-}: {
-  bookings: ScheduleBooking[];
-  farmQtyMutation: ReturnType<typeof useCaptureFarmQuantity>;
-  factoryQtyMutation: ReturnType<typeof useCaptureFactoryQuantity>;
-  onSaveComplete: () => void;
-  confirmPct: number;
-  signedPct: number;
-  yieldPct: number;
-  confirmedCount: number;
-  signedCount: number;
-  totalWorkers: number;
-}) {
-  const [changes, setChanges] = useState<BatchChanges>({
-    farm_qty: {},
-    factory_qty: {},
-  });
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleFarmChange = (bookingId: string, value: string) => {
-    const num = value === "" ? null : parseFloat(value);
-    setChanges((prev) => ({
-      ...prev,
-      farm_qty: { ...prev.farm_qty, [bookingId]: isNaN(num as number) ? null : num },
-    }));
-  };
-
-  const handleFactoryChange = (bookingId: string, value: string) => {
-    const num = value === "" ? null : parseFloat(value);
-    setChanges((prev) => ({
-      ...prev,
-      factory_qty: { ...prev.factory_qty, [bookingId]: isNaN(num as number) ? null : num },
-    }));
-  };
-
-  const saveAll = async () => {
-    const farmUpdates = Object.entries(changes.farm_qty).filter(([, qty]) => qty !== null && qty !== undefined);
-    const factoryUpdates = Object.entries(changes.factory_qty).filter(([, qty]) => qty !== null && qty !== undefined);
-    if (farmUpdates.length === 0 && factoryUpdates.length === 0) return;
-
-    setIsSaving(true);
-    const errors: string[] = [];
-
-    for (const [bookingId, qty] of farmUpdates) {
-      try {
-        await farmQtyMutation.mutateAsync({ id: bookingId, farm_qty: qty! });
-      } catch (err: any) {
-        errors.push(`Farm qty for booking ${bookingId}: ${err.message}`);
-      }
-    }
-    for (const [bookingId, qty] of factoryUpdates) {
-      try {
-        await factoryQtyMutation.mutateAsync({ id: bookingId, factory_qty: qty! });
-      } catch (err: any) {
-        errors.push(`Factory qty for booking ${bookingId}: ${err.message}`);
-      }
-    }
-
-    setIsSaving(false);
-    if (errors.length > 0) {
-      alert(`Some updates failed:\n${errors.join("\n")}`);
-    } else {
-      alert("All quantities saved successfully!");
-      setChanges({ farm_qty: {}, factory_qty: {} });
-      onSaveComplete();
-    }
-  };
-
-  return (
-    <div>
-      {/* Indicators Header (moved from individual tab) */}
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-6 flex-wrap">
-        <div className="flex items-center gap-4">
-          <MiniRing value={confirmPct} color="#10b981" trackColor="#d1fae5" label="Confirmed" />
-          <MiniRing value={signedPct} color="#3b82f6" trackColor="#dbeafe" label="Signed" />
-          <MiniRing value={yieldPct} color="#f59e0b" trackColor="#fef3c7" label="Yield" />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-500 font-semibold w-16">Confirmed</span>
-            <div className="w-24 h-1.5 rounded-full bg-gray-200 overflow-hidden">
-              <div className="h-1.5 rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${confirmPct}%` }} />
-            </div>
-            <span className="text-[10px] text-emerald-700 font-bold tabular-nums w-10">{confirmedCount}/{totalWorkers}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-500 font-semibold w-16">Signed</span>
-            <div className="w-24 h-1.5 rounded-full bg-gray-200 overflow-hidden">
-              <div className="h-1.5 rounded-full bg-blue-500 transition-all duration-500" style={{ width: `${signedPct}%` }} />
-            </div>
-            <span className="text-[10px] text-blue-700 font-bold tabular-nums w-10">{signedCount}/{totalWorkers}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Worker</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Farm Kg</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Factory Kg</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {bookings.map((booking) => {
-              const worker = booking.worker;
-              const currentFarm = changes.farm_qty[booking.id] ?? booking.farm_qty ?? "";
-              const currentFactory = changes.factory_qty[booking.id] ?? booking.factory_qty ?? "";
-              return (
-                <tr key={booking.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-emerald-800">{initials(worker?.name ?? "?")}</span>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">{worker?.name ?? "—"}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{worker?.phone ?? "—"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex gap-2">
-                      <StatusBadge
-                        on={booking.is_confirmed}
-                        label="Confirmed"
-                        onClass="border-emerald-300 bg-emerald-100 text-emerald-800"
-                      />
-                      <StatusBadge
-                        on={booking.worker_signed}
-                        label="Signed"
-                        onClass="border-primary/30 bg-primary/10 text-primary"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={currentFarm === null ? "" : currentFarm}
-                      onChange={(e) => handleFarmChange(booking.id, e.target.value)}
-                      disabled={!booking.is_confirmed}
-                      className="w-28 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:text-gray-400"
-                      placeholder="kg"
-                    />
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={currentFactory === null ? "" : currentFactory}
-                      onChange={(e) => handleFactoryChange(booking.id, e.target.value)}
-                      disabled={!booking.is_confirmed}
-                      className="w-28 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:text-gray-400"
-                      placeholder="kg"
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end">
-        <button
-          onClick={saveAll}
-          disabled={isSaving || (Object.keys(changes.farm_qty).length === 0 && Object.keys(changes.factory_qty).length === 0)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 shadow-sm"
-        >
-          {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <MdSave className="w-4 h-4" />}
-          {isSaving ? "Saving..." : "Save All Changes"}
-        </button>
+// InfoTile component
+const InfoTile = ({ icon: Icon, label, value, className = "" }: { icon: any; label: string; value: string; className?: string }) => (
+  <div className={className}>
+    <div className="flex items-start gap-2">
+      <Icon className="w-4 h-4 text-primary/60 mt-0.5 shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">{label}</p>
+        <p className="text-sm font-medium text-gray-700 truncate">{value}</p>
       </div>
     </div>
-  );
-}
+  </div>
+);
 
-/* ═══════════════════════════════════════════════════
-   Main Page
-   ═══════════════════════════════════════════════════ */
+// WorkerRow component
+const WorkerRow = ({ booking, confirmMutation, farmQtyMutation, factoryQtyMutation, signOffMutation }: { booking: ScheduleBooking; confirmMutation: any; farmQtyMutation: any; factoryQtyMutation: any; signOffMutation: any }) => (
+  <div className="px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+    <div className="flex items-start gap-4">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-900">{booking.worker?.name || "—"}</p>
+        <p className="text-xs text-gray-500">{booking.worker?.phone || "—"}</p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button onClick={() => confirmMutation.mutate(booking.id)} className="px-2 py-1 text-xs font-bold rounded bg-blue-100 text-blue-800 hover:bg-blue-200">Confirm</button>
+        <button onClick={() => signOffMutation.mutate(booking.id)} className="px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-800 hover:bg-green-200">Sign Off</button>
+      </div>
+    </div>
+  </div>
+);
+
+// BatchWorkersTable component
+const BatchWorkersTable = ({ bookings, farmQtyMutation, factoryQtyMutation, onSaveComplete, confirmPct, signedPct, yieldPct, confirmedCount, signedCount, totalWorkers }: any) => (
+  <div className="px-5 py-4">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-gray-600">Confirmed: {confirmPct}%</span>
+        <span className="text-xs text-gray-500">{confirmedCount}/{totalWorkers}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-gray-600">Signed: {signedPct}%</span>
+        <span className="text-xs text-gray-500">{signedCount}/{totalWorkers}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-gray-600">With Yield: {yieldPct}%</span>
+      </div>
+    </div>
+  </div>
+);
+
 export default function ScheduleDetailsPage() {
   const params = useParams();
   const id = params.id as string;
@@ -560,173 +164,175 @@ export default function ScheduleDetailsPage() {
   const summary = schedule.bookings_summary;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sticky Topbar */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/schedules" className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
-              <MdArrowBack className="w-5 h-5" />
-            </Link>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base font-extrabold text-gray-900 truncate">{schedule.activity.name}</h1>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${STATUS_STYLES[schedule.status] ?? "bg-gray-100 text-gray-600"}`}>
-                  {statusLabel(schedule.status)}
-                </span>
-                <button onClick={() => navigator.clipboard.writeText(schedule.reference_code)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 transition-colors shrink-0 group">
-                  <span className="text-[10px] font-mono font-semibold text-gray-600 group-hover:text-gray-800">{schedule.reference_code}</span>
-                  <MdContentCopy className="w-2.5 h-2.5 text-gray-500 group-hover:text-gray-700" />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
+        {/* Sticky Topbar */}
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link href="/schedules" className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
+                <MdArrowBack className="w-5 h-5" />
+              </Link>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-base font-extrabold text-gray-900 truncate">{schedule.activity?.name || "—"}</h1>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${STATUS_STYLES[schedule.status as keyof typeof STATUS_STYLES] ?? "bg-gray-100 text-gray-600"}`}>
+                    {statusLabel(schedule.status)}
+                  </span>
+                  <button onClick={() => navigator.clipboard.writeText(schedule.reference_code)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 hover:bg-gray-200 transition-colors shrink-0 group">
+                    <span className="text-[10px] font-mono font-semibold text-gray-600 group-hover:text-gray-800">{schedule.reference_code}</span>
+                    <MdContentCopy className="w-2.5 h-2.5 text-gray-500 group-hover:text-gray-700" />
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-500 font-medium leading-none mt-0.5">{schedule.farm?.name || "—"} &middot; {schedule.farm?.zone?.name || "—"}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {schedule.status !== "cancelled" && (
+                <button onClick={() => cancelSchedule.mutate(id)} disabled={cancelSchedule.isPending} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-100 text-orange-800 text-xs font-bold border border-orange-200 hover:bg-orange-200 disabled:opacity-50 transition-colors">
+                  <MdCancel className="w-3.5 h-3.5" /> {cancelSchedule.isPending ? "Cancelling…" : "Cancel"}
                 </button>
-              </div>
-              <p className="text-[11px] text-gray-500 font-medium leading-none mt-0.5">{schedule.farm.name} &middot; {schedule.farm.zone.name}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {schedule.status !== "cancelled" && (
-              <button onClick={() => cancelSchedule.mutate(id)} disabled={cancelSchedule.isPending} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-100 text-orange-800 text-xs font-bold border border-orange-200 hover:bg-orange-200 disabled:opacity-50 transition-colors">
-                <MdCancel className="w-3.5 h-3.5" /> {cancelSchedule.isPending ? "Cancelling…" : "Cancel"}
-              </button>
-            )}
-            <Link href={`/schedules/${id}/edit`} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm">
-              <MdEdit className="w-3.5 h-3.5" /> Edit
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5">
-        {summary && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-            {[
-              { label: "Farm KGs", value: `${summary.total_farm_kgs} kg`, icon: MdScale },
-              { label: "Factory KGs", value: `${summary.total_factory_kgs} kg`, icon: MdScale },
-              { label: "Attended", value: summary.attended, icon: MdCheckCircle },
-              { label: "Absent", value: summary.absent, icon: MdCancel },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label} className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-extrabold text-gray-900 tabular-nums leading-none">{value}</p>
-                  <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">{label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Main Two-Column Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
-          {/* Left Card: Schedule Details */}
-          <div className="lg:col-span-2 flex flex-col">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
-              <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2 shrink-0">
-                <MdCalendarToday className="w-4 h-4 text-primary" />
-                <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-600">Schedule Details</h2>
-              </div>
-              <div className="px-5 py-5 grid grid-cols-2 gap-x-6 gap-y-5 flex-1">
-                <InfoTile icon={MdAgriculture} label="Activity" value={schedule.activity.name} />
-                <InfoTile icon={MdCalendarToday} label="Date" value={humanDate} />
-                <InfoTile icon={MdAccessTime} label="Time" value={humanTime} />
-                <InfoTile icon={MdLocationOn} label="Farm" value={schedule.farm.name} />
-                <InfoTile icon={MdLocationOn} label="Zone" value={schedule.farm.zone.name} />
-                {schedule.farm.area && <InfoTile icon={MdScale} label="Farm Area" value={`${schedule.farm.area} acres`} />}
-                <InfoTile icon={MdPerson} label="Created By" value={schedule.created_by.name} />
-                {schedule.created_by.email && (
-                  <InfoTile icon={MdEmail} label="Creator Email" value={schedule.created_by.email} className="col-span-2" />
-                )}
-                <InfoTile icon={MdCalendarToday} label="Created" value={createdDate.toLocaleDateString("en-KE", { year: "numeric", month: "long", day: "numeric" })} />
-              </div>
-              <div className="px-5 pb-5 border-t border-gray-100 pt-4 shrink-0">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <MdNotes className="w-3.5 h-3.5 text-primary/60" />
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Notes</span>
-                </div>
-                {schedule.notes ? (
-                  <p className="text-sm font-medium text-gray-700 leading-relaxed bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">{schedule.notes}</p>
-                ) : (
-                  <p className="text-sm text-gray-400 italic">No notes recorded yet.</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Card: Booked Workers with Mode Toggle */}
-          <div className="lg:col-span-3 flex flex-col">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
-              <div className="px-5 py-3.5 border-b border-gray-100 shrink-0">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <div className="flex items-center gap-2 shrink-0">
-                    <MdPeople className="w-4 h-4 text-primary" />
-                    <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-600">Booked Workers</h2>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">{bookingsCount}</span>
-                  </div>
-
-                  {/* Mode Toggle */}
-                  <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
-                    <button
-                      onClick={() => setMode("individual")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
-                        mode === "individual" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      <MdViewList className="w-3.5 h-3.5" /> Individual
-                    </button>
-                    <button
-                      onClick={() => setMode("batch")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
-                        mode === "batch" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      <MdTableView className="w-3.5 h-3.5" /> Batch Table
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {bookings.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center py-16">
-                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                    <MdPeople className="w-7 h-7 text-gray-300" />
-                  </div>
-                  <p className="text-sm font-medium text-gray-500">No workers assigned to this schedule yet.</p>
-                </div>
-              ) : mode === "individual" ? (
-                <div className="flex-1 overflow-y-auto min-h-0">
-                  {bookings.map((booking) => (
-                    <WorkerRow
-                      key={booking.id}
-                      booking={booking}
-                      confirmMutation={confirmMutation}
-                      farmQtyMutation={farmQtyMutation}
-                      factoryQtyMutation={factoryQtyMutation}
-                      signOffMutation={signOffMutation}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <BatchWorkersTable
-                  bookings={bookings}
-                  farmQtyMutation={farmQtyMutation}
-                  factoryQtyMutation={factoryQtyMutation}
-                  onSaveComplete={() => refetch()}
-                  confirmPct={confirmPct}
-                  signedPct={signedPct}
-                  yieldPct={yieldPct}
-                  confirmedCount={confirmedCount}
-                  signedCount={signedCount}
-                  totalWorkers={bookings.length}
-                />
               )}
+              <Link href={`/schedules/${id}/edit`} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm">
+                <MdEdit className="w-3.5 h-3.5" /> Edit
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5">
+          {summary && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+              {[
+                { label: "Farm KGs", value: `${summary.total_farm_kgs} kg`, icon: MdScale },
+                { label: "Factory KGs", value: `${summary.total_factory_kgs} kg`, icon: MdScale },
+                { label: "Attended", value: summary.attended, icon: MdCheckCircle },
+                { label: "Absent", value: summary.absent, icon: MdCancel },
+              ].map(({ label, value, icon: Icon }) => (
+                <div key={label} className="bg-white border border-gray-200 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm">
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-extrabold text-gray-900 tabular-nums leading-none">{value}</p>
+                    <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wide">{label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Main Two-Column Layout */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
+            {/* Left Card: Schedule Details */}
+            <div className="lg:col-span-2 flex flex-col">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
+                <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2 shrink-0">
+                  <MdCalendarToday className="w-4 h-4 text-primary" />
+                  <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-600">Schedule Details</h2>
+                </div>
+                <div className="px-5 py-5 grid grid-cols-2 gap-x-6 gap-y-5 flex-1">
+                  <InfoTile icon={MdAgriculture} label="Activity" value={schedule.activity?.name || "—"} />
+                  <InfoTile icon={MdCalendarToday} label="Date" value={humanDate} />
+                  <InfoTile icon={MdAccessTime} label="Time" value={humanTime} />
+                  <InfoTile icon={MdLocationOn} label="Farm" value={schedule.farm?.name || "—"} />
+                  <InfoTile icon={MdLocationOn} label="Zone" value={schedule.farm?.zone?.name || "—"} />
+                  {schedule.farm?.area && <InfoTile icon={MdScale} label="Farm Area" value={`${schedule.farm.area} acres`} />}
+                  <InfoTile icon={MdPerson} label="Created By" value={schedule.created_by?.name || "—"} />
+                  {schedule.created_by?.email && (
+                    <InfoTile icon={MdEmail} label="Creator Email" value={schedule.created_by.email} className="col-span-2" />
+                  )}
+                  <InfoTile icon={MdCalendarToday} label="Created" value={createdDate.toLocaleDateString("en-KE", { year: "numeric", month: "long", day: "numeric" })} />
+                </div>
+                <div className="px-5 pb-5 border-t border-gray-100 pt-4 shrink-0">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <MdNotes className="w-3.5 h-3.5 text-primary/60" />
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Notes</span>
+                  </div>
+                  {schedule.notes ? (
+                    <p className="text-sm font-medium text-gray-700 leading-relaxed bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">{schedule.notes}</p>
+                  ) : (
+                    <p className="text-sm text-gray-400 italic">No notes recorded yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Card: Booked Workers with Mode Toggle */}
+            <div className="lg:col-span-3 flex flex-col">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1">
+                <div className="px-5 py-3.5 border-b border-gray-100 shrink-0">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <MdPeople className="w-4 h-4 text-primary" />
+                      <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-600">Booked Workers</h2>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">{bookingsCount}</span>
+                    </div>
+
+                    {/* Mode Toggle */}
+                    <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                      <button
+                        onClick={() => setMode("individual")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                          mode === "individual" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
+                        }`}
+                      >
+                        <MdViewList className="w-3.5 h-3.5" /> Individual
+                      </button>
+                      <button
+                        onClick={() => setMode("batch")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                          mode === "batch" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
+                        }`}
+                      >
+                        <MdTableView className="w-3.5 h-3.5" /> Batch Table
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {bookings.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center py-16">
+                    <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                      <MdPeople className="w-7 h-7 text-gray-300" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-500">No workers assigned to this schedule yet.</p>
+                  </div>
+                ) : mode === "individual" ? (
+                  <div className="flex-1 overflow-y-auto min-h-0">
+                    {bookings.map((booking) => (
+                      <WorkerRow
+                        key={booking.id}
+                        booking={booking}
+                        confirmMutation={confirmMutation}
+                        farmQtyMutation={farmQtyMutation}
+                        factoryQtyMutation={factoryQtyMutation}
+                        signOffMutation={signOffMutation}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <BatchWorkersTable
+                    bookings={bookings}
+                    farmQtyMutation={farmQtyMutation}
+                    factoryQtyMutation={factoryQtyMutation}
+                    onSaveComplete={() => refetch()}
+                    confirmPct={confirmPct}
+                    signedPct={signedPct}
+                    yieldPct={yieldPct}
+                    confirmedCount={confirmedCount}
+                    signedCount={signedCount}
+                    totalWorkers={bookings.length}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

@@ -7,6 +7,7 @@ export interface HrisUser {
   role_description: string;
   account_number: string | null;
   membership?: string | null;
+  farm?: { id: string; name: string } | null;
   created_at: string;
   updated_at: string;
 }

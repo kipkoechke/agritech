@@ -323,19 +323,19 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
 
                   <div className="space-y-1">
                     {daySchedules.slice(0, 2).map((schedule) => {
-                      const colors = getActivityColor(schedule.activity.name);
+                      const colors = getActivityColor(schedule.activity?.name || "");
                       return (
                         <div
                           key={schedule.id}
                           className={`text-xs truncate px-1.5 py-1 rounded-lg ${colors.light} ${colors.text} border ${colors.border} cursor-pointer hover:opacity-80`}
-                          title={`${schedule.reference_code} - ${schedule.activity.name}`}
+                          title={`${schedule.reference_code} - ${schedule.activity?.name || ""}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/schedules/${schedule.id}`);
                           }}
                         >
                           <span className="font-medium">
-                            {schedule.activity.name.substring(0, 10)}
+                            {schedule.activity?.name?.substring(0, 10) || "—"}
                           </span>
                           {schedule.status === "cancelled" && (
                             <MdCancelIcon className="w-3 h-3 inline ml-1 text-red-500" />
@@ -392,7 +392,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
           {selectedDate && selectedDateSchedules.length > 0 && (
             <div className="flex-1 overflow-y-auto max-h-[400px] space-y-2 pr-1 custom-scrollbar">
               {selectedDateSchedules.map((schedule) => {
-                const colors = getActivityColor(schedule.activity.name);
+                const colors = getActivityColor(schedule.activity?.name || "");
                 return (
                   <div
                     key={schedule.id}
@@ -410,7 +410,7 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                           </p>
                         </div>
                         <p className={`text-xs font-medium ${colors.text}`}>
-                          {schedule.activity.name}
+                          {schedule.activity?.name || "—"}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -436,20 +436,20 @@ const CalendarView = ({ schedules }: { schedules: Schedule[] }) => {
                       <div className="flex items-center gap-1.5 text-xs">
                         <MdAgriculture className="w-3 h-3 text-gray-400" />
                         <span className="text-gray-600 text-xs truncate">
-                          {schedule.farm.name}
+                          {schedule.farm?.name || "—"}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs">
                         <MdLocationOn className="w-3 h-3 text-gray-400" />
                         <span className="text-gray-600 text-xs truncate">
-                          {schedule.farm.zone.name}
+                          {schedule.farm?.zone?.name || "—"}
                         </span>
                       </div>
                       {schedule.created_by && (
                         <div className="flex items-center gap-1.5 text-xs">
                           <MdPerson className="w-3 h-3 text-gray-400" />
                           <span className="text-gray-600 text-xs truncate">
-                            {schedule.created_by.name}
+                            {schedule.created_by?.name || "—"}
                           </span>
                         </div>
                       )}
@@ -678,15 +678,15 @@ export default function SchedulesPage() {
                                 <span
                                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colors.light} ${colors.text}`}
                                 >
-                                  {schedule.activity.name}
+                                  {schedule.activity?.name || "—"}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
-                                  {schedule.farm.name}
+                                  {schedule.farm?.name || "—"}
                                 </div>
                                 <div className="text-xs text-gray-400">
-                                  {schedule.farm.zone.name}
+                                  {schedule.farm?.zone?.name || "—"}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">

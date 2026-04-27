@@ -100,7 +100,7 @@ export default function SupervisorDashboard() {
   const workerRankingData = useMemo(
     () =>
       (charts?.worker_performance ?? []).map((wp) => ({
-        name: wp.worker.name,
+        name: wp.worker?.name || "—",
         value: wp.total_kgs,
         jobs: wp.jobs,
       })),
@@ -390,7 +390,7 @@ export default function SupervisorDashboard() {
                       className="border-b border-gray-50 hover:bg-gray-50"
                     >
                       <td className="py-2 pr-3 text-gray-800 font-medium">
-                        {item.worker.name}
+                        {item.worker?.name || "—"}
                       </td>
                       <td className="py-2 pr-3 text-gray-600 max-w-30 truncate">
                         {item.farm}
