@@ -59,7 +59,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node) && dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -127,8 +127,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       onChangeMulti?.(newValues);
     } else {
       onChange?.(optionValue);
-      setIsOpen(false);
-      setSearchQuery("");
+      setTimeout(() => {
+        setIsOpen(false);
+        setSearchQuery("");
+      }, 0);
     }
   };
 
@@ -263,7 +265,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               <button
                 key={option?.value || Math.random()}
                 type="button"
-                onClick={() => handleSelect(option.value)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(option.value);
+                }}
                 className={`
                   w-full text-left px-3 py-2.5 hover:bg-emerald-50 transition-colors text-sm
                   ${
