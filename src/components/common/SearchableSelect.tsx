@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { MdExpandMore, MdSearch, MdClose } from "react-icons/md";
 
 interface Option {
@@ -53,6 +54,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -82,13 +84,19 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     const viewportHeight = window.innerHeight;
     const spaceBelow = viewportHeight - buttonRect.bottom;
     const spaceAbove = buttonRect.top;
-    const DROPDOWN_ESTIMATED_HEIGHT = 280; // approximate max height + padding
+    const DROPDOWN_ESTIMATED_HEIGHT = 280;
 
     if (spaceBelow < DROPDOWN_ESTIMATED_HEIGHT && spaceAbove > DROPDOWN_ESTIMATED_HEIGHT) {
       setDropdownPosition("above");
     } else {
       setDropdownPosition("below");
     }
+
+    setDropdownPos({
+      top: buttonRect.bottom,
+      left: buttonRect.left,
+      width: buttonRect.width,
+    });
   }, [isOpen]);
 
   // Handle search input change with debounce for backend search
@@ -135,7 +143,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   };
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative" ref={containerRef} style={{ zIndex: 1 }}>
       <label className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
@@ -216,16 +224,19 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </p>
       )}
 
-      {/* Dropdown - Positioned dynamically */}
-      {isOpen && (
+      {/* Dropdown - Positioned dynamically with portal */}
+      {isOpen && createPortal(
         <div
           ref={dropdownRef}
-          className={`absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-y-auto ${
-            dropdownPosition === "below"
-              ? "top-full mt-1"
-              : "bottom-full mb-1"
-          }`}
-          style={{ maxHeight: "16rem" }}
+          className="fixed bg-white border border-gray-300 rounded-lg shadow-lg overflow-y-auto"
+          style={{
+            top: dropdownPosition === "below" ? dropdownPos.top + 4 : undefined,
+            bottom: dropdownPosition === "above" ? window.innerHeight - dropdownPos.top + 4 : undefined,
+            left: dropdownPos.left,
+            width: dropdownPos.width,
+            maxHeight: "16rem",
+            zIndex: 999999,
+          }}
         >
           {/* Search Input */}
           <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
@@ -288,7 +299,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               )}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Error Message */}
