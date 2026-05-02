@@ -10,6 +10,7 @@ import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useCreateCluster } from "@/hooks/useCluster";
 import { useFactories } from "@/hooks/useFactory";
+import { factorySublocations, Sublocation } from "@/lib/factorySublocations";
 import type { CreateClusterData } from "@/types/cluster";
 
 function SimpleMap({
@@ -70,12 +71,16 @@ export default function NewClusterPage() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<ClusterFormData>({
     defaultValues: { name: "" },
   });
 
   const [factoryId, setFactoryId] = useState("");
   const [factorySearch, setFactorySearch] = useState("");
+  const [selectedFactoryCode, setSelectedFactoryCode] = useState<string>("");
+  const [sublocation, setSublocation] = useState("");
+  const [availableSublocations, setAvailableSublocations] = useState<Sublocation[]>([]);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
@@ -86,13 +91,69 @@ export default function NewClusterPage() {
   const factoryOptions = factoriesData?.data?.map((f: any) => ({
     value: f.id,
     label: f.name,
+    code: f.code || f.name,
   })) || [];
+
+  const getSublocationsForFactory = (factoryName: string, factoryCode?: string) => {
+    const keys = Object.keys(factorySublocations);
+    
+    if (factoryCode && factorySublocations[factoryCode]) {
+      return factorySublocations[factoryCode];
+    }
+    
+    const matchedKey = keys.find(k => 
+      k.toLowerCase() === factoryName.toLowerCase() || 
+      factoryName.toLowerCase().includes(k.toLowerCase())
+    );
+    
+    return matchedKey ? factorySublocations[matchedKey] : [];
+  };
+
+  const handleFactoryChange = (newFactoryId: string) => {
+    setFactoryId(newFactoryId);
+    setSublocation("");
+    setValue("name", "");
+    
+    const selectedFactory = factoriesData?.data?.find((f: any) => f.id === newFactoryId);
+    if (selectedFactory) {
+      const factoryName = selectedFactory.name;
+      const factoryCode = selectedFactory.code;
+      
+      setSelectedFactoryCode(factoryName);
+      
+      const sublocations = getSublocationsForFactory(factoryName, factoryCode);
+      setAvailableSublocations(sublocations);
+      
+      if (sublocations.length > 0) {
+        const defaultSublocation = sublocations[0];
+        setSublocation(defaultSublocation.code);
+        setValue("name", defaultSublocation.name);
+      }
+    } else {
+      setSelectedFactoryCode("");
+      setAvailableSublocations([]);
+    }
+  };
+
+  const handleSublocationChange = (sublocationCode: string) => {
+    setSublocation(sublocationCode);
+    const selectedSublocation = availableSublocations.find(s => s.code === sublocationCode);
+    if (selectedSublocation) {
+      setValue("name", selectedSublocation.name);
+    }
+  };
+
+  const sublocationOptions = availableSublocations.map((s) => ({
+    value: s.code,
+    label: s.name,
+  }));
 
   const onSubmit = (data: ClusterFormData) => {
     if (!factoryId) return;
     const payload: CreateClusterData = {
       name: data.name,
       factory_id: factoryId,
+      sublocation_code: sublocation || undefined,
     };
     if (coords) {
       payload.coordinates = { lat: coords.lat, lng: coords.lng };
@@ -124,31 +185,46 @@ export default function NewClusterPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6 relative" style={{ zIndex: 1 }}>
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <div className="flex flex-col h-full">
-    <InputField
-      label="Name"
-      placeholder="Cluster name"
-      register={register("name", { required: "Name is required" })}
-      error={errors.name?.message}
-      required
-    />
-  </div>
-  <div className="flex flex-col h-full">
-<SearchableSelect
-              label="Factory"
-              options={factoryOptions}
-              value={factoryId}
-              onChange={setFactoryId}
-              placeholder="Search and select a factory"
-              isLoading={factoriesLoading}
-              onSearchChange={setFactorySearch}
-              searchPlaceholder="Search factories..."
-              required
-            />
-  </div>
-</div>
+<form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6 relative" style={{ zIndex: 1 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col h-full">
+                <InputField
+                  label="Name"
+                  placeholder="Cluster name"
+                  register={register("name", { required: "Name is required" })}
+                  error={errors.name?.message}
+                  required
+                />
+              </div>
+              <div className="flex flex-col h-full">
+                <SearchableSelect
+                  label="Factory"
+                  options={factoryOptions}
+                  value={factoryId}
+                  onChange={handleFactoryChange}
+                  placeholder="Search and select a factory"
+                  isLoading={factoriesLoading}
+                  onSearchChange={setFactorySearch}
+                  searchPlaceholder="Search factories..."
+                  required
+                />
+              </div>
+            </div>
+
+            {factoryId && availableSublocations.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col h-full">
+                  <SearchableSelect
+                    label="Sublocation"
+                    options={sublocationOptions}
+                    value={sublocation}
+                    onChange={handleSublocationChange}
+                    placeholder="Select sublocation"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -185,7 +261,7 @@ export default function NewClusterPage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={createCluster.isPending || !factoryId}
+                disabled={createCluster.isPending || !factoryId || (availableSublocations.length > 0 && !sublocation)}
               >
                 {createCluster.isPending ? "Creating..." : "Create Cluster"}
               </Button>
