@@ -16,11 +16,8 @@ import {
   Cell,
 } from "recharts";
 import { useAdminDashboard } from "@/hooks/useRoleDashboard";
-import { useZones } from "@/hooks/useZone";
-import { useFactories } from "@/hooks/useFactory";
-import { useHrisUsers } from "@/hooks/useHrisUser";
 import { useFarms } from "@/hooks/useFarm";
-import { useWorkers } from "@/hooks/useWorkers";
+import { useIsAdmin } from "@/hooks/useAuth";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import StatCard from "@/components/common/StatCard";
 import RankingChart from "@/components/common/RankingChart";
@@ -48,6 +45,7 @@ const SkeletonBox = ({ h = 16 }: { h?: number }) => (
 );
 
 export default function AdminDashboard() {
+  const isAdmin = useIsAdmin();
   const today = new Date();
   const thirtyDaysAgo = new Date(today);
   thirtyDaysAgo.setDate(today.getDate() - 30);
@@ -55,96 +53,34 @@ export default function AdminDashboard() {
   const [showFilters, setShowFilters] = useState(false);
   const [fromDate, setFromDate] = useState(formatDate(thirtyDaysAgo));
   const [toDate, setToDate] = useState(formatDate(today));
-  const [zoneId, setZoneId] = useState("");
-  const [factoryId, setFactoryId] = useState("");
-  const [supervisorId, setSupervisorId] = useState("");
-  const [farmerId, setFarmerId] = useState("");
   const [farmId, setFarmId] = useState("");
-  const [workerId, setWorkerId] = useState("");
 
   // Filter data sources
-  const { data: zonesData } = useZones();
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
-    zone_id: zoneId,
-    per_page: 200,
-  });
-  const { data: supervisorsData, isLoading: supervisorsLoading } = useHrisUsers({
-    role: "supervisor",
-    per_page: 200,
-  });
-  const { data: farmersData, isLoading: farmersLoading } = useHrisUsers({
-    role: "farmer",
-    supervisor_id: supervisorId || undefined,
-    per_page: 200,
-  });
-  const { data: workersData, isLoading: workersLoading } = useWorkers({
-    per_page: 200,
-  });
   const { data: farmsData, isLoading: farmsLoading } = useFarms(
-    { owner_id: farmerId, per_page: 200 },
-    { enabled: !!farmerId },
+    { per_page: 200 },
+    { enabled: isAdmin },
   );
-
-  const zoneOptions = [
-    { value: "", label: "All Zones" },
-    ...(zonesData || []).map((z) => ({ value: z.id, label: z.name })),
-  ];
-
-  const factoryOptions = [
-    { value: "", label: "All Factories" },
-    ...(factoriesData?.data ?? []).map((f) => ({
-      value: f.id,
-      label: `${f.name} (${f.code})`,
-    })),
-  ];
-
-  const supervisorOptions = [
-    { value: "", label: "All Supervisors" },
-    ...(supervisorsData?.data ?? []).map((s) => ({ value: s.id, label: s.name })),
-  ];
-
-  const farmerOptions = [
-    { value: "", label: "All Farmers" },
-    ...(farmersData?.data ?? []).map((f) => ({ value: f.id, label: f.name })),
-  ];
 
   const farmOptions = [
     { value: "", label: "All Farms" },
     ...(farmsData?.data ?? []).map((f) => ({ value: f.id, label: f.name })),
   ];
 
-  const workerOptions = [
-    { value: "", label: "All Workers" },
-    ...(workersData?.data ?? []).map((w) => ({ value: w.id, label: w.name })),
-  ];
-
   const params = useMemo(
     () => ({
       from_date: fromDate || undefined,
       to_date: toDate || undefined,
-      zone_id: zoneId || undefined,
-      factory_id: factoryId || undefined,
-      supervisor_id: supervisorId || undefined,
-      farmer_id: farmerId || undefined,
       farm_id: farmId || undefined,
-      worker_id: workerId || undefined,
     }),
-    [fromDate, toDate, zoneId, factoryId, supervisorId, farmerId, farmId, workerId],
+    [fromDate, toDate, farmId],
   );
 
-  const { data, isLoading, isError } = useAdminDashboard(params);
+  const { data, isLoading, isError } = useAdminDashboard(params, { enabled: isAdmin });
 
   const summary = data?.summary;
   const charts = data?.charts;
 
-  const activeFilterCount = [
-    zoneId,
-    factoryId,
-    supervisorId,
-    farmerId,
-    farmId,
-    workerId,
-  ].filter(Boolean).length;
+  const activeFilterCount = [farmId].filter(Boolean).length;
 
   // Prepare ranking data
   const zoneRankingData = useMemo(
@@ -246,64 +182,6 @@ export default function AdminDashboard() {
 
         {showFilters && (
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Zone */}
-            <SearchableSelect
-              label="Zone"
-              options={zoneOptions}
-              value={zoneId}
-              onChange={(val) => {
-                setZoneId(val);
-                setFactoryId("");
-                setSupervisorId("");
-                setFarmerId("");
-                setFarmId("");
-              }}
-              placeholder="All Zones"
-            />
-
-            {/* Factory */}
-            <SearchableSelect
-              label="Factory"
-              options={factoryOptions}
-              value={factoryId}
-              onChange={(val) => {
-                setFactoryId(val);
-                setSupervisorId("");
-                setFarmerId("");
-                setFarmId("");
-              }}
-              placeholder="All Factories"
-              isLoading={factoriesLoading}
-            />
-
-            {/* Supervisor */}
-            <SearchableSelect
-              label="Supervisor"
-              options={supervisorOptions}
-              value={supervisorId}
-              onChange={(val) => {
-                setSupervisorId(val);
-                setFarmerId("");
-                setFarmId("");
-              }}
-              placeholder="All Supervisors"
-              isLoading={supervisorsLoading}
-            />
-
-            {/* Farmer */}
-            <SearchableSelect
-              label="Farmer"
-              options={farmerOptions}
-              value={farmerId}
-              onChange={(val) => {
-                setFarmerId(val);
-                setFarmId("");
-              }}
-              placeholder="All Farmers"
-              isLoading={farmersLoading}
-              disabled={!supervisorId}
-            />
-
             {/* Farm */}
             <SearchableSelect
               label="Farm"
@@ -312,23 +190,12 @@ export default function AdminDashboard() {
               onChange={setFarmId}
               placeholder="All Farms"
               isLoading={farmsLoading}
-              disabled={!farmerId}
-            />
-
-            {/* Worker */}
-            <SearchableSelect
-              label="Worker"
-              options={workerOptions}
-              value={workerId}
-              onChange={setWorkerId}
-              placeholder="All Workers"
-              isLoading={workersLoading}
             />
 
             {/* From Date */}
             <div>
               <label className="block text-xs text-gray-500 mb-1">
-                From Date
+                Start Date
               </label>
               <input
                 type="date"
@@ -341,7 +208,7 @@ export default function AdminDashboard() {
             {/* To Date */}
             <div>
               <label className="block text-xs text-gray-500 mb-1">
-                To Date
+                End Date
               </label>
               <input
                 type="date"
@@ -356,12 +223,7 @@ export default function AdminDashboard() {
               <div className="flex items-end">
                 <button
                   onClick={() => {
-                    setZoneId("");
-                    setFactoryId("");
-                    setSupervisorId("");
-                    setFarmerId("");
                     setFarmId("");
-                    setWorkerId("");
                   }}
                   className="text-xs text-red-500 hover:text-red-700 underline"
                 >

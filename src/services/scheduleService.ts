@@ -75,8 +75,36 @@ export const cancelSchedule = async (id: string): Promise<ScheduleResponse> => {
 export const approveSchedule = async (
   id: string,
 ): Promise<ScheduleResponse> => {
-  const response = await axiosInstance.post<ScheduleResponse>(
-    `/schedules/${id}/approve`,
+  const scheduleResponse = await axiosInstance.get<ScheduleResponse>(
+    `/schedules/${id}`,
   );
-  return response.data;
+  const schedule = scheduleResponse.data.data;
+  const bookings = schedule.bookings?.data ?? [];
+  
+  const errors: string[] = [];
+  
+  for (const booking of bookings) {
+    try {
+      await axiosInstance.post(`/bookings/${booking.id}/farmer-accept`);
+    } catch (err: any) {
+      if (err.response?.status === 500) {
+        try {
+          await axiosInstance.post(`/bookings/${booking.id}/confirm-attendance`);
+        } catch (confirmErr) {
+          errors.push(`Booking ${booking.id}: Failed to confirm`);
+        }
+      } else {
+        errors.push(`Booking ${booking.id}: ${err.response?.data?.message || err.message}`);
+      }
+    }
+  }
+  
+  if (errors.length > 0) {
+    throw new Error(errors.join('\n'));
+  }
+  
+  const updatedScheduleResponse = await axiosInstance.get<ScheduleResponse>(
+    `/schedules/${id}`,
+  );
+  return updatedScheduleResponse.data;
 };

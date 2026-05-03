@@ -9,6 +9,7 @@ import {
   MdSchedule,
   MdPayments,
   MdAssignment,
+  MdTrendingUp,
 } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
@@ -77,6 +78,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileMenuOpen, onClose }) => {
         href: "/registration",
         active: pathname === "/registration",
         roles: ["admin", "farmer", "supervisor"],
+      },
+      {
+        name: "Performance",
+        icon: MdTrendingUp,
+        href: "/performance",
+        active: pathname.startsWith("/performance"),
+        roles: ["admin", "farmer"],
       },
       {
         name: "HRIS",

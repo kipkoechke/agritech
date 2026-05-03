@@ -99,3 +99,21 @@ export const workerSignOff = async (
   );
   return response.data;
 };
+
+export const farmerAcceptBooking = async (
+  id: string,
+): Promise<BookingResponse> => {
+  const response = await axiosInstance.post<BookingResponse>(
+    `/bookings/${id}/farmer-accept`,
+  );
+  return response.data;
+};
+
+export const submitPaymentToFarmer = async (
+  id: string,
+): Promise<BookingResponse> => {
+  const response = await axiosInstance.post<BookingResponse>(
+    `/bookings/${id}/submit-payment`,
+  );
+  return response.data;
+};

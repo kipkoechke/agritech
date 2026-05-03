@@ -9,6 +9,8 @@ import {
   captureFarmQuantity,
   captureFactoryQuantity,
   workerSignOff,
+  farmerAcceptBooking,
+  submitPaymentToFarmer,
   BookingsParams,
 } from "@/services/bookingService";
 import type { CreateBookingData, UpdateBookingData } from "@/types/booking";
@@ -143,6 +145,38 @@ export const useWorkerSignOff = () => {
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to sign off worker"));
+    },
+  });
+};
+
+export const useFarmerAcceptBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => farmerAcceptBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      toast.success("Booking accepted by farmer");
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to accept booking"));
+    },
+  });
+};
+
+export const useSubmitPaymentToFarmer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => submitPaymentToFarmer(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      toast.success("Payment submitted to farmer");
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to submit payment"));
     },
   });
 };
