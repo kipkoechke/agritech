@@ -17,7 +17,6 @@ export interface Worker {
 export interface CreateWorkerData {
   name: string;
   phone: string;
-  pin: string;
   zone_id?: string;
   factory_id?: string;
   cluster_id?: string;
@@ -26,7 +25,6 @@ export interface CreateWorkerData {
 export interface UpdateWorkerData {
   name?: string;
   phone?: string;
-  pin?: string;
 }
 
 export interface WorkerPagination {

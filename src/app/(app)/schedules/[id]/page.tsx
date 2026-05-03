@@ -191,26 +191,17 @@ const BatchWorkersTable = ({ bookings, farmQtyMutation, factoryQtyMutation, sign
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{worker?.phone || "—"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-4">
-                      <label className="inline-flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={currentAttendance === true}
-                          onChange={(e) => handleAttendanceChange(booking.id, e.target.checked)}
-                          className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                        />
-                        <span className="text-xs text-gray-700">Yes</span>
-                      </label>
-                      <label className="inline-flex items-center gap-1 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={currentAttendance === false}
-                          onChange={(e) => handleAttendanceChange(booking.id, !e.target.checked)}
-                          className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
-                        />
-                        <span className="text-xs text-gray-700">No</span>
-                      </label>
-                    </div>
+                    <button
+                      onClick={() => handleAttendanceChange(booking.id, !currentAttendance)}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold border transition-colors shadow-sm ${
+                        currentAttendance
+                          ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
+                          : "bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200"
+                      }`}
+                    >
+                      {currentAttendance ? <MdCheckCircle className="w-3 h-3" /> : <MdRadioButtonUnchecked className="w-3 h-3" />}
+                      {currentAttendance ? "Confirmed" : "Confirm"}
+                    </button>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <input

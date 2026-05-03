@@ -42,7 +42,7 @@ export default function WorkGroupDetailPage() {
   const [workerSearch, setWorkerSearch] = useState("");
   const [showCreateWorker, setShowCreateWorker] = useState(false);
   const [showAddExisting, setShowAddExisting] = useState(false);
-  const [newWorkers, setNewWorkers] = useState([{ name: "", phone: "", pin: "" }]);
+  const [newWorkers, setNewWorkers] = useState([{ name: "", phone: "" }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
@@ -80,7 +80,7 @@ export default function WorkGroupDetailPage() {
   const handleCreateWorkers = async () => {
     setIsSubmitting(true);
     
-    const validWorkers = newWorkers.filter(w => w.name && w.phone && w.pin);
+    const validWorkers = newWorkers.filter(w => w.name && w.phone);
     if (validWorkers.length === 0) {
       setIsSubmitting(false);
       return;
@@ -93,7 +93,6 @@ export default function WorkGroupDetailPage() {
         const response = await createWorker.mutateAsync({
           name: worker.name,
           phone: worker.phone,
-          pin: worker.pin,
           cluster_id: group?.cluster?.id,
         });
         createdWorkerIds.push(response.data.id);
@@ -106,7 +105,7 @@ export default function WorkGroupDetailPage() {
         });
       }
 
-      setNewWorkers([{ name: "", phone: "", pin: "" }]);
+      setNewWorkers([{ name: "", phone: "" }]);
       setShowCreateWorker(false);
     } catch (err) {
       console.error("Failed to create workers:", err);
@@ -116,7 +115,7 @@ export default function WorkGroupDetailPage() {
   };
 
   const addMoreWorker = () => {
-    setNewWorkers([...newWorkers, { name: "", phone: "", pin: "" }]);
+    setNewWorkers([...newWorkers, { name: "", phone: "" }]);
   };
 
   const removeWorker = (index: number) => {
@@ -124,13 +123,9 @@ export default function WorkGroupDetailPage() {
     setNewWorkers(newWorkers.filter((_, i) => i !== index));
   };
 
-  const updateWorker = (index: number, field: "name" | "phone" | "pin", value: string) => {
+  const updateWorker = (index: number, field: "name" | "phone", value: string) => {
     const updated = [...newWorkers];
-    if (field === "pin") {
-      updated[index][field] = value.replace(/\D/g, "").slice(0, 4);
-    } else {
-      updated[index][field] = value;
-    }
+    updated[index][field] = value;
     setNewWorkers(updated);
   };
 
@@ -563,7 +558,7 @@ export default function WorkGroupDetailPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setNewWorkers([{ name: "", phone: "", pin: "" }]);
+                  setNewWorkers([{ name: "", phone: "" }]);
                   setShowCreateWorker(false);
                 }}
                 className="text-gray-400 hover:text-gray-600 text-lg leading-none"
@@ -575,7 +570,7 @@ export default function WorkGroupDetailPage() {
               <div className="space-y-4">
                 {newWorkers.map((worker, index) => (
                   <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex-1 grid grid-cols-3 gap-3">
+                    <div className="flex-1 grid grid-cols-2 gap-3">
                       <InputField
                         label="Full Name"
                         placeholder="e.g. Jane Muthoni"
@@ -588,14 +583,6 @@ export default function WorkGroupDetailPage() {
                         placeholder="e.g. 0712345678"
                         value={worker.phone}
                         onChange={(e) => updateWorker(index, "phone", e.target.value)}
-                        required
-                      />
-                      <InputField
-                        label="PIN"
-                        type="password"
-                        placeholder="4-digit PIN"
-                        value={worker.pin}
-                        onChange={(e) => updateWorker(index, "pin", e.target.value)}
                         required
                       />
                     </div>
@@ -624,7 +611,7 @@ export default function WorkGroupDetailPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setNewWorkers([{ name: "", phone: "", pin: "" }]);
+                  setNewWorkers([{ name: "", phone: "" }]);
                   setShowCreateWorker(false);
                 }}
                 className="px-4 py-2 rounded-full text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -636,7 +623,7 @@ export default function WorkGroupDetailPage() {
                 onClick={handleCreateWorkers}
                 disabled={
                   isSubmitting ||
-                  !newWorkers.some(w => w.name && w.phone && w.pin)
+                  !newWorkers.some(w => w.name && w.phone)
                 }
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
