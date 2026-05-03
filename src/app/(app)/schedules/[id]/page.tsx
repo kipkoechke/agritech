@@ -7,7 +7,6 @@ import { useParams } from "next/navigation";
 import {
   MdArrowBack,
   MdCancel,
-  MdEdit,
   MdInfo,
   MdContentCopy,
   MdAgriculture,
@@ -26,7 +25,7 @@ import {
   MdCreate,
   MdSave,
 } from "react-icons/md";
-import { useSchedule, useCancelSchedule } from "@/hooks/useSchedule";
+import { useSchedule } from "@/hooks/useSchedule";
 import {
   useCaptureFarmQuantity,
   useCaptureFactoryQuantity,
@@ -287,7 +286,6 @@ export default function ScheduleDetailsPage() {
   const params = useParams();
   const id = params.id as string;
   const { data: scheduleResponse, isLoading, refetch } = useSchedule(id);
-  const cancelSchedule = useCancelSchedule();
 
   const farmQtyMutation = useCaptureFarmQuantity();
   const factoryQtyMutation = useCaptureFactoryQuantity();
@@ -355,16 +353,6 @@ export default function ScheduleDetailsPage() {
                 </div>
                 <p className="text-[11px] text-gray-500 font-medium leading-none mt-0.5">{schedule.farm?.name || "—"} &middot; {schedule.farm?.zone?.name || "—"}</p>
               </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              {schedule.status !== "cancelled" && (
-                <button onClick={() => cancelSchedule.mutate(id)} disabled={cancelSchedule.isPending} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-100 text-orange-800 text-xs font-bold border border-orange-200 hover:bg-orange-200 disabled:opacity-50 transition-colors">
-                  <MdCancel className="w-3.5 h-3.5" /> {cancelSchedule.isPending ? "Cancelling…" : "Cancel"}
-                </button>
-              )}
-              <Link href={`/schedules/${id}/edit`} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors shadow-sm">
-                <MdEdit className="w-3.5 h-3.5" /> Edit
-              </Link>
             </div>
           </div>
         </div>
