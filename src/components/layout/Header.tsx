@@ -58,6 +58,7 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }: HeaderProps) => {
   width={80}
   height={30}
   className="h-6 w-auto object-contain"
+  style={{ width: "auto" }}
   priority
 />
 

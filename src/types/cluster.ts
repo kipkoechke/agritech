@@ -22,6 +22,7 @@ export interface CreateClusterData {
   name: string;
   code?: string;
   factory_id: string;
+  sublocation_code?: string;
   coordinates?: { lat: number; lng: number };
 }
 

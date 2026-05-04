@@ -44,7 +44,7 @@ export interface CreateFarmData {
   name: string;
   size: number;
   coordinates: { lat: number; lng: number };
-  zone_id: string;
+  zone_id?: string;
   product_id: string;
   owner_id?: string;
   supervisor_id?: string;

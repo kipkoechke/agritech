@@ -27,11 +27,14 @@ import {
 } from "@/hooks/useWorkGroup";
 import { useWorkers, useCreateWorker } from "@/hooks/useWorkers";
 import { useClusters } from "@/hooks/useCluster";
+import { useIsAdmin, useIsFarmer } from "@/hooks/useAuth";
 import type { WorkGroupMember } from "@/types/workGroup";
 
 export default function WorkGroupDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const isAdmin = useIsAdmin();
+  const isFarmer = useIsFarmer();
 
   const [selectedMember, setSelectedMember] = useState<WorkGroupMember | null>(
     null,
@@ -39,11 +42,8 @@ export default function WorkGroupDetailPage() {
   const [workerSearch, setWorkerSearch] = useState("");
   const [showCreateWorker, setShowCreateWorker] = useState(false);
   const [showAddExisting, setShowAddExisting] = useState(false);
-  const [newWorker, setNewWorker] = useState({
-    name: "",
-    phone: "",
-    pin: "",
-  });
+  const [newWorkers, setNewWorkers] = useState([{ name: "", phone: "" }]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: groupResponse, isLoading } = useWorkGroup(id);
   const { data: membersResponse, isLoading: membersLoading } =
@@ -77,34 +77,56 @@ export default function WorkGroupDetailPage() {
         description: w.phone,
       })) || [];
 
-  const handleCreateWorker = () => {
-    if (!newWorker.name || !newWorker.phone || !newWorker.pin) return;
-    createWorker.mutate(
-      {
-        name: newWorker.name,
-        phone: newWorker.phone,
-        pin: newWorker.pin,
-        cluster_id: group?.cluster?.id,
-      },
-      {
-        onSuccess: (response) => {
-          const newWorkerId = response.data.id;
-          addMembers.mutate(
-            { workGroupId: id, data: { members: [newWorkerId] } },
-            {
-              onSuccess: () => {
-                setNewWorker({
-                  name: "",
-                  phone: "",
-                  pin: "",
-                });
-                setShowCreateWorker(false);
-              },
-            },
-          );
-        },
-      },
-    );
+  const handleCreateWorkers = async () => {
+    setIsSubmitting(true);
+    
+    const validWorkers = newWorkers.filter(w => w.name && w.phone);
+    if (validWorkers.length === 0) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const createdWorkerIds: string[] = [];
+      
+      for (const worker of validWorkers) {
+        const response = await createWorker.mutateAsync({
+          name: worker.name,
+          phone: worker.phone,
+          cluster_id: group?.cluster?.id,
+        });
+        createdWorkerIds.push(response.data.id);
+      }
+
+      if (createdWorkerIds.length > 0) {
+        await addMembers.mutateAsync({
+          workGroupId: id,
+          data: { members: createdWorkerIds },
+        });
+      }
+
+      setNewWorkers([{ name: "", phone: "" }]);
+      setShowCreateWorker(false);
+    } catch (err) {
+      console.error("Failed to create workers:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const addMoreWorker = () => {
+    setNewWorkers([...newWorkers, { name: "", phone: "" }]);
+  };
+
+  const removeWorker = (index: number) => {
+    if (newWorkers.length === 1) return;
+    setNewWorkers(newWorkers.filter((_, i) => i !== index));
+  };
+
+  const updateWorker = (index: number, field: "name" | "phone", value: string) => {
+    const updated = [...newWorkers];
+    updated[index][field] = value;
+    setNewWorkers(updated);
   };
 
   if (isLoading) {
@@ -168,13 +190,15 @@ export default function WorkGroupDetailPage() {
                   )}
                 </div>
               </div>
-              <Link
-                href={`/work-groups/${id}/edit`}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
-              >
-                <MdEdit className="w-3.5 h-3.5" />
-                Edit
-              </Link>
+              {(isAdmin || isFarmer) && (
+                <Link
+                  href={`/work-groups/${id}/edit`}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors shrink-0"
+                >
+                  <MdEdit className="w-3.5 h-3.5" />
+                  Edit
+                </Link>
+              )}
             </div>
           </div>
 
@@ -520,81 +544,91 @@ export default function WorkGroupDetailPage() {
         </div>
       )}
 
-      {/* Create Worker Modal */}
+{/* Create Worker Modal */}
       {showCreateWorker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <MdPersonAdd className="w-4 h-4 text-primary" />
                 <h2 className="text-sm font-bold text-gray-900">
-                  Add New Worker
+                  Add New Workers
                 </h2>
               </div>
               <button
-                onClick={() => setShowCreateWorker(false)}
+                type="button"
+                onClick={() => {
+                  setNewWorkers([{ name: "", phone: "" }]);
+                  setShowCreateWorker(false);
+                }}
                 className="text-gray-400 hover:text-gray-600 text-lg leading-none"
               >
                 ×
               </button>
             </div>
-            <div className="px-6 py-5 space-y-4">
-              <InputField
-                label="Full Name"
-                placeholder="e.g. Jane Muthoni"
-                value={newWorker.name}
-                onChange={(e) =>
-                  setNewWorker((s) => ({ ...s, name: e.target.value }))
-                }
-                required
-              />
-<InputField
-                label="Phone"
-                placeholder="e.g. 0712345678"
-                value={newWorker.phone}
-                onChange={(e) =>
-                  setNewWorker((s) => ({ ...s, phone: e.target.value }))
-                }
-                required
-              />
-              <InputField
-                label="PIN"
-                type="password"
-                placeholder="4-digit PIN"
-                value={newWorker.pin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-                  setNewWorker((s) => ({ ...s, pin: val }));
-                }}
-                required
-              />
-            </div>
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-6 py-5 overflow-y-auto flex-1">
+              <div className="space-y-4">
+                {newWorkers.map((worker, index) => (
+                  <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex-1 grid grid-cols-2 gap-3">
+                      <InputField
+                        label="Full Name"
+                        placeholder="e.g. Jane Muthoni"
+                        value={worker.name}
+                        onChange={(e) => updateWorker(index, "name", e.target.value)}
+                        required
+                      />
+                      <InputField
+                        label="Phone"
+                        placeholder="e.g. 0712345678"
+                        value={worker.phone}
+                        onChange={(e) => updateWorker(index, "phone", e.target.value)}
+                        required
+                      />
+                    </div>
+                    {newWorkers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeWorker(index)}
+                        className="mt-5 p-1.5 text-red-500 hover:bg-red-100 rounded-full transition-colors"
+                      >
+                        <FiTrash className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
               <button
                 type="button"
-                onClick={() => setShowCreateWorker(false)}
+                onClick={addMoreWorker}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-dashed border-gray-300 text-gray-600 text-xs font-semibold hover:bg-gray-50 hover:border-gray-400 transition-colors"
+              >
+                <MdAdd className="w-4 h-4" />
+                + More Workers
+              </button>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewWorkers([{ name: "", phone: "" }]);
+                  setShowCreateWorker(false);
+                }}
                 className="px-4 py-2 rounded-full text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={handleCreateWorker}
+                onClick={handleCreateWorkers}
                 disabled={
-                  createWorker.isPending ||
-                  addMembers.isPending ||
-                  !newWorker.name ||
-                  !newWorker.phone ||
-                  !newWorker.pin
+                  isSubmitting ||
+                  !newWorkers.some(w => w.name && w.phone)
                 }
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 <MdPersonAdd className="w-3.5 h-3.5" />
-                {createWorker.isPending
-                  ? "Creating…"
-                  : addMembers.isPending
-                    ? "Adding to group…"
-                    : "Create & Add to Group"}
+                {isSubmitting ? "Creating..." : "Save & Add to Group"}
               </button>
             </div>
           </div>

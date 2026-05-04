@@ -20,9 +20,7 @@ import {
 } from "recharts";
 import { FiChevronDown, FiChevronUp, FiFilter, FiCalendar } from "react-icons/fi";
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
-import { useWorkGroups } from "@/hooks/useWorkGroup";
-import { useWorkers } from "@/hooks/useWorkers";
-import { useHrisUsers } from "@/hooks/useHrisUser";
+
 
 const HA_TO_ACRES = 2.47105;
 const formatDate = (date: Date) => date.toISOString().split("T")[0];
@@ -37,9 +35,6 @@ export default function FarmerDashboard() {
   const [fromDate, setFromDate] = useState(formatDate(thirtyDaysAgo));
   const [toDate, setToDate] = useState(formatDate(today));
   const [farmId, setFarmId] = useState("");
-  const [workGroupId, setWorkGroupId] = useState("");
-  const [workerId, setWorkerId] = useState("");
-  const [supervisorId, setSupervisorId] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
   const [expandedScheduleId, setExpandedScheduleId] = useState<string | null>(null);
@@ -50,11 +45,8 @@ export default function FarmerDashboard() {
       from_date: fromDate || undefined,
       to_date: toDate || undefined,
       farm_id: farmId || undefined,
-      work_group_id: workGroupId || undefined,
-      worker_id: workerId || undefined,
-      supervisor_id: supervisorId || undefined,
     }),
-    [fromDate, toDate, farmId, workGroupId, workerId, supervisorId],
+    [fromDate, toDate, farmId],
   );
 
   const { data, isLoading: loading, isError } = useFarmerDashboard(params);
@@ -91,7 +83,7 @@ export default function FarmerDashboard() {
   const workerRankingData = useMemo(
     () =>
       (charts?.worker_payments ?? []).map((wp) => ({
-        name: wp.worker.name,
+        name: wp.worker?.name || "—",
         value: wp.total_kgs,
         jobs: wp.jobs.length,
         total_amount: getWorkerTotalPay(wp),
@@ -102,19 +94,13 @@ export default function FarmerDashboard() {
   const farmRankingData = useMemo(
     () =>
       (charts?.farm_performance ?? []).map((fp) => ({
-        name: fp.farm.name,
+        name: fp.farm?.name || "—",
         value: fp.total_kgs,
         size: (fp.size * HA_TO_ACRES).toFixed(1),
-        zone: fp.farm.zone,
+        zone: fp.farm?.zone,
       })),
     [charts],
   );
-
-  const { data: workersData } = useWorkers({ per_page: 100 });
-  const { data: supervisorsData } = useHrisUsers({ role: "supervisor", per_page: 100 } as any);
-
-  const workerOptions = workersData?.data ?? [];
-  const supervisorOptions = supervisorsData?.data ?? [];
 
   const SkeletonBox = ({ h = 16 }: { h?: number }) => (
     <div
@@ -162,51 +148,6 @@ export default function FarmerDashboard() {
                 {farms.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Work Group</label>
-              <select
-                value={workGroupId}
-                onChange={(e) => setWorkGroupId(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="">All Work Groups</option>
-                {workGroups.map((wg) => (
-                  <option key={wg.id} value={wg.id}>
-                    {wg.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Worker</label>
-              <select
-                value={workerId}
-                onChange={(e) => setWorkerId(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="">All Workers</option>
-                {workerOptions.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Supervisor</label>
-              <select
-                value={supervisorId}
-                onChange={(e) => setSupervisorId(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="">All Supervisors</option>
-                {supervisorOptions.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
                   </option>
                 ))}
               </select>
@@ -438,15 +379,15 @@ export default function FarmerDashboard() {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                         <span className="text-xs font-bold text-emerald-700">
-                          {wp.worker.name.charAt(0).toUpperCase()}
+                          {(wp.worker?.name || "?").charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">
-                          {wp.worker.name}
+                          {wp.worker?.name || "—"}
                         </p>
                         <p className="text-[11px] text-gray-400">
-                          {wp.worker.phone}
+                          {wp.worker?.phone || "—"}
                         </p>
                       </div>
                     </div>
@@ -600,10 +541,10 @@ export default function FarmerDashboard() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">
-                          {schedule.schedule.code} - {schedule.farm.name}
+                          {schedule.schedule?.code || "—"} - {schedule.farm?.name || "—"}
                         </p>
                         <p className="text-[11px] text-gray-400">
-                          {schedule.supervisor.name} •{" "}
+                          {schedule.supervisor?.name || "—"} •{" "}
                           {new Date(
                             schedule.scheduled_date,
                           ).toLocaleDateString("en-KE", {
@@ -680,7 +621,7 @@ export default function FarmerDashboard() {
                               className="hover:bg-gray-50 transition-colors"
                             >
                               <td className="px-4 py-2 text-gray-700 font-medium">
-                                {booking.worker.name}
+                                {booking.worker?.name || "—"}
                               </td>
                               <td className="px-4 py-2 text-right text-gray-600">
                                 {booking.farm_qty.toLocaleString()}

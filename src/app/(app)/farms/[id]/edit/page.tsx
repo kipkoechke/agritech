@@ -1,37 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import { MdAgriculture, MdArrowBack } from "react-icons/md";
 import { InputField } from "@/components/common/InputField";
 import { SearchableSelect } from "@/components/common/SearchableSelect";
 import Button from "@/components/common/Button";
 import { useFarm, useUpdateFarm } from "@/hooks/useFarm";
-import { useZones } from "@/hooks/useZone";
 import { useProducts } from "@/hooks/useProduct";
 import { useHrisUsers } from "@/hooks/useHrisUser";
-import { useZoneFactories } from "@/hooks/useFactory";
 import { useFactoryClusters } from "@/hooks/useCluster";
+import { useFactories } from "@/hooks/useFactory";
 import type { UpdateFarmData } from "@/types/farm";
-import "leaflet/dist/leaflet.css";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false },
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false },
-);
+function SimpleMap({
+  initialCoords,
+  onSelect,
+}: {
+  initialCoords?: { lat: number; lng: number } | null;
+  onSelect: (coords: { lat: number; lng: number }) => void;
+}) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
-import { useMapEvents } from "react-leaflet";
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    const initMap = async () => {
+      const L = (await import("leaflet")).default;
+      await import("leaflet/dist/leaflet.css");
+
+      if (mapRef.current && !mapInstanceRef.current) {
+        const map = L.map(mapRef.current).setView(
+          initialCoords ? [initialCoords.lat, initialCoords.lng] : [0.0236, 37.9062],
+          initialCoords ? 14 : 6
+        );
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap",
+          maxZoom: 19,
+        }).addTo(map);
+
+        if (initialCoords) {
+          markerRef.current = L.marker([initialCoords.lat, initialCoords.lng]).addTo(map);
+        }
+
+        map.on("click", (e: any) => {
+          onSelect({ lat: e.latlng.lat, lng: e.latlng.lng });
+          if (markerRef.current) {
+            markerRef.current.setLatLng([e.latlng.lat, e.latlng.lng]);
+          } else {
+            markerRef.current = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+          }
+        });
+
+        mapInstanceRef.current = map;
+      }
+    };
+
+    initMap();
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [initialCoords, onSelect]);
+
+  return (
+    <div ref={mapRef} className="h-72 w-full border border-gray-300 rounded-lg overflow-hidden" />
+  );
+}
 
 interface FarmFormData {
   name: string;
@@ -45,7 +88,6 @@ export default function EditFarmPage() {
 
   const { data: farmResponse, isLoading } = useFarm(id);
   const updateFarm = useUpdateFarm();
-  const { data: zonesData, isLoading: zonesLoading } = useZones();
   const { data: productsData, isLoading: productsLoading } = useProducts();
   const [farmerSearch, setFarmerSearch] = useState("");
   const [supervisorSearch, setSupervisorSearch] = useState("");
@@ -66,26 +108,28 @@ export default function EditFarmPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FarmFormData>({
-    values: farm ? { name: farm.name, size: String(farm.size) } : undefined,
+    values: farm ? { name: farm.name, size: String(parseFloat(farm.size) * 2.471) } : undefined,
   });
 
-  const [zoneId, setZoneId] = useState<string | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [supervisorId, setSupervisorId] = useState<string | null>(null);
   const [factoryId, setFactoryId] = useState<string | null>(null);
   const [clusterId, setClusterId] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [factorySearch, setFactorySearch] = useState("");
 
-  const zoneValue = zoneId ?? (farm?.zone?.id || "");
   const productValue = productId ?? (farm?.product?.id || "");
   const ownerValue = ownerId ?? (farm?.farmer?.id || "");
   const supervisorValue = supervisorId ?? (farm?.supervisor?.id || "");
   const factoryValue = factoryId ?? (farm?.factory?.id || "");
   const clusterValue = clusterId ?? (farm?.cluster?.id || "");
 
-  const { data: factoriesData, isLoading: factoriesLoading } = useZoneFactories(zoneValue);
   const { data: clustersData, isLoading: clustersLoading } = useFactoryClusters(factoryValue);
+  const { data: allFactoriesData, isLoading: allFactoriesLoading } = useFactories({
+    per_page: 5000,
+    search: factorySearch || undefined,
+  });
 
   const existingCoords =
     farm?.coordinates?.latitude && farm?.coordinates?.longitude
@@ -95,13 +139,6 @@ export default function EditFarmPage() {
         }
       : null;
   const mapCoords = coords || existingCoords;
-
-  const zoneOptions = Array.isArray(zonesData)
-    ? zonesData.map((z: { id: string; name: string }) => ({
-        value: z.id,
-        label: z.name,
-      }))
-    : [];
 
   const productOptions =
     productsData?.data?.map((p) => ({ value: p.id, label: p.name })) || [];
@@ -121,17 +158,17 @@ export default function EditFarmPage() {
     })) || [];
 
   const factoryOptions =
-    factoriesData?.data?.map((f: any) => ({ value: f.id, label: f.name })) || [];
+    allFactoriesData?.data?.map((f: any) => ({ value: f.id, label: f.name })) || [];
 
   const clusterOptions =
     clustersData?.data?.map((c: any) => ({ value: c.id, label: c.name })) || [];
 
   const onSubmit = (data: FarmFormData) => {
+    const acresToHectares = parseFloat(data.size) / 2.471;
     const payload: UpdateFarmData = {
       name: data.name,
-      size: parseFloat(data.size) || undefined,
+      size: isNaN(acresToHectares) ? undefined : acresToHectares,
       coordinates: mapCoords ? { lat: mapCoords.lat, lng: mapCoords.lng } : undefined,
-      zone_id: zoneValue || undefined,
       product_id: productValue || undefined,
       owner_id: ownerValue || undefined,
       supervisor_id: supervisorValue || undefined,
@@ -143,17 +180,6 @@ export default function EditFarmPage() {
       { onSuccess: () => router.push(`/farms/${id}`) },
     );
   };
-
-  function LocationMarker() {
-    useMapEvents({
-      click(e) {
-        setCoords(e.latlng);
-      },
-    });
-    return mapCoords ? (
-      <Marker position={[mapCoords.lat, mapCoords.lng]} />
-    ) : null;
-  }
 
   if (isLoading) {
     return (
@@ -208,6 +234,7 @@ export default function EditFarmPage() {
               <InputField
                 label="Size (Acres)"
                 type="number"
+                step="any"
                 placeholder="Enter farm size"
                 register={register("size", { required: "Size is required" })}
                 error={errors.size?.message}
@@ -215,15 +242,21 @@ export default function EditFarmPage() {
               />
             </div>
 
-            {/* Row 2: Zone | Product */}
+            {/* Row 2: Factory | Product */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <SearchableSelect
-                label="Zone"
-                options={zoneOptions}
-                value={zoneValue}
-                onChange={(v) => { setZoneId(v); setFactoryId(""); setClusterId(""); }}
-                placeholder="Select a zone"
-                isLoading={zonesLoading}
+                label="Factory"
+                options={factoryOptions}
+                value={factoryValue}
+                onChange={(v) => {
+                  setFactoryId(v);
+                  setClusterId("");
+                }}
+                placeholder="Search and select a factory"
+                isLoading={allFactoriesLoading}
+                onSearchChange={setFactorySearch}
+                searchPlaceholder="Search factories..."
+                required
               />
               <SearchableSelect
                 label="Product"
@@ -232,19 +265,12 @@ export default function EditFarmPage() {
                 onChange={setProductId}
                 placeholder="Select a product"
                 isLoading={productsLoading}
+                required
               />
             </div>
 
-            {/* Row 3: Factory | Cluster */}
+            {/* Row 3: Cluster */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <SearchableSelect
-                label="Factory"
-                options={factoryOptions}
-                value={factoryValue}
-                onChange={(v) => { setFactoryId(v); setClusterId(""); }}
-                placeholder={zoneValue ? "Select a factory" : "Select a zone first"}
-                isLoading={factoriesLoading}
-              />
               <SearchableSelect
                 label="Cluster"
                 options={clusterOptions}
@@ -277,31 +303,26 @@ export default function EditFarmPage() {
               />
             </div>
 
-            <div>
+            {/* Map */}
+            <div className="relative z-0">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Pick Coordinates
               </label>
-              <div className="h-72 w-full border border-gray-300 rounded-lg overflow-hidden">
-                <MapContainer
-                  center={
-                    mapCoords
-                      ? [mapCoords.lat, mapCoords.lng]
-                      : [0.0236, 37.9062]
-                  }
-                  zoom={mapCoords ? 14 : 6}
-                  style={{ height: "100%", width: "100%" }}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationMarker />
-                </MapContainer>
-              </div>
-              {mapCoords && (
-                <p className="mt-2 text-sm text-gray-600">
-                  Selected: Lat {mapCoords.lat.toFixed(5)}, Lng{" "}
-                  {mapCoords.lng.toFixed(5)}
-                </p>
-              )}
-              {!mapCoords && (
+              <SimpleMap initialCoords={mapCoords} onSelect={setCoords} />
+              {mapCoords ? (
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    Selected: Lat {mapCoords.lat.toFixed(5)}, Lng {mapCoords.lng.toFixed(5)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setCoords(null)}
+                    className="text-sm text-red-600 hover:text-red-800"
+                  >
+                    Clear
+                  </button>
+                </div>
+              ) : (
                 <p className="mt-2 text-sm text-gray-500">
                   Click on the map to pick coordinates
                 </p>

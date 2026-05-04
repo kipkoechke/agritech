@@ -45,7 +45,9 @@ export default function EditClusterPage() {
 
   const [factorySearch, setFactorySearch] = useState("");
 
-  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({ search: factorySearch || undefined });
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
+    search: factorySearch || undefined,
+  });
 
   const {
     register,
@@ -61,18 +63,17 @@ export default function EditClusterPage() {
   });
 
   const [factoryId, setFactoryId] = useState<string | null>(null);
+  const [factorySearch, setFactorySearch] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     cluster?.coordinates
       ? { lat: cluster.coordinates[0], lng: cluster.coordinates[1] }
       : null,
   );
 
-  // Update coords when cluster loads
-  if (cluster?.coordinates && !coords) {
-    setCoords({ lat: cluster.coordinates[0], lng: cluster.coordinates[1] });
-  }
-
-  const factoryValue = factoryId ?? (cluster?.factory?.id || "");
+  const { data: factoriesData, isLoading: factoriesLoading } = useFactories({
+    per_page: 5000,
+    search: factorySearch || undefined,
+  });
 
   const factories = factoriesData?.data || [];
 
@@ -80,6 +81,8 @@ export default function EditClusterPage() {
     value: f.id,
     label: f.name,
   }));
+
+  const factoryValue = factoryId ?? (cluster?.factory?.id || "");
 
   const onSubmit = (data: ClusterFormData) => {
     const payload: UpdateClusterData = {
@@ -167,9 +170,10 @@ export default function EditClusterPage() {
               options={factoryOptions}
               value={factoryValue}
               onChange={setFactoryId}
-              placeholder="Select factory"
+              placeholder="Search and select a factory"
               isLoading={factoriesLoading}
               onSearchChange={setFactorySearch}
+              searchPlaceholder="Search factories..."
               required
             />
 

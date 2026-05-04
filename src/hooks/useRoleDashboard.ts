@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import {
   getAdminDashboard,
   getFarmerDashboard,
@@ -10,11 +10,15 @@ import type {
   SupervisorDashboardParams,
 } from "@/types/roleDashboard";
 
-export const useAdminDashboard = (params: AdminDashboardParams = {}) => {
+export const useAdminDashboard = (
+  params: AdminDashboardParams = {},
+  options?: { enabled?: boolean },
+) => {
   return useQuery({
     queryKey: ["dashboard-admin", params],
     queryFn: () => getAdminDashboard(params),
     staleTime: 5 * 60 * 1000,
+    enabled: options?.enabled ?? true,
   });
 };
 

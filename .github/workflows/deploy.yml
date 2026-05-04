@@ -1,0 +1,124 @@
+name: Deploy to Hostup Podman
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      # Install podman on GitHub runner
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          podman --version
+
+      # Login to GitHub Container Registry with podman
+      - name: Login to GHCR with Podman
+        run: |
+          echo "${{ secrets.AGTECH_PAT_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # Build & push image with podman
+      - name: Build and push Podman image
+        run: |
+          # Ensure the image name is lowercase
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/agtech-app-container"
+          IMAGE_NAME=$(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+          
+          # Tag with both commit SHA AND latest
+          COMMIT_TAG=${{ github.sha }}
+          
+          echo "Using IMAGE_NAME: $IMAGE_NAME"
+          echo "Commit tag: $COMMIT_TAG"
+          
+          # Build the image with podman
+          podman build \
+            --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }} \
+            --build-arg NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }} \
+            --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=${{ secrets.AGTECH_API_URL }} \
+            -t $IMAGE_NAME:$COMMIT_TAG -t $IMAGE_NAME:latest .
+          
+          # Push both tags with podman
+          podman push $IMAGE_NAME:$COMMIT_TAG
+          podman push $IMAGE_NAME:latest
+
+      # Setup SSH
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTUP_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOSTUP_SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server with Podman
+        run: |
+          ssh -o StrictHostKeyChecking=no -T ${{ secrets.HOSTUP_SERVER_USER }}@${{ secrets.HOSTUP_SERVER_IP }} "
+            set -e
+
+            IMAGE_NAME=\"ghcr.io/digital-path-technologies-ltd/agtech-app-container\"
+            IMAGE_NAME=\$(echo \$IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+            IMAGE_TAG=\"latest\"
+
+            echo \"Using IMAGE_NAME: \$IMAGE_NAME and IMAGE_TAG: \$IMAGE_TAG\"
+
+            # Ensure podman is installed on server
+            if ! command -v podman &> /dev/null; then
+                echo \"Installing podman on server...\"
+                sudo apt-get update
+                sudo apt-get install -y podman
+            fi
+
+            echo \"Logging into GHCR with podman...\"
+            echo \"${{ secrets.AGTECH_PAT_TOKEN }}\" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo \"Pulling new image with podman...\"
+            podman pull \$IMAGE_NAME:\$IMAGE_TAG
+
+            echo \"Replacing container with podman...\"
+            podman stop agtech-app-container || true
+            podman rm agtech-app-container || true
+
+            # Create podman systemd user directory if not exists
+            mkdir -p ~/.config/systemd/user
+
+            echo \"Starting new container with podman...\"
+            podman run -d \\
+              --name agtech-app-container \\
+              -p 3003:3000 \\
+              --restart unless-stopped \\
+              --memory=1gb \\
+              --cpus=0.5 \\
+              --label \"io.containers.autoupdate=registry\" \\
+              -e NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }} \\
+              -e NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }} \\
+              -e CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} \\
+              -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \\
+              -e NEXT_PUBLIC_API_BASE_URL=${{ secrets.AGTECH_API_URL }} \\
+              \$IMAGE_NAME:\$IMAGE_TAG
+
+            # Generate systemd service for auto-start
+            echo \"Creating systemd service for container...\"
+            podman generate systemd --name agtech-app-container --files --new
+            mv container-agtech-app-container.service ~/.config/systemd/user/
+            systemctl --user daemon-reload
+            systemctl --user enable container-agtech-app-container.service
+            systemctl --user start container-agtech-app-container.service
+          
+            # Enable lingering for deploy user (to keep user services running after logout)
+            sudo loginctl enable-linger ${{ secrets.HOSTUP_SERVER_USER }}
+
+            echo \"Cleaning up old images...\"
+            podman image prune -f
+
+            echo \"Deployment complete\"
+            podman ps --filter name=agtech-app-container
+          "

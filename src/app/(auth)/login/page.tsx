@@ -20,6 +20,7 @@ export default function LoginPage() {
               width={150}
               height={100}
               className="mx-auto object-contain"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
 
