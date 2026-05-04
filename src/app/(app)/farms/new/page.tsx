@@ -100,9 +100,10 @@ export default function NewFarmPage() {
   const factoryOptions = allFactoriesData?.data?.map((f: any) => ({ value: f.id, label: f.name })) || [];
 
   const onFormSubmit = async (data: FarmFormData) => {
+    const acresToHectares = parseFloat(data.size) / 2.471;
     const payload: CreateFarmData = {
       name: data.name,
-      size: parseFloat(data.size) || 0,
+      size: isNaN(acresToHectares) ? 0 : acresToHectares,
       coordinates: coords || { lat: 0, lng: 0 },
       product_id: productId,
       owner_id: isAdmin ? ownerId || undefined : user?.id,

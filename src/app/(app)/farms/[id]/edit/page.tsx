@@ -104,7 +104,7 @@ export default function EditFarmPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FarmFormData>({
-    values: farm ? { name: farm.name, size: String(farm.size) } : undefined,
+    values: farm ? { name: farm.name, size: String(parseFloat(farm.size) * 2.471) } : undefined,
   });
 
   const [productId, setProductId] = useState<string | null>(null);
@@ -160,9 +160,10 @@ export default function EditFarmPage() {
     clustersData?.data?.map((c: any) => ({ value: c.id, label: c.name })) || [];
 
   const onSubmit = (data: FarmFormData) => {
+    const acresToHectares = parseFloat(data.size) / 2.471;
     const payload: UpdateFarmData = {
       name: data.name,
-      size: parseFloat(data.size) || undefined,
+      size: isNaN(acresToHectares) ? undefined : acresToHectares,
       coordinates: mapCoords ? { lat: mapCoords.lat, lng: mapCoords.lng } : undefined,
       product_id: productValue || undefined,
       owner_id: ownerValue || undefined,
